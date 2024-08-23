@@ -49,6 +49,7 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
+	nemu_state.state=NEMU_QUIT;
   return -1;
 }
 
@@ -103,19 +104,19 @@ void sdb_mainloop() {
   }
 
   for (char *str; (str = rl_gets()) != NULL; ) {
-    char *str_end = str + strlen(str);
+    char *str_end = str + strlen(str);//末尾指针
 
     /* extract the first token as the command */
-    char *cmd = strtok(str, " ");
+    char *cmd = strtok(str, " ");//以空格作为分隔符分割
     if (cmd == NULL) { continue; }
 
     /* treat the remaining string as the arguments,
      * which may need further parsing
      */
-    char *args = cmd + strlen(cmd) + 1;
+    char *args = cmd + strlen(cmd) + 1;//strtok原理是把源串作为分割符号的记号替换成\0
     if (args >= str_end) {
-      args = NULL;
-    }
+      args = NULL;//看看有没有到末尾指针，也就是看分割的串有没有漏的
+    }//获取命令行参数的循环
 
 #ifdef CONFIG_DEVICE
     extern void sdl_clear_event_queue();
@@ -126,7 +127,7 @@ void sdb_mainloop() {
     for (i = 0; i < NR_CMD; i ++) {
       if (strcmp(cmd, cmd_table[i].name) == 0) {
         if (cmd_table[i].handler(args) < 0) { return; }
-        break;
+        break;//如果不是小于0的话那么会结束查询指令循环而不是直接返回值，结束这一轮指令的处理。继续上一个循环，持续不断获取指令.如果小于0那么不处理了，直接退出机器，然后执行主函数的返回看看机器是不是坏的
       }
     }
 
