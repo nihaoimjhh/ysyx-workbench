@@ -43,7 +43,7 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 static void exec_once(Decode *s, vaddr_t pc) {
   s->pc = pc;
   s->snpc = pc;
-  isa_exec_once(s);
+  isa_exec_once(s);//执行命令
   cpu.pc = s->dnpc;
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
@@ -73,12 +73,12 @@ static void exec_once(Decode *s, vaddr_t pc) {
 
 static void execute(uint64_t n) {
   Decode s;
-  for (;n > 0; n --) {
-    exec_once(&s, cpu.pc);
-    g_nr_guest_inst ++;
-    trace_and_difftest(&s, cpu.pc);
-    if (nemu_state.state != NEMU_RUNNING) break;
-    IFDEF(CONFIG_DEVICE, device_update());
+  for (;n > 0; n --) {//命令执行循环
+    exec_once(&s, cpu.pc);//真正执行的函数
+    g_nr_guest_inst ++;//已执行过的命令数量
+    trace_and_difftest(&s, cpu.pc);//跟踪
+    if (nemu_state.state != NEMU_RUNNING) break;//确保机器一直正常运行
+    IFDEF(CONFIG_DEVICE, device_update());//外设
   }
 }
 
@@ -98,30 +98,30 @@ void assert_fail_msg() {
 
 /* Simulate how the CPU works. */
 void cpu_exec(uint64_t n) {
-  g_print_step = (n < MAX_INST_TO_PRINT);
+  g_print_step = (n < MAX_INST_TO_PRINT);//如果n小于规定数10那么就可以打印，把默认false置一
   switch (nemu_state.state) {
-    case NEMU_END: case NEMU_ABORT:
+    case NEMU_END: case NEMU_ABORT://机器终止或者运行结束则打印提示信息
       printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
-      return;
-    default: nemu_state.state = NEMU_RUNNING;
+      return;//看有没有正确运行，坏了就直接返回。
+    default: nemu_state.state = NEMU_RUNNING;//如果不是上述条件那么状态就是润状态
   }
 
-  uint64_t timer_start = get_time();
+  uint64_t timer_start = get_time();//记录运行起始时间
 
-  execute(n);
+  execute(n);//执行命令
 
-  uint64_t timer_end = get_time();
-  g_timer += timer_end - timer_start;
+  uint64_t timer_end = get_time();//记录终止时间
+  g_timer += timer_end - timer_start;//花费时间
 
   switch (nemu_state.state) {
-    case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
+    case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;//搞完了就break
 
     case NEMU_END: case NEMU_ABORT:
       Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
-          nemu_state.halt_pc);
+          nemu_state.halt_pc);//有问题的处理，防御性编程
       // fall through
     case NEMU_QUIT: statistic();
   }

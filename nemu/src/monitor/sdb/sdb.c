@@ -52,6 +52,32 @@ static int cmd_q(char *args) {
 	nemu_state.state=NEMU_QUIT;
   return -1;
 }
+static int cmd_si(char *args) {
+	uint64_t n;
+	nemu_state.state=NEMU_RUNNING;
+	if(args==NULL){
+		 n=1;//默认1
+	 }
+	else{
+    sscanf(args,"%lu",&n);
+	 }
+    cpu_exec(n);
+    cpu_exec(0);
+	
+  return 0;//
+}static int cmd_info(char *args) {
+	 if(args==NULL) {printf("please enter r or w.\ninfo r is print regs and infor w is print watchpoints.\n"); return 0;}
+	 if(strcmp(args,"r")==0){
+		 isa_reg_display();
+	} 
+	 else if(strcmp(args,"w")==0){
+		//print watchpoins;
+	 }
+	 else {
+		 printf("plase enter the right choice r(regs) or w(watchpoints)\n"); 
+	 }
+  return 0;
+}
 
 static int cmd_help(char *args);
 
@@ -63,6 +89,8 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
+  { "si", "step excute", cmd_si },
+  { "info", "info r(regs) or info w(watchpoints)", cmd_info },
 
   /* TODO: Add more commands */
 
@@ -113,9 +141,9 @@ void sdb_mainloop() {
     /* treat the remaining string as the arguments,
      * which may need further parsing
      */
-    char *args = cmd + strlen(cmd) + 1;//strtok原理是把源串作为分割符号的记号替换成\0
+    char *args = cmd + strlen(cmd) + 1;//strtok原理是把源串作为分割符号的记号替换成\0,args获取命令参数
     if (args >= str_end) {
-      args = NULL;//看看有没有到末尾指针，也就是看分割的串有没有漏的
+      args = NULL;//看看有没有到末尾指针，也就是看分割的串有没有漏的,到末尾了就置空,防御性编程
     }//获取命令行参数的循环
 
 #ifdef CONFIG_DEVICE
@@ -125,8 +153,8 @@ void sdb_mainloop() {
 
     int i;
     for (i = 0; i < NR_CMD; i ++) {
-      if (strcmp(cmd, cmd_table[i].name) == 0) {
-        if (cmd_table[i].handler(args) < 0) { return; }
+      if (strcmp(cmd, cmd_table[i].name) == 0) {//判断用户输入命令是否与设置命令一致其实就是看看有没有这个指令有的话就break,没有的话就会一直循环直到末尾，最后检测有没有到末尾判断打印找没找到命令。
+        if (cmd_table[i].handler(args) < 0) { return; }//实际函数处理，上面判断找到，顺便看看要不要退出。<0是为q准备的
         break;//如果不是小于0的话那么会结束查询指令循环而不是直接返回值，结束这一轮指令的处理。继续上一个循环，持续不断获取指令.如果小于0那么不处理了，直接退出机器，然后执行主函数的返回看看机器是不是坏的
       }
     }
