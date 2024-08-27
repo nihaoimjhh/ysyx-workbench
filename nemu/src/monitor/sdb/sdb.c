@@ -91,7 +91,7 @@ static int cmd_x(char *args){
 	 if(args1==NULL||sscanf(args1,"%d",&N)==0){printf("Please enter the number N\n"); return 0;}//短接碰见NULL直接return防止报错,防止用户乱输
 	 
 	 args2=strtok(NULL," ");
-	 if(args2==NULL||sscanf(args2,"0x%x",&EXPR)==0){printf("Please enter the legitimate address EXPR(The 8-bit hexadecimal address has 32 bits)\n"); return 0;}
+	 if(args2==NULL||sscanf(args2,"0x%x",&EXPR)==0){printf("Please enter the legitimate address EXPR(The 8-bit hexadecimal address has 32 bits)\n"); return 0;}//必需把null判断放在前面，短接，不能执行后面判断，不然直接崩溃。
 	 else addr=EXPR;
 	 for(i=0;i<N;i++){
 		 printf("addr:%x\t%x\n",addr,vaddr_read(addr,4));
@@ -105,6 +105,23 @@ static int cmd_x(char *args){
 
 	 return 0;
 }
+static int cmd_p(char *args){
+	 if(args==NULL) {printf("Please enter your expression\n");return 0;}
+	 bool success= ture;
+	 word_t ans;
+	 ans=expr(args,&success);
+	 if(success){
+		 printf("%lu\n",ans);
+	 }
+	 else{
+		 printf("Something went wrong Please check your expression\n");
+	 }
+	 return 0;
+}
+
+
+
+
 static int cmd_help(char *args);
 
 static struct {
@@ -118,6 +135,7 @@ static struct {
   { "si", "step excute", cmd_si },
   { "info", "info r(regs) or info w(watchpoints)", cmd_info },
   { "x", "examine mem", cmd_x},
+  { "p", "print a expr (calculate the figure)", cmd_p},
 
   /* TODO: Add more commands */
 
