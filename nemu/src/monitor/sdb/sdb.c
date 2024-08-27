@@ -18,6 +18,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+#include "memory/vaddr.h"//只放vaddr.h找不到，上面有提示加文件夹
 
 static int is_batch_mode = false;
 
@@ -65,7 +66,8 @@ static int cmd_si(char *args) {
     cpu_exec(0);
 	
   return 0;//
-}static int cmd_info(char *args) {
+}
+static int cmd_info(char *args) {
 	 if(args==NULL) {printf("please enter r or w.\ninfo r is print regs and infor w is print watchpoints.\n"); return 0;}
 	 if(strcmp(args,"r")==0){
 		 isa_reg_display();
@@ -78,7 +80,31 @@ static int cmd_si(char *args) {
 	 }
   return 0;
 }
+static int cmd_x(char *args){
+	 if(args==NULL) {printf("Please enter the number N to be printed and which address EXPR\nexample: x 10 0x80000000(The 8-bit hexadecimal address has 32 bits)\n"); return 0;}
+	 char *args1,*args2;
+	 int N,i;
+	 word_t EXPR;
+	 word_t addr;//相当于uint32_t
 
+	 args1=strtok(NULL," ");
+	 if(args1==NULL||sscanf(args1,"%d",&N)==0){printf("Please enter the number N\n"); return 0;}//短接碰见NULL直接return防止报错,防止用户乱输
+	 
+	 args2=strtok(NULL," ");
+	 if(args2==NULL||sscanf(args2,"0x%x",&EXPR)==0){printf("Please enter the legitimate address EXPR(The 8-bit hexadecimal address has 32 bits)\n"); return 0;}
+	 else addr=EXPR;
+	 for(i=0;i<N;i++){
+		 printf("addr:%x\t%x\n",addr,vaddr_read(addr,4));
+		 addr+=4;
+	 }
+	 
+
+	
+
+
+
+	 return 0;
+}
 static int cmd_help(char *args);
 
 static struct {
@@ -91,6 +117,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si", "step excute", cmd_si },
   { "info", "info r(regs) or info w(watchpoints)", cmd_info },
+  { "x", "examine mem", cmd_x},
 
   /* TODO: Add more commands */
 
@@ -137,11 +164,11 @@ void sdb_mainloop() {
     /* extract the first token as the command */
     char *cmd = strtok(str, " ");//以空格作为分隔符分割
     if (cmd == NULL) { continue; }
-
+	
     /* treat the remaining string as the arguments,
      * which may need further parsing
      */
-    char *args = cmd + strlen(cmd) + 1;//strtok原理是把源串作为分割符号的记号替换成\0,args获取命令参数
+    char *args = cmd + strlen(cmd) + 1;//strtok原理是把源串作为分割符号的记号替换成\0,args获取命令参数,注意不是一次全部干掉，是调用一次干掉一个分割符号调用一次干掉一个,返回的是原串指针
     if (args >= str_end) {
       args = NULL;//看看有没有到末尾指针，也就是看分割的串有没有漏的,到末尾了就置空,防御性编程
     }//获取命令行参数的循环
