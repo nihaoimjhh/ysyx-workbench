@@ -161,10 +161,15 @@ static int check_parentheses(int p,int q,bool *success){
 	 for(i=p;i<=q;i++){
 		 if(tokens[i].type=='(')
 			 left++;
-		 if(tokens[i].type==')')
+		 if(tokens[i].type==')'){
 			 left--;
+			 if(left==0&&i<q){
+				 return false;
+				 //防止双括号()()内双括号直接干掉。//打的补丁
+			 }
+		 }
 	 }
-	 if(tokens[p].type=='('&&left==0&&tokens[q].type==')')
+	 if(tokens[p].type=='('&&left==0&&tokens[q].type==')')//这里有一次q写成p了，调试的时候编译器直接把p优化了导致运行到上面p就没了，调半天调不出来。回头一瞟。我去,编译器还会吃我的p
 		 return true;
 	 else
 		 return false;
@@ -226,8 +231,8 @@ static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最�
 						 return val1/val2;
 					else {
 						 *success=false;
-						 return 0;
 						 printf("Arithmetic error occurred.The dividend appears 0\n");
+						 return 0;
 						 }
 			default:assert(false);//搞一个这个比较好一点
 		 }	
