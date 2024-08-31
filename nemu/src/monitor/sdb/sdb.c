@@ -107,11 +107,11 @@ static int cmd_x(char *args){
 }
 static int cmd_p(char *args){
 	 if(args==NULL) {printf("Please enter your expression\n");return 0;}
-	 bool success= ture;
+	 bool success= true;
 	 word_t ans;
 	 ans=expr(args,&success);
 	 if(success){
-		 printf("%lu\n",ans);
+		 printf("ans=%u\n",ans);//ans测试
 	 }
 	 else{
 		 printf("Something went wrong Please check your expression\n");

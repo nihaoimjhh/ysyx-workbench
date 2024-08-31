@@ -20,6 +20,9 @@
  */
 #include <regex.h>
 
+static word_t eval(int p,int q,bool *success);
+static int check_parentheses(int p,int q,bool *success);
+static int findop(int p,int q);
 enum {
   TK_NOTYPE = 256, TK_EQ,TK_NUM,
 
@@ -31,7 +34,7 @@ static struct rule {
   const char *regex;
   int token_type;
 } rules[] = {
-
+//rules的结构体不需要深究
   /* TODO: Add more rules.
    * Pay attention to the precedence level of different rules.
    */
@@ -75,7 +78,6 @@ typedef struct token {
 
 static Token tokens[32] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
-
 static bool make_token(char *e) {
   int position = 0;//初始位置
   int i;//遍历规则使用
@@ -103,7 +105,7 @@ static bool make_token(char *e) {
 			 break;
 		 tokens[nr_token].type = rules[i].token_type;
         switch (rules[i].token_type) {
-			case 'TK_NUM':
+			case TK_NUM:
 				 strncpy(tokens[nr_token].str,substr_start,substr_len);//数字拷进str
 				 tokens[nr_token].str[substr_len]='\0';
 				 break;
@@ -117,20 +119,128 @@ static bool make_token(char *e) {
       printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
       return false;
     }
-  }
+  }  
+     printf("nr_token:%d\n",nr_token);
+	for(i=0;i<nr_token;i++){
+		 if(tokens[i].type==TK_NUM)
+			 printf("|NUM|\t");//看看装进去没有
+		 else
+			 printf("|%c|\t",tokens[i].type);//看看装进去没有
+	
+	}
+	printf("\n");
+	for(i=0;i<nr_token;i++){
+		 printf("|%s|\t",tokens[i].str);//看看装进去没有
+	
+	}
+	printf("\n");
 
   return true;
 }
 
+static int check_parentheses(int p,int q,bool *success){
+	 int i;
+	 int left=0,right=0;
+	 if(tokens[p].type==')'){
+		 *success=false; 
+		 printf("There is a problem with the brackets\n"); 
+		 return false;
+	 }//第一个就是)直接错误
+     for(i=p;i<=q;i++){
+		 if(tokens[i].type=='(')
+			 left++;
+		 if(tokens[i].type==')')
+			 right++;
+	 }
+	 if(left!=right){
+		 *success=false;
+		 printf("There is a problem with the number of brackets\n"); 
+		 return false;
+		 }//先把能想到的排除的先排除了再说。
+	 left=0;
+	 for(i=p;i<=q;i++){
+		 if(tokens[i].type=='(')
+			 left++;
+		 if(tokens[i].type==')')
+			 left--;
+	 }
+	 if(tokens[p].type=='('&&left==0&&tokens[q].type==')')
+		 return true;
+	 else
+		 return false;
+	 if(left<0){*success=false; return false;}//防范于未然
 
+}
+static int findop(int p,int q){//到这里的时候先不考虑括号合不合法，假设合法
+	 int i=0,op=0,parent=0,flag=0;//flag用来标记op是不是已经被+-占掉了。+-有最高权利
+	 for(i=p;i<=q;i++){//主循环遍历
+		 if(tokens[i].type=='(')
+			 parent=1;
+		 if(tokens[i].type==')')
+			 parent=0;//由于op不可能出现在()里面所以要标记跳过,parent是1的时候说明现在在括号里面
+		 if(parent==1)
+			 continue;
+		 else if(parent==0){
+			 if(tokens[i].type=='+'||tokens[i].type=='-'){
+				 op=i;
+				 flag=1;
+			 }
+			 if((tokens[i].type=='*'||tokens[i].type=='/')&&flag==0){
+				 op=i;
+			 }
+		 }
+	 }
+	 return op;
+	 	
+}
+static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最后相加，如果俩是表达式，则递归。总的来说，总要转化成数字运算数字。数字是表达式。
+	int op;
+	 if(*success==false){return 0;}//一旦错误，立刻返回。
+	if(p>q){ *success=false;return 0;}
+    else if(p==q){//表达式运算是主要递归目的是数字运算数字，再向上传值。在这里是递归的终点。值运算在后面，其实数字也是特殊的值运算，应该和后面的switch归为一类。
+		 if(tokens[p].type==TK_NUM)
+			 return (word_t)strtoul(tokens[p].str,NULL,10);
+		 else
+			 *success=false;
+	}
+	else if(check_parentheses(p,q,success)==true){//去括号函数
+		 return eval(p+1,q-1,success);
+	}
+	else{
+		 op=findop(p,q);
+		 word_t val1=eval(p,op-1,success);//一次p写成q了半天找不到错
+		 word_t val2=eval(op+1,q,success);
+		 switch (tokens[op].type){//值运算
+			 case '+': return val1+val2; break;
+			 case '-':
+					 if(val1<val2){
+						 printf("The evaluation stops because some part of the expression has a number less than 0. The type is uint_32\n"); 
+						 *success=false;
+					 }
+					 else
+					 return val1-val2; 
+					 break;
+			 case '*': return val1*val2; break;
+			 case '/': 
+					if(val2!=0)
+						 return val1/val2;
+					else {
+						 *success=false;
+						 return 0;
+						 printf("Arithmetic error occurred.The dividend appears 0\n");
+						 }
+			default:assert(false);//搞一个这个比较好一点
+		 }	
+	}
+	 return 0;
+
+}
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
-    *success = false;
+    *success = false;//token这一关都没过就直接返回false就够了
     return 0;
   }
+  
+  return eval(0,nr_token-1,success);	
 
-  /* TODO: Insert codes to evaluate the expression. */
-  TODO();
-
-  return 0;
 }
