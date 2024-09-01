@@ -19,7 +19,7 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
-
+# define MAX_TOKENS 2000
 static word_t eval(int p,int q,bool *success);
 static int check_parentheses(int p,int q,bool *success);
 static int findop(int p,int q);
@@ -76,7 +76,7 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+static Token tokens[MAX_TOKENS] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 static bool make_token(char *e) {
   int position = 0;//初始位置
@@ -92,8 +92,8 @@ static bool make_token(char *e) {
         char *substr_start = e + position;//字段开始的地方
         int substr_len = pmatch.rm_eo;//匹配字段长度so是0所以eo是匹配字段长度
 
-        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-            i, rules[i].regex, position, substr_len, substr_len, substr_start);
+//        Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+//            i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
         position += substr_len;//改变位置再次循环匹配
 
@@ -101,7 +101,7 @@ static bool make_token(char *e) {
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-		 if(rules[i].token_type==TK_NOTYPE) 
+		 if(rules[i].token_type==TK_NOTYPE) //空格匹配到了就跳过
 			 break;
 		 tokens[nr_token].type = rules[i].token_type;
         switch (rules[i].token_type) {
@@ -111,6 +111,10 @@ static bool make_token(char *e) {
 				 break;
         }
 		 nr_token++;//token数量加1
+		 if(nr_token==MAX_TOKENS){
+			 printf("The matched expression exceeds MAX_TOKENS:%d\n",MAX_TOKENS);
+			 return false;
+		 }
         break;
       }
     }
@@ -120,21 +124,21 @@ static bool make_token(char *e) {
       return false;
     }
   }  
-     printf("nr_token:%d\n",nr_token);
-	for(i=0;i<nr_token;i++){
-		 if(tokens[i].type==TK_NUM)
-			 printf("|NUM|\t");//看看装进去没有
-		 else
-			 printf("|%c|\t",tokens[i].type);//看看装进去没有
-	
-	}
-	printf("\n");
-	for(i=0;i<nr_token;i++){
-		 printf("|%s|\t",tokens[i].str);//看看装进去没有
-	
-	}
-	printf("\n");
-
+//     printf("nr_token:%d\n",nr_token);
+//	for(i=0;i<nr_token;i++){
+//		 if(tokens[i].type==TK_NUM)
+//			 printf("|NUM|\t");//看看装进去没有
+//		 else
+//			 printf("|%c|\t",tokens[i].type);//看看装进去没有
+//	
+//	}
+//	printf("\n");
+//	for(i=0;i<nr_token;i++){
+//		 printf("|%s|\t",tokens[i].str);//看看装进去没有
+//	
+//	}
+//	printf("\n");
+//
   return true;
 }
 
@@ -219,8 +223,8 @@ static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最�
 			 case '+': return val1+val2; break;
 			 case '-':
 					 if(val1<val2){
-						 printf("The evaluation stops because some part of the expression has a number less than 0. The type is uint_32\n"); 
-						 *success=false;
+					 printf("The evaluation stops because some part of the expression has a number less than 0. The type is uint_32\n"); 
+						 *success=false;//感觉负数判断没啥用
 					 }
 					 else
 					 return val1-val2; 
@@ -241,6 +245,7 @@ static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最�
 
 }
 word_t expr(char *e, bool *success) {
+	*success=1;
   if (!make_token(e)) {
     *success = false;//token这一关都没过就直接返回false就够了
     return 0;

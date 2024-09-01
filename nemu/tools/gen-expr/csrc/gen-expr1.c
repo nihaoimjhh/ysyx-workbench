@@ -19,25 +19,27 @@
 #include <time.h>
 #include <assert.h>
 #include <string.h>
+#include <unistd.h> //forgetpid
 
+#define MAX_DEPTH 30
 // this should be enough
 static char buf[65536] = {};
 static char code_buf[65536 + 128] = {}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
+"#include <stdint.h>\n" 
 "int main() { "
-"  unsigned result = %s; "
+"  uint32_t result = %s; "
 "  printf(\"%%u\", result); "
 "  return 0; "
 "}";//模版，用来创建C语言程序然后计算答案
-
 
 static int choose(int n) {
   return rand()%n;
 }
 
 static void gen_num() {
-     unsigned int num = rand() % 10; // 生成一个0到99之间的随机数
+     uint32_t num = rand() % 100; // 生成一个0到99之间的随机数
 	 char num_str[12];
 	 sprintf(num_str, "%u", num); // 将数字转换为字符串
 	 strcat(buf, num_str); // 将字符串追加到 buf 中
@@ -62,7 +64,7 @@ static void gen_rand_op() {
 
 static void gen_rand_expr(int depth,int *success) {
  
-  if (depth > 20 || strlen(buf) > 65500){*success=0;return;};//递归深度不能太大
+  if (depth > MAX_DEPTH || strlen(buf) > 65500){*success=0;return;};//递归深度不能太大
   switch (choose(3)){
 		 case 0: 
 		 	 depth++;
@@ -92,7 +94,7 @@ static void gen_rand_expr(int depth,int *success) {
 
 
 int main(int argc, char *argv[]) {
-  int seed = time(0);
+  int seed = time(NULL) ^ getpid();
   int success=1;
   srand(seed);//随机数要用的种子
   int loop = 1;//循环次数
@@ -105,28 +107,27 @@ int main(int argc, char *argv[]) {
      success=1;
     gen_rand_expr(0,&success);//生成表达式应该是直接存储到buf里面
     if(success==0)
-       continue;
+       continue;//防止生成一半的表达式
     sprintf(code_buf, code_format, buf);//用来插入表达式到答案计算代码里面
 
-    FILE *fp = fopen("/tmp/.code.c", "w");//创建文件
+    FILE *testbench1 = fopen("/home/jinghanhui/ysyx-workbench/nemu/tools/gen-expr/results/testbench1", "a");//创建文件
+    FILE *fp = fopen("/tmp/.code1.c", "w");//创建文件
     assert(fp != NULL);
     fputs(code_buf, fp);//写入答案计算代码
     fclose(fp);//关闭文件
 
-    int ret = system("gcc -Werror /tmp/.code.c -o /tmp/.expr");//
+    int ret = system("gcc -Werror /tmp/.code1.c -o /tmp/.expr1  > /dev/null 2>&1");//看有无除0有就滤除该表达式
     if (ret != 0) continue;
 
-    fp = popen("/tmp/.expr", "r");//返回代码计算结果,管道
+    fp = popen("/tmp/.expr1", "r");//返回代码计算结果,管道
     assert(fp != NULL);
 
-    int result;
-    ret = fscanf(fp, "%d", &result);//读取结果存到ret
+    uint32_t result;
+    ret = fscanf(fp, "%u", &result);//读取结果存到ret
+	 fprintf(testbench1,"%u %s\n", result, buf);//打印表达式以及电脑计算的值,写到文件里面去
     pclose(fp);
-     if (result <= (unsigned int)0x7FFFFFFF) { // 如果结果是无符号数并且小于等于 2^31 - 1 (即 2147483647)
-    printf("%u %s\n", result, buf);//打印表达式以及电脑计算的值
-  } 
-  else
-      continue;
-      }
+    fclose(testbench1);
+   }
   return 0;
 }
+
