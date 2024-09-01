@@ -20,10 +20,12 @@
 #include <assert.h>
 #include <string.h>
 #include <unistd.h> //forgetpid
-#define MAX_DEPTH 30
+
+#define MAX_DEPTH 50
 // this should be enough
 static char buf[65536] = {};
-static char code_buf[65536 + 128] = {}; // a little larger than `buf`
+static char bufcal[6553600] = {};//用来计算“正确”的uint_32类型。
+static char code_buf[6553600 + 128] = {}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
 "#include <stdint.h>\n" 
@@ -42,18 +44,21 @@ static void gen_num() {
 	 char num_str[12];
 	 sprintf(num_str, "%u", num); // 将数字转换为字符串
 	 strcat(buf, num_str); // 将字符串追加到 buf 中
+	 strcat(bufcal, num_str); // 将字符串追加到 buf 中
 }
 
 static void gen_char(char c) {
 	 char temp[2] = {0,'\0'}; // 创建一个包含字符和结束符的临时字符串
 	 temp[0]=c;
 	 strcat(buf, temp); // 将临时字符串追加到 buf 的末尾
+	 strcat(bufcal, temp); // 将临时字符串追加到 buf 的末尾
 }
 static void gen_space() {
 	 char temp[2] = {0,'\0'}; // 创建一个包含字符和结束符的临时字符串
 	 if(choose(3))
 	 temp[0]=' ';
 	 strcat(buf, temp); // 将临时字符串追加到 buf 的末尾
+	 strcat(bufcal, temp); // 将临时字符串追加到 buf 的末尾
 }
 static void gen_rand_op() {
 	 char ops[] = "+-*/"; // 操作符集合
@@ -73,6 +78,7 @@ static void gen_rand_expr(int depth,int *success) {
 			 break;
 		 case 1: 
 			 depth++;
+             strcat(bufcal,"(uint32_t)");
 			 gen_char('(');
 			 gen_space();
 			 gen_rand_expr(depth,success);
@@ -103,11 +109,12 @@ int main(int argc, char *argv[]) {
   int i;
   for (i = 0; i < loop; i ++) {
      buf[0] = '\0';//清空buff
+     bufcal[0] = '\0';//清空buff
      success=1;
     gen_rand_expr(0,&success);//生成表达式应该是直接存储到buf里面
     if(success==0)
        continue;//防止生成一半的表达式
-    sprintf(code_buf, code_format, buf);//用来插入表达式到答案计算代码里面
+    sprintf(code_buf, code_format, bufcal);//用来插入表达式到答案计算代码里面
 
     FILE *testbench3 = fopen("/home/jinghanhui/ysyx-workbench/nemu/tools/gen-expr/results/testbench3", "a");//创建文件
     FILE *fp = fopen("/tmp/.code3.c", "w");//创建文件

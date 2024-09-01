@@ -18,7 +18,7 @@ BUILD_DIR = build
 RESULT_DIR = results
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 EXECS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%, $(SRCS))
-usecase= 10000
+usecase= 10
 RESULT1 = $(RESULT_DIR)/testbench1
 RESULT2 = $(RESULT_DIR)/testbench2
 RESULT3 = $(RESULT_DIR)/testbench3
@@ -60,7 +60,7 @@ run: $(EXECS)
 	./$(BUILD_DIR)/gen-expr13 $(usecase) & \
 	./$(BUILD_DIR)/gen-expr14 $(usecase) & \
 	./$(BUILD_DIR)/gen-expr15 $(usecase) & \
-	wait;'
+	wait;'#等待一起才cat不然不能正常拼接
 	cat $(RESULT1) $(RESULT2) $(RESULT3) $(RESULT4) $(RESULT5) $(RESULT6)  $(RESULT7)  $(RESULT8)  $(RESULT9)  $(RESULT10)  $(RESULT11)  $(RESULT12)  $(RESULT13)  $(RESULT14)  $(RESULT15)  > $(COMBINED_RESULT)
 	rm $(RESULT1) $(RESULT2) $(RESULT3) $(RESULT4) $(RESULT5) $(RESULT6) $(RESULT7)  $(RESULT8)  $(RESULT9)  $(RESULT10)  $(RESULT11)  $(RESULT12)  $(RESULT13)  $(RESULT14)  $(RESULT15)   
 clean:

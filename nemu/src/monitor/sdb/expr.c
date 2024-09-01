@@ -222,11 +222,11 @@ static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最�
 		 switch (tokens[op].type){//值运算
 			 case '+': return val1+val2; break;
 			 case '-':
-					 if(val1<val2){
-					 printf("The evaluation stops because some part of the expression has a number less than 0. The type is uint_32\n"); 
-						 *success=false;//感觉负数判断没啥用
-					 }
-					 else
+			//		 if(val1<val2){
+			//		 printf("The evaluation stops because some part of the expression has a number less than 0. The type is uint_32\n"); 
+			//			 *success=false;//感觉负数判断没啥用
+			//		 }
+			//		 else
 					 return val1-val2; 
 					 break;
 			 case '*': return val1*val2; break;
