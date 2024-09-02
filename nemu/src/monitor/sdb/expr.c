@@ -14,17 +14,18 @@
 ***************************************************************************************/
 
 #include <isa.h>
-
+#include <stdlib.h>
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
+#include <memory/vaddr.h>
 # define MAX_TOKENS 2000
 static word_t eval(int p,int q,bool *success);
 static int check_parentheses(int p,int q,bool *success);
 static int findop(int p,int q);
 enum {
-  TK_NOTYPE = 256, TK_EQ,TK_NUM,
+  TK_NOTYPE = 256, TK_EQ,TK_NUM,TK_HEXNUM,TK_REG,TK_NOEQ,TK_AND,TK_OR,DEREF,
 
   /* TODO: Add more token types */
 
@@ -46,8 +47,13 @@ static struct rule {
   {"\\(", '('},         
   {"\\)", ')'},         
   {"/", '/'},         
+  {"0x[a-fA-F0-9]+", TK_HEXNUM},//必须把这个放在NUM判断前面，否则前面的0就会被NUM读走，导致x留下然后出现错误         
   {"[0-9]+", TK_NUM},         
+  {"\\$[a-zA-Z0-9]+", TK_REG},         
   {"==", TK_EQ},        // equal
+  {"!=", TK_NOEQ},        // equal
+  {"&&", TK_AND},        // equal
+  {"\\|\\|", TK_OR},        // equal
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -79,7 +85,9 @@ typedef struct token {
 static Token tokens[MAX_TOKENS] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 static bool make_token(char *e) {
+  word_t temp;
   int position = 0;//初始位置
+  bool success=1;
   int i;//遍历规则使用
   regmatch_t pmatch;//存储匹配的结果
 
@@ -87,6 +95,7 @@ static bool make_token(char *e) {
 
   while (e[position] != '\0') {//处理循环
     /* Try all rules one by one. */
+	 
     for (i = 0; i < NR_REGEX; i ++) {//遍历rules
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {//so==0的目的是必须要从匹配的串的头匹配成功，不能对一点点。对一点点不算对，直接pass
         char *substr_start = e + position;//字段开始的地方
@@ -101,14 +110,46 @@ static bool make_token(char *e) {
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
+		 success=1;
 		 if(rules[i].token_type==TK_NOTYPE) //空格匹配到了就跳过
 			 break;
 		 tokens[nr_token].type = rules[i].token_type;
         switch (rules[i].token_type) {
-			case TK_NUM:
+		     case TK_NUM:
 				 strncpy(tokens[nr_token].str,substr_start,substr_len);//数字拷进str
 				 tokens[nr_token].str[substr_len]='\0';
 				 break;
+			 case TK_HEXNUM:
+				 strncpy(tokens[nr_token].str,substr_start,substr_len);//数字拷进str
+				 tokens[nr_token].str[substr_len]='\0';
+				 temp=(word_t)strtoul(tokens[nr_token].str,NULL,16);//NULL可以放没有处理的部分，由于这里全是16进制数，不需要这个信息，这个是输出信息
+				 sprintf(tokens[nr_token].str,"%u",temp);//覆盖，16进制转10进制之后以字符串再写进去 
+				 tokens[nr_token].type=TK_NUM;//在这就给他操作了，直接16转10然后处理成数字后面就不用大变
+				 break;
+			 case TK_REG:
+				 strncpy(tokens[nr_token].str,substr_start,substr_len);//数字拷进str
+				 tokens[nr_token].str[substr_len]='\0';
+				 temp=isa_reg_str2val(tokens[nr_token].str,&success);
+				 if(success==0)
+					 return false;
+				 else{
+					 sprintf(tokens[nr_token].str,"%u",temp);
+				 }
+				 tokens[nr_token].type=TK_NUM;//在这就给他操作了，把寄存器直接当值
+				 break;
+			 case TK_AND:
+				 strncpy(tokens[nr_token].str,substr_start,substr_len);//数字拷进str
+				 tokens[nr_token].str[substr_len]='\0';
+				 break;
+			 case TK_OR:
+				 strncpy(tokens[nr_token].str,substr_start,substr_len);//数字拷进str
+				 tokens[nr_token].str[substr_len]='\0';
+				 break;
+			 case TK_NOEQ:
+				 strncpy(tokens[nr_token].str,substr_start,substr_len);//数字拷进str
+				 tokens[nr_token].str[substr_len]='\0';
+				 break;
+			 
         }
 		 nr_token++;//token数量加1
 		 if(nr_token==MAX_TOKENS){
@@ -124,21 +165,6 @@ static bool make_token(char *e) {
       return false;
     }
   }  
-//     printf("nr_token:%d\n",nr_token);
-//	for(i=0;i<nr_token;i++){
-//		 if(tokens[i].type==TK_NUM)
-//			 printf("|NUM|\t");//看看装进去没有
-//		 else
-//			 printf("|%c|\t",tokens[i].type);//看看装进去没有
-//	
-//	}
-//	printf("\n");
-//	for(i=0;i<nr_token;i++){
-//		 printf("|%s|\t",tokens[i].str);//看看装进去没有
-//	
-//	}
-//	printf("\n");
-//
   return true;
 }
 
@@ -181,29 +207,39 @@ static int check_parentheses(int p,int q,bool *success){
 
 }
 static int findop(int p,int q){//到这里的时候先不考虑括号合不合法，假设合法
-	 int i=0,op=0,parent=0,flag=0;//flag用来标记op是不是已经被+-占掉了。+-有最高权利
+	 int i=0,op=0,parent=0,flag1=0,flag2=0,flag3=0;//flag用来标记op是不是已经被+-占掉了。+-有最高权利,优先级判定
 	 for(i=p;i<=q;i++){//主循环遍历
 		 if(tokens[i].type=='(')
 			 parent++;//防止多重嵌套，我开始用的是1和0:
 		 if(tokens[i].type==')')
-			 parent--;//由于op不可能出现在()里面所以要标记跳过,parent是1的时候说明现在在括号里面
+			 parent--;//由于op不可能出现在()里面所以要标记跳过,parent是>0的时候说明现在在括号里面,不用考虑合不合法，在前层函数已经判断过了
 		 if(parent>0)
 			 continue;
 		 else if(parent==0){
 			 if(tokens[i].type=='+'||tokens[i].type=='-'){
 				 op=i;
-				 flag=1;
+				 flag1=1;
 			 }
-			 if((tokens[i].type=='*'||tokens[i].type=='/')&&flag==0){
+			 if((tokens[i].type=='*'||tokens[i].type=='/')&&flag1==0){
 				 op=i;
+				 flag2=1;
 			 }
-		 }
+
+			 if((tokens[i].type==TK_EQ||tokens[i].type==TK_NOEQ||tokens[i].type==TK_AND||tokens[i].type==TK_OR)&&flag1==0&&flag2==0){
+				 op=i;
+				 flag3=1;
+		     }
+			 if(tokens[i].type==DEREF&&flag1==0&&flag2==0&&flag3==0){
+				 op=i;
+		    }
+	     }
 	 }
 	 return op;
 	 	
 }
 static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最后相加，如果俩是表达式，则递归。总的来说，总要转化成数字运算数字。数字是表达式。
 	int op;
+    word_t val1,val2;
 	 if(*success==false){return 0;}//一旦错误，立刻返回。
 	if(p>q){ *success=false;return 0;}
     else if(p==q){//表达式运算是主要递归目的是数字运算数字，再向上传值。在这里是递归的终点。值运算在后面，其实数字也是特殊的值运算，应该和后面的switch归为一类。
@@ -217,8 +253,13 @@ static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最�
 	}
 	else{
 		 op=findop(p,q);
-		 word_t val1=eval(p,op-1,success);//一次p写成q了半天找不到错
-		 word_t val2=eval(op+1,q,success);
+		 if(tokens[op].type==DEREF){
+			val1=-1;//确定DEREF现在可以正常操作了，只需要解引用就行了,解引用的运算层次最低
+		 }
+		 else{
+		     val1=eval(p,op-1,success);//一次p写成q了半天找不到错
+		 }
+		     val2=eval(op+1,q,success);
 		 switch (tokens[op].type){//值运算
 			 case '+': return val1+val2; break;
 			 case '-':
@@ -238,6 +279,18 @@ static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最�
 						 printf("Arithmetic error occurred.The dividend appears 0\n");
 						 return 0;
 						 }
+			 case TK_EQ: return val1==val2; break;
+			 case TK_NOEQ: return val1!=val2; break;
+			 case TK_AND: return val1&&val2; break;
+			 case TK_OR: return val1||val2; break;
+			 case DEREF: 
+						 if(val2>=0x80000000&&val2<=0x87ffffff){
+							 return vaddr_read(val2,4);
+						 }
+						 else{
+							 printf("Invalid memory address:%u\n",val2);
+							 break;
+						 }
 			default:assert(false);//搞一个这个比较好一点
 		 }	
 	}
@@ -245,12 +298,36 @@ static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最�
 
 }
 word_t expr(char *e, bool *success) {
+	int i;
 	*success=1;
   if (!make_token(e)) {
     *success = false;//token这一关都没过就直接返回false就够了
     return 0;
   }
-  
+
+   for (i = 0; i < nr_token; i ++) {
+		    if (tokens[i].type == '*' && (i == 0 || (tokens[i - 1].type !=TK_NUM&&tokens[i - 1].type !=')'))) {
+			    tokens[i].type = DEREF;
+			 }
+	}
+     printf("nr_token:%d\n",nr_token);
+	for(i=0;i<nr_token;i++){
+		 if(tokens[i].type==TK_NUM)
+			 printf("|NUM|\t");//看看装进去没有
+		 else if(tokens[i].type==DEREF){
+			 printf("|DEREF|\t");//看看装进去没有
+		 }
+		 else 
+			 printf("|%c|\t",tokens[i].type);
+	}
+	printf("\n");
+	for(i=0;i<nr_token;i++){
+		 printf("|%s|\t",tokens[i].str);//看看装进去没有
+	
+	}
+	printf("\n");
+
+
   return eval(0,nr_token-1,success);	
 
 }
