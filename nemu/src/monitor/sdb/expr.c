@@ -208,7 +208,7 @@ static int check_parentheses(int p,int q,bool *success){
 }
 static int findop(int p,int q){//到这里的时候先不考虑括号合不合法，假设合法
 	 int i=0,op=0,parent=0,flag1=0,flag2=0,flag3=0;//flag用来标记op是不是已经被+-占掉了。+-有最高权利,优先级判定
-	 for(i=p;i<=q;i++){//主循环遍历
+	 for(i=p;i<=q;i++){//主循环遍历找op,注意多重解引用是第一个为op，不是最后一个和四则运算不一样
 		 if(tokens[i].type=='(')
 			 parent++;//防止多重嵌套，我开始用的是1和0:
 		 if(tokens[i].type==')')
@@ -231,6 +231,7 @@ static int findop(int p,int q){//到这里的时候先不考虑括号合不合�
 		     }
 			 if(tokens[i].type==DEREF&&flag1==0&&flag2==0&&flag3==0){
 				 op=i;
+				 break;
 		    }
 	     }
 	 }
