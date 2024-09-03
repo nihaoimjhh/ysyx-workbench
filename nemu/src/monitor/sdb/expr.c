@@ -113,7 +113,7 @@ static bool make_token(char *e) {
 		 success=1;
 		 if(rules[i].token_type==TK_NOTYPE) //空格匹配到了就跳过
 			 break;
-		 tokens[nr_token].type = rules[i].token_type;
+		 tokens[nr_token].type = rules[i].token_type;//匹配到的type按顺序考进tokens,完成args到tokens的转换
         switch (rules[i].token_type) {
 		     case TK_NUM:
 				 strncpy(tokens[nr_token].str,substr_start,substr_len);//数字拷进str
@@ -229,11 +229,25 @@ static int findop(int p,int q){//到这里的时候先不考虑括号合不合�
 				 op=i;
 				 flag3=1;
 		     }
+			 		    
+		 }
+	     }
+	 
+	 parent=0;
+     for(i=p;i<=q;i++){//防止*0x80000000**0x80000000乘号不被识别为第一个op
+
+		 if(tokens[i].type=='(')
+			 parent++;//防止多重嵌套，我开始用的是1和0:
+		 if(tokens[i].type==')')
+			 parent--;//由于op不可能出现在()里面所以要标记跳过,parent是>0的时候说明现在在括号里面,不用考虑合不合法，在前层函数已经判断过了
+		 if(parent>0)
+			 continue;
+		 else if(parent==0){
 			 if(tokens[i].type==DEREF&&flag1==0&&flag2==0&&flag3==0){
 				 op=i;
-				 break;
-		    }
-	     }
+				 break;//保证从前面确定op并且不能第一个识别了就break;防止*0x80000000**0x80000000中间运算符直接被先确定为第一个解引用，DEREF应该是最后最后确定
+			 }
+		 }
 	 }
 	 return op;
 	 	
