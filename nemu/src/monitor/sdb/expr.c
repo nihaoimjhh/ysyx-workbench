@@ -325,22 +325,22 @@ word_t expr(char *e, bool *success) {
 			    tokens[i].type = DEREF;
 			 }
 	}
-     printf("nr_token:%d\n",nr_token);
-	for(i=0;i<nr_token;i++){
-		 if(tokens[i].type==TK_NUM)
-			 printf("|NUM|\t");//看看装进去没有
-		 else if(tokens[i].type==DEREF){
-			 printf("|DEREF|\t");//看看装进去没有
-		 }
-		 else 
-			 printf("|%c|\t",tokens[i].type);
-	}
-	printf("\n");
-	for(i=0;i<nr_token;i++){
-		 printf("|%s|\t",tokens[i].str);//看看装进去没有
-	
-	}
-	printf("\n");
+//     printf("nr_token:%d\n",nr_token);
+//	for(i=0;i<nr_token;i++){
+//		 if(tokens[i].type==TK_NUM)
+//			 printf("|NUM|\t");//看看装进去没有
+//		 else if(tokens[i].type==DEREF){
+//			 printf("|DEREF|\t");//看看装进去没有
+//		 }
+//		 else 
+//			 printf("|%c|\t",tokens[i].type);
+//	}
+//	printf("\n");
+//	for(i=0;i<nr_token;i++){
+//		 printf("|%s|\t",tokens[i].str);//看看装进去没有
+//	
+//	}
+//	printf("\n");
 
 
   return eval(0,nr_token-1,success);	

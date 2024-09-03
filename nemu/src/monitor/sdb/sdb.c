@@ -73,7 +73,7 @@ static int cmd_info(char *args) {
 		 isa_reg_display();
 	} 
 	 else if(strcmp(args,"w")==0){
-		//print watchpoins;
+		 wp_print();
 	 }
 	 else {
 		 printf("plase enter the right choice r(regs) or w(watchpoints)\n"); 
@@ -118,8 +118,25 @@ static int cmd_p(char *args){
 	 }
 	 return 0;
 }
-
-
+static int cmd_w(char *args){//args==expr
+	 if(args==NULL) {printf("Please enter the expression you want to monitor\n");return 0;}
+	 bool success=true;
+	 word_t ans;
+	 ans=expr(args,&success);
+	 if(success){
+		 wp_creat(args,ans,&success);
+		 if(!success)
+			 printf("An error occurred creating a watch point\n");
+	 }
+	 else{
+		 printf("Something went wrong Please check your expression\n");
+	 }
+	 return 0;
+}
+static int cmd_d(char *args){//args==N no.N
+	 wp_remove(args);
+     return 0;
+}
 
 
 static int cmd_help(char *args);
@@ -133,9 +150,11 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   { "si", "step excute", cmd_si },
-  { "info", "info r(regs) or info w(watchpoints)", cmd_info },
-  { "x", "examine mem", cmd_x},
-  { "p", "print a expr (calculate the figure)", cmd_p},
+  { "info", "info r or w :info r(regs) or info w(watchpoints)", cmd_info },
+  { "x", "x N adress(0x80000000): examine mem", cmd_x},
+  { "p", "p expr :print a expr (calculate the figure)", cmd_p},
+  { "w", "w expr :watch a expr and creat a watch points", cmd_w},
+  { "d", "d N :delete a watchpoint", cmd_d},
 
   /* TODO: Add more commands */
 

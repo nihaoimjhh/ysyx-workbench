@@ -61,6 +61,7 @@ void test_expr(){
 				 fprintf(error_fp,"\n");//打完空行更好看
 				 error++;//错误加一
 			 }
+			 printf("Have tested:%d\tpass:%d\terror:%d\n",nr_expr,nr_expr-error,error);//数据可视化
          } 
 		 else {
              printf("Failed to parse line: %s", buffer);
