@@ -134,7 +134,10 @@ static int cmd_w(char *args){//args==expr
 	 return 0;
 }
 static int cmd_d(char *args){//args==N no.N
+	 if(args==NULL) printf("Please enter the serial number you want to delete or enter (d all) to delete all watchpoints\n");
+	 else{
 	 wp_remove(args);
+	 }
      return 0;
 }
 

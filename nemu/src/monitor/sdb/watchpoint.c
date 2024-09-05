@@ -66,12 +66,16 @@ WP *new_wp(bool *success){//把free从第一个断了，然后接到head里面
 WP *free_wp(WP *wp,bool *success){
 	 WP *freetemp=NULL;
 	 WP *headtemp=NULL;
+	 if(wp==NULL){
+		 *success=false;
+		 return free_;
+	 }
 	 if(wp->remove==1){
 		 *success=false;
 		 printf("The watch is not enabled\n");
 	 }
 	 else{
-		 wp->expr[0]='\0';
+		 wp->expr[0]='\0';//清除才能用strcpy
 		 wp->ans=0;
 		 if(head==wp){//头指的就是要删的
 			 headtemp=head;//取头
@@ -88,7 +92,13 @@ WP *free_wp(WP *wp,bool *success){
 			 }
 		 }
 		 else{
-			 for(headtemp=head;headtemp->next!=wp;headtemp=headtemp->next){}//遍历已有监视点，找到需要删除的监视点的上一个指针
+			 for(headtemp=head;headtemp->next!=wp;headtemp=headtemp->next){
+				 printf("2:%p\n",&wp_pool[2]);
+			 printf("%p\n",headtemp->next);
+			 printf("%p\n",headtemp->next->next);
+			 printf("%p\n",headtemp->next->next->next);
+			 
+			 }//遍历已有监视点，找到需要删除的监视点的上一个指针
 		     if(free_==NULL){//头就是空的和下面情况不一样
 				 free_=headtemp->next;
 				 free_->next=NULL;//封口，不封口new的时候死循环
@@ -119,22 +129,43 @@ WP *wp_creat(char *args,word_t ans,bool *success){
 
 }
 void wp_remove(char *args){	 
- 	 int N;
-	 
+ 	 int N=0;
+	 int i=0;
+	 int remove=0;
 	 bool success=true;
-	 if(!sscanf(args,"%d",&N)){
-		 printf("Please enter the serial number you want to delete\n");
-	 }
-	 else{
-		if(N>=NR_WP){
-	     printf("There are only %d watchpoints\nWatchpoint NO.%d does not exist\n",NR_WP,N);
-	 }
-		else{
-		 free_wp(&wp_pool[N],&success);}
-		 if(!success){
-			 printf("There was an error in deleting a watch\n");
+	 if(strcmp(args,"all")==0){
+		 for(i=0;i<NR_WP;i++){
+	   	  	 if(wp_pool[i].remove==0){
+	   		     free_wp(&wp_pool[i],&success);
+	   		     if(!success){
+	   		         printf("There was an error in deleting a watchpoint:%d\n",i);
+	   		     }
+	   		     else{
+	   		         printf("Deleted watchpoint:%d successfully\n",i);
+					 remove=1;
+	   		     }
+		     }
 		 }
+		 if(remove==0)
+			 printf("No watchpoints to delete\n");
 	 }
+	 else if(!sscanf(args,"%d",&N)){
+			 printf("Please enter the serial number you want to delete\n");
+	 }
+	 else if(sscanf(args,"%d",&N)){
+		 if(N>=NR_WP){
+			 printf("There are only %d watchpoints\nWatchpoint NO.%d does not exist\n",NR_WP,N);
+		 }
+		 else{
+			 free_wp(&wp_pool[N],&success);
+			 if(!success){
+				 printf("There was an error in deleting a watchpoint:%d\n",N);
+			 }
+			 else{
+				 printf("Deleted watchpoint:%d successfully\n",N);
+			 }
+		 }
+     }
 }
 void wp_print(){
 	 int i,flag=0;
