@@ -26,7 +26,7 @@ const char *regs[] = {
 void isa_reg_display() {
      int i;
 	 for(i=0;i<ARRLEN(regs);i++){
-		 printf("%s\t%#x\t%d\n",regs[i],gpr(i),gpr(i));//local-include有定义这个宏
+		 printf("%s\t%#x\t%u\n",regs[i],gpr(i),gpr(i));//local-include有定义这个宏
 	 
 	 }
 }
@@ -36,11 +36,11 @@ word_t isa_reg_str2val(const char *s, bool *success) {
 	 char tempreg[4]={};
 	 strncpy(tempreg,s+1,4);//去掉$符号这样才能搜索，末尾直接填最大值如果 source 的长度小于 n，strncpy 会将 destination 的剩余部分用 null 字符 '\0' 填充，直到复制的字符数达到 n。
 	 
-	 if(strcmp(s,temp0)==0){
-		 return gpr(i);//local-include有定义这个宏
+	 if(strcmp(s,temp0)==0){//第一个是自带$的
+		 return gpr(0);//local-include有定义这个宏
 	 }
 	else{
-	     for(i=0;i<ARRLEN(regs);i++){//有这个宏就用
+	     for(i=1;i<ARRLEN(regs);i++){//有这个宏就用
 			 if(strcmp(tempreg,regs[i])==0){
 				 return gpr(i);//local-include有定义这个宏
 			 }
