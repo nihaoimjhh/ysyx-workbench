@@ -93,24 +93,21 @@ WP *free_wp(WP *wp,bool *success){
 		 }
 		 else{
 			 for(headtemp=head;headtemp->next!=wp;headtemp=headtemp->next){
-				 printf("2:%p\n",&wp_pool[2]);
-			 printf("%p\n",headtemp->next);
-			 printf("%p\n",headtemp->next->next);
-			 printf("%p\n",headtemp->next->next->next);
-			 
-			 }//遍历已有监视点，找到需要删除的监视点的上一个指针
+
+			 			 }//遍历已有监视点，找到需要删除的监视点的上一个指针
 		     if(free_==NULL){//头就是空的和下面情况不一样
 				 free_=headtemp->next;
+				 headtemp->next=headtemp->next->next;//删点
 				 free_->next=NULL;//封口，不封口new的时候死循环
 				 free_->remove=1;
 			 }
 			 else{
 				 for(freetemp=free_;freetemp->next!=NULL;freetemp=freetemp->next){}//遍历空，找到末尾
 					 freetemp->next=headtemp->next;//续尾
+					 headtemp->next=headtemp->next->next;//删点删点应该在封口之前不然报错
 					 freetemp->next->next=NULL;//封口
 					 freetemp->next->remove=1;
-			 }
-			 headtemp->next=headtemp->next->next;//删点
+			 } 
 		 }
 	 
 	 }
