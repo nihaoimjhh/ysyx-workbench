@@ -25,7 +25,7 @@ const char *regs[] = {
 
 void isa_reg_display() {
      int i;
-	 for(i=0;i<(sizeof(regs)/sizeof(regs[0]));i++){
+	 for(i=0;i<ARRLEN(regs);i++){
 		 printf("%s\t%#x\t%d\n",regs[i],gpr(i),gpr(i));//local-include有定义这个宏
 	 
 	 }
@@ -40,12 +40,12 @@ word_t isa_reg_str2val(const char *s, bool *success) {
 		 return gpr(i);//local-include有定义这个宏
 	 }
 	else{
-	     for(i=0;i<(sizeof(regs)/sizeof(regs[0]));i++){
+	     for(i=0;i<ARRLEN(regs);i++){//有这个宏就用
 			 if(strcmp(tempreg,regs[i])==0){
 				 return gpr(i);//local-include有定义这个宏
 			 }
 		 }
-		 if(i==(sizeof(regs)/sizeof(regs[0]))){
+		 if(i==ARRLEN(regs)){
 			 printf("Register %s was not found\n",s);
 			 *success=0;
 		 }

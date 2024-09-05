@@ -17,6 +17,7 @@
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
 #include <locale.h>
+#include "/home/jinghanhui/ysyx-workbench/nemu/src/monitor/sdb/sdb.h"
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -32,12 +33,20 @@ static bool g_print_step = false;
 
 void device_update();
 
-static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
+static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {//每次执行是运行cpu_excute,齐调用excute为核心函数，里面有trace，所以说每次执行较少步骤时候，每一次cpu执行该函数会执行,wp_check放这里再合适不过了
+ int flag=0;
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
-  IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
+  IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));//定义了CONFIG_DIFFTEST,才会调用difftest_step(_this->pc, dnpc);
+  IFDEF(CONFIG_WATCHPOINT, flag=wp_check());
+  if(flag==1){
+	nemu_state.state = NEMU_STOP;
+  }
+
+
+
 }
 
 static void exec_once(Decode *s, vaddr_t pc) {
@@ -71,14 +80,15 @@ static void exec_once(Decode *s, vaddr_t pc) {
 #endif
 }
 
-static void execute(uint64_t n) {
+static void execute(uint64_t n) {//cpu执行的核心函数
   Decode s;
   for (;n > 0; n --) {//命令执行循环
     exec_once(&s, cpu.pc);//真正执行的函数
     g_nr_guest_inst ++;//已执行过的命令数量
-    trace_and_difftest(&s, cpu.pc);//跟踪
+    trace_and_difftest(&s, cpu.pc);//每次执行一次就运行一下这个函数
     if (nemu_state.state != NEMU_RUNNING) break;//确保机器一直正常运行
     IFDEF(CONFIG_DEVICE, device_update());//外设
+    IFDEF(CONFIG_WATCHPOINT,wp_check() );//监视点check
   }
 }
 
@@ -97,7 +107,7 @@ void assert_fail_msg() {
 }
 
 /* Simulate how the CPU works. */
-void cpu_exec(uint64_t n) {
+void cpu_exec(uint64_t n) {//里面有execute
   g_print_step = (n < MAX_INST_TO_PRINT);//如果n小于规定数10那么就可以打印，把默认false置一
   switch (nemu_state.state) {
     case NEMU_END: case NEMU_ABORT://机器终止或者运行结束则打印提示信息

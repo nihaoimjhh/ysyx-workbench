@@ -32,4 +32,5 @@ WP *wp_creat(char *args,word_t ans,bool *success);
 WP *free_wp(WP *wp,bool *success);
 void wp_print();
 void wp_remove(char *args);
+int wp_check();
 #endif

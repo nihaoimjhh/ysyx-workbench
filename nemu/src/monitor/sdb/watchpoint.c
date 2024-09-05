@@ -176,7 +176,24 @@ void wp_print(){
 		 printf("no watchpoints\n");
 	 }
 }
-
+int wp_check(){
+	 int i=0,flag=0;
+	 word_t newans;
+	 bool success;
+	 for(i=0;i<NR_WP;i++){
+		 if(wp_pool[i].remove==1) continue;
+		 else{
+			 newans=expr(wp_pool[i].expr,&success);
+			 if(newans!=wp_pool[i].ans){
+				 printf("watchpoint:%d has been changed expr:%s\nOld value = %u\nNew value = %u\n",i,wp_pool[i].expr,wp_pool[i].ans,newans);
+				 wp_pool[i].ans=newans;
+				 flag=1;
+			 }
+		 }
+	 
+	 }
+	 return flag;
+}
 
 
 
