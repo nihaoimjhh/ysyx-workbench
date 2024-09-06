@@ -45,7 +45,7 @@ $(OBJ_DIR)/%.o: %.cc
 
 # Some convenient rules
 
-.PHONY: app clean
+.PHONY: app clean count
 
 app: $(BINARY)
 
@@ -55,3 +55,7 @@ $(BINARY):: $(OBJS) $(ARCHIVES)
 
 clean:
 	-rm -rf $(BUILD_DIR)
+count:
+	find $(NEMU_HOME)/ -name "*.c" -o -name "*.h" | xargs cat | grep -v '^\s*$$' | wc -l
+	find $(NEMU_HOME)/ -name "*.c" -o -name "*.h" | xargs cat | wc -l
+#$记得转义

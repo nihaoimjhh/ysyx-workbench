@@ -185,7 +185,7 @@ int wp_check(){
 		 else{
 			 newans=expr(wp_pool[i].expr,&success);
 			 if(newans!=wp_pool[i].ans){
-				 printf("watchpoint:%d has been changed expr:%s\nOld value = %u\nNew value = %u\n",i,wp_pool[i].expr,wp_pool[i].ans,newans);
+				 printf("expr:%s                 NO.%d\nOld value = %u\nNew value = %u\n",wp_pool[i].expr,i,wp_pool[i].ans,newans);
 				 wp_pool[i].ans=newans;
 				 flag=1;
 			 }

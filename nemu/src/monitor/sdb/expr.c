@@ -48,8 +48,8 @@ static struct rule {
   {"\\)", ')'},         
   {"/", '/'},         
   {"0x[a-fA-F0-9]+", TK_HEXNUM},//必须把这个放在NUM判断前面，否则前面的0就会被NUM读走，导致x留下然后出现错误         
-  {"[0-9]+", TK_NUM},         
   {"\\$[a-zA-Z0-9]+", TK_REG},         
+  {"[0-9]+", TK_NUM},         
   {"==", TK_EQ},        // equal
   {"!=", TK_NOEQ},        // equal
   {"&&", TK_AND},        // equal
