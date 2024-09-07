@@ -216,20 +216,21 @@ static int findop(int p,int q){//到这里的时候先不考虑括号合不合�
 		 if(parent>0)
 			 continue;
 		 else if(parent==0){
-			 if(tokens[i].type=='+'||tokens[i].type=='-'){
+			if((tokens[i].type==TK_EQ||tokens[i].type==TK_NOEQ||tokens[i].type==TK_AND||tokens[i].type==TK_OR)){
+				 op=i;
+				 flag3=1;
+		     }
+		
+			 if((tokens[i].type=='+'||tokens[i].type=='-')&&flag3==0){
 				 op=i;
 				 flag1=1;
 			 }
-			 if((tokens[i].type=='*'||tokens[i].type=='/')&&flag1==0){
+			 if((tokens[i].type=='*'||tokens[i].type=='/')&&flag1==0&&flag3==0){
 				 op=i;
 				 flag2=1;
 			 }
 
-			 if((tokens[i].type==TK_EQ||tokens[i].type==TK_NOEQ||tokens[i].type==TK_AND||tokens[i].type==TK_OR)&&flag1==0&&flag2==0){
-				 op=i;
-				 flag3=1;
-		     }
-			 		    
+		 		    
 		 }
 	     }
 	 
@@ -323,7 +324,7 @@ word_t expr(char *e, bool *success) {
    for (i = 0; i < nr_token; i ++) {
 		    if (tokens[i].type == '*' && (i == 0 || (tokens[i - 1].type !=TK_NUM&&tokens[i - 1].type !=')'))) {
 			    tokens[i].type = DEREF;
-			 }
+			 }//把乘号和函数解引用的*区分开来
 	}
 //     printf("nr_token:%d\n",nr_token);
 //	for(i=0;i<nr_token;i++){
@@ -343,6 +344,6 @@ word_t expr(char *e, bool *success) {
 //	printf("\n");
 
 
-  return eval(0,nr_token-1,success);	
+  return eval(0,nr_token-1,success);	//-1是为了到达最后一个元素
 
 }
