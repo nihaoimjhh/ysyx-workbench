@@ -128,17 +128,17 @@ WP *wp_creat(char *args,word_t ans,bool *success){
 void wp_remove(char *args){	 
  	 int N=0;
 	 int i=0;
-	 int remove=0;
+	 int remove=0;//查看是否有监视点被删除
 	 bool success=true;
 	 if(strcmp(args,"all")==0){
-		 for(i=0;i<NR_WP;i++){
-	   	  	 if(wp_pool[i].remove==0){
-	   		     free_wp(&wp_pool[i],&success);
+		 for(i=0;i<NR_WP;i++){//遍历所有监视点
+	   	  	 if(wp_pool[i].remove==0){//没被删除
+	   		     free_wp(&wp_pool[i],&success);//删除
 	   		     if(!success){
 	   		         printf("There was an error in deleting a watchpoint:%d\n",i);
 	   		     }
 	   		     else{
-	   		         printf("Deleted watchpoint:%d successfully\n",i);
+	   		         printf("Deleted watchpoint:%d successfully\n",i);//删除提示
 					 remove=1;
 	   		     }
 		     }
@@ -146,10 +146,10 @@ void wp_remove(char *args){
 		 if(remove==0)
 			 printf("No watchpoints to delete\n");
 	 }
-	 else if(!sscanf(args,"%d",&N)){
+	 else if(sscanf(args,"%d",&N)<=0){
 			 printf("Please enter the serial number you want to delete\n");
 	 }
-	 else if(sscanf(args,"%d",&N)){
+	 else if(sscanf(args,"%d",&N)>0){
 		 if(N>=NR_WP){
 			 printf("There are only %d watchpoints\nWatchpoint NO.%d does not exist\n",NR_WP,N);
 		 }

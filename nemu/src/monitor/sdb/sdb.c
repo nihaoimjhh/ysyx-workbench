@@ -55,7 +55,7 @@ static int cmd_q(char *args) {
 }
 static int cmd_si(char *args) {
 	uint64_t n;
-	nemu_state.state=NEMU_RUNNING;
+	//nemu_state.state=NEMU_RUNNING;//cpu_exec里面有了,放了重复会报错，现在不知道为啥
 	if(args==NULL){
 		 n=1;//默认1
 	 }
@@ -63,7 +63,7 @@ static int cmd_si(char *args) {
     sscanf(args,"%lu",&n);
 	 }
     cpu_exec(n);
-    cpu_exec(0);
+    //nemu_state.state=NEMU_STOP;cpu_exec里面有了
 	
   return 0;//
 }
@@ -81,28 +81,31 @@ static int cmd_info(char *args) {
   return 0;
 }
 static int cmd_x(char *args){
-	 if(args==NULL) {printf("Please enter the number N to be printed and which address EXPR\nexample: x 10 0x80000000(The 8-bit hexadecimal address has 32 bits)\n"); return 0;}
-	 char *args1,*args2;
+	 bool success=true;
+	 if(args==NULL) {printf("Please enter the number N to be printed and which address EXPR\nexample: x 10 0x80000000 or x 10 $reg\n"); return 0;}
+	 char *args1=NULL,*args2=NULL;
 	 int N,i;
-	 word_t EXPR;
-	 word_t addr;//相当于uint32_t
-
+	 word_t result;
+	 vaddr_t addr;//相当于uint32_t
 	 args1=strtok(NULL," ");
-	 if(args1==NULL||sscanf(args1,"%d",&N)==0){printf("Please enter the number N\n"); return 0;}//短接碰见NULL直接return防止报错,防止用户乱输
-	 
 	 args2=strtok(NULL," ");
-	 if(args2==NULL||sscanf(args2,"0x%x",&EXPR)==0){printf("Please enter the legitimate address EXPR(The 8-bit hexadecimal address has 32 bits)\n"); return 0;}//必需把null判断放在前面，短接，不能执行后面判断，不然直接崩溃。
-	 else addr=EXPR;
-	 for(i=0;i<N;i++){
-		 printf("addr:%x\t%x\n",addr,vaddr_read(addr,4));
-		 addr+=4;
+	 if(args1==NULL){printf("Please enter the number N to be printed\n");return 0;}
+	 if(args2==NULL){printf("Please enter the address or EXPR\n");return 0;}
+	 if(sscanf(args1,"%d",&N)<=0){printf("Please enter the number N to be printed\n");return 0;} 
+	 addr=expr(args2,&success);
+	 if(addr<0x80000000||addr>0x87ffffff){
+		 printf("Invalid memory address:Hexadecimal:%#x  decimal:%u\taddr hould in [0x80000000,0x87ffffff]\n",addr,addr);
+		 return 0;
 	 }
-	 
-
-	
-
-
-
+	 if(!success){
+		 printf("Some errors have occurred Please enter the correct expression\n"); return 0;}
+	 else{
+		 result=vaddr_read(addr,4);
+		 for(i=0;i<N;i++){
+			 printf("%#x\t%u\n",addr,result);
+			 addr+=4;
+		 }
+	 }
 	 return 0;
 }
 static int cmd_p(char *args){
@@ -111,7 +114,7 @@ static int cmd_p(char *args){
 	 word_t ans;
 	 ans=expr(args,&success);
 	 if(success){
-		 printf("ans=%u\n",ans);//ans测试
+		 printf("ans:\tdecimal:%u\tHexadecimal:%#x\n",ans,ans);//ans测试
 	 }
 	 else{
 		 printf("Something went wrong Please check your expression\n");
@@ -122,9 +125,9 @@ static int cmd_w(char *args){//args==expr
 	 if(args==NULL) {printf("Please enter the expression you want to monitor\n");return 0;}
 	 bool success=true;
 	 word_t ans;
-	 ans=expr(args,&success);
+	 ans=expr(args,&success);//先算值
 	 if(success){
-		 wp_creat(args,ans,&success);
+		 wp_creat(args,ans,&success);//存值
 		 if(!success)
 			 printf("An error occurred creating a watch point\n");
 	 }

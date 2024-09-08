@@ -235,7 +235,7 @@ static int findop(int p,int q){//到这里的时候先不考虑括号合不合�
 	     }
 	 
 	 parent=0;
-     for(i=p;i<=q;i++){//防止*0x80000000**0x80000000乘号不被识别为第一个op
+     for(i=p;i<=q;i++){//防止*0x80000000**0x80000000乘号不被识别为第一个op,和解引用的优先级综合判断，重新开一个循环。因为解引用是从前到后的
 
 		 if(tokens[i].type=='(')
 			 parent++;//防止多重嵌套，我开始用的是1和0:
@@ -301,10 +301,10 @@ static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最�
 			 case TK_OR: return val1||val2; break;
 			 case DEREF: 
 						 if(val2>=0x80000000&&val2<=0x87ffffff){
-							 return vaddr_read(val2,4);
+							 return vaddr_read((vaddr_t)val2,4);
 						 }
 						 else{
-							 printf("Invalid memory address:%u\n",val2);
+							 printf("Invalid memory address:Hexadecimal:%#x  decimal:%u\taddr hould in [0x80000000,0x87ffffff]\n]",val2,val2);
 							 break;
 						 }
 			default:assert(false);//搞一个这个比较好一点
