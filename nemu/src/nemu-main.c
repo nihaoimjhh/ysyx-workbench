@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
   init_monitor(argc, argv);
 #endif
   /* Start engine. */
- test_expr();
+// test_expr();
   engine_start();
 
   return is_exit_status_bad();//不是正常状态就是1所以报错
@@ -56,7 +56,7 @@ void test_expr(){
 			 //if(success==1)
 			 nr_expr++;//能够测试不报错，数目加1
 			 //if(ans!=answer&&success==1){
-			 if(ans!=answer){
+			 if(ans!=answer||success==0){
 				 fprintf(error_fp, "Expression     :%s\nExpected answer: %u\nYour     answer: %u\n", expression, answer, ans);//打印错误
 				 fprintf(error_fp,"\n");//打完空行更好看
 				 error++;//错误加一

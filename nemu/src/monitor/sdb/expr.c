@@ -127,7 +127,7 @@ static bool make_token(char *e) {
 				 tokens[nr_token].type=TK_NUM;//在这就给他操作了，直接16转10然后处理成数字后面就不用大变
 				 break;
 			 case TK_REG:
-				 strncpy(tokens[nr_token].str,substr_start,substr_len);//数字拷进str
+				 strncpy(tokens[nr_token].str,substr_start,substr_len);//符号拷进str
 				 tokens[nr_token].str[substr_len]='\0';
 				 temp=isa_reg_str2val(tokens[nr_token].str,&success);
 				 if(success==0)
@@ -138,7 +138,7 @@ static bool make_token(char *e) {
 				 tokens[nr_token].type=TK_NUM;//在这就给他操作了，把寄存器直接当值
 				 break;
 			 case TK_AND:
-				 strncpy(tokens[nr_token].str,substr_start,substr_len);//数字拷进str
+				 strncpy(tokens[nr_token].str,substr_start,substr_len);//符号拷进str
 				 tokens[nr_token].str[substr_len]='\0';
 				 break;
 			 case TK_OR:
@@ -304,7 +304,8 @@ static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最�
 							 return vaddr_read((vaddr_t)val2,4);
 						 }
 						 else{
-							 printf("Invalid memory address:Hexadecimal:%#x  decimal:%u\taddr hould in [0x80000000,0x87ffffff]\n]",val2,val2);
+							 printf("Invalid memory address:Hexadecimal:%#x  decimal:%u\taddr hould in [0x80000000,0x87ffffff]\n",val2,val2);
+							 *success=0;
 							 break;
 						 }
 			default:assert(false);//搞一个这个比较好一点
@@ -326,6 +327,20 @@ word_t expr(char *e, bool *success) {
 			    tokens[i].type = DEREF;
 			 }//把乘号和函数解引用的*区分开来
 	}
+   for (i = 0; i < nr_token; i ++) {//防止出现 1 2+3这种不合法表达式
+	    if(tokens[i].type==TK_NUM){
+			 if(*success==1)
+		         *success=0;
+			 else{
+				 printf("such \"1 2+3\" are not allowed\n");
+				 return 0;
+
+			 }
+		}
+		else
+			*success=1;
+	}
+    *success=1;
 //     printf("nr_token:%d\n",nr_token);
 //	for(i=0;i<nr_token;i++){
 //		 if(tokens[i].type==TK_NUM)
