@@ -11,6 +11,7 @@ module ysyx_24090003_IDU(
 assign rs1 = inst[19:15];
 assign rs2 = inst[24:20];
 assign rd = inst[11:7];
+assign funct = inst[14:12];
 assign opcode = inst[6:0];
 ysyx_24090003_ImmT ysyx_24090003_immT(
     .inst(inst),

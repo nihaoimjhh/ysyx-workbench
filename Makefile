@@ -1,4 +1,4 @@
-STUID = none
+STUID = 24090003
 STUNAME = 敬韩辉
 
 # DO NOT modify the following code!!!

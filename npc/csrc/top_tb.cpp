@@ -14,13 +14,17 @@ int main(int argc, char **argv, char **env) {
     // Initialize simulation inputs
     top->cpu_clk = 0;
     top->cpu_rs = 1;
-    top->addr_read_data = 0x100113; // 32'b00000000000000010010000100010011
 
     // Run simulation for 100 clock cycles
     for (int i = 0; i < 100; i++) {
         // Toggle clock
         top->cpu_clk = !top->cpu_clk;
-
+    if(i%3==0){    
+       top->addr_read_data = 0x108093; // 
+    }
+    else {
+        top->addr_read_data = 0x0;
+    }
         // Evaluate model
         top->eval();
 

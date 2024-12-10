@@ -1,25 +1,48 @@
+(*dont_touch = "true"*)  // Prevent synthesis tool from optimizing the module
 module ysyx_24090003_IFU(
     input cpu_clk,
     input cpu_rs,
     input [31:0] addr_read_data, // 从外部存储器读取的指令
     input [31:0] EXnpc, // 从外部存储器读取的指令
     input [31:0] EXspc, // 从外部存储器读取的指令
-    output reg [31:0] inst,
-    output reg [31:0] npc // 下一个PC值
+    input npc_write_enable,
+    input spc_write_enable,
+    output [31:0] inst,
+    output [31:0] npc, // 下一个PC值
+    output [31:0] pc // 下一个PC值
 );
-    reg [31:0] pc;
-
+    reg [31:0] pc_r;
+    reg [31:0] npc_r;
+    reg [31:0] spc_r;
+    reg [31:0] inst_r;
     // 取指逻辑
-    always @(posedge cpu_clk ) begin
+    assign inst = inst_r;
+    assign npc = npc_r;
+    assign pc = pc_r;
+    always @(posedge cpu_clk or posedge cpu_rs) begin
         if (cpu_rs) begin
-            pc <= 32'h80000000; // 重置时PC设为0
-            inst <= 32'b0; // 重置时输出0
-            npc <= 32'h80000000; // 重置时npc设为0
+            pc_r <= 32'h80000000; // 重置时PC设为
+            npc_r <= 32'h80000000; // 重置时npc设为0
+            spc_r <= 32'h80000000; // 重置时npc设为0
+            inst_r <= 32'b0; // 重置时输出0
+            npc_r <= 32'h80000000; // 重置时npc设为0
         end else begin
-                npc <= pc + 4; // 否则，npc加4
-            end
-            pc <= npc; // 更新PC为npc的值
-            inst <= addr_read_data; // 从外部存储器读取指令
+            case(npc_write_enable)
+            1:
+                npc_r <= EXnpc; // 使用执行模块提供的 npc
+            0:
+                npc_r <= pc_r + 4; // 自加 4
+            endcase
+
+            case(spc_write_enable)
+            1:
+                spc_r <= EXspc; // 使用执行模块提供的 spc
+            0:
+                spc_r <= 32'b0; // 默认 spc 为 0
+            endcase
+            pc_r <= npc_r; // 更新PC为npc的值
+            inst_r <= addr_read_data; // 从外部存储器读取指令
         end
+    end
     
 endmodule

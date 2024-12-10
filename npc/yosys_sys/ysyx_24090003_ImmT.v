@@ -1,6 +1,6 @@
 module ysyx_24090003_ImmT( 
     input [31:0]inst,
-    output [31:0]imm
+    output reg [31:0]imm
 );
     wire [2:0] Itype;
     wire [31:0] immI;
@@ -17,11 +17,15 @@ ysyx_24090003_ITF ysyx_24090003_instType(
     assign immB = {{19{inst[31]}}, inst[31], inst[7], inst[30:25], inst[11:8], 1'b0};
     assign immU = {inst[31:12], 12'b0};
     assign immJ = {{12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0};
-    assign imm = (Itype == 3'b001) ? immI :
-                 (Itype == 3'b010) ? immS :
-                 (Itype == 3'b011) ? immB :
-                 (Itype == 3'b100) ? immU :
-                 (Itype == 3'b101) ? immJ : 32'b0;
-                 
+    always @(*) begin
+        case (Itype)
+            3'b001: imm = immI;
+            3'b010: imm = immS;
+            3'b011: imm = immB;
+            3'b100: imm = immU;
+            3'b101: imm = immJ;
+            default: imm = 32'b0;
+        endcase
+    end
 
 endmodule
