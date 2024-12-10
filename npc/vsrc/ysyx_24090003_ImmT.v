@@ -25,7 +25,7 @@ ysyx_24090003_ITF ysyx_24090003_instType(
             3'b011: imm = immB;
             3'b100: imm = immU;
             3'b101: imm = immJ;
-            default: imm = 32'b0;
+            default: imm = 32'b1;//ebreak是1
         endcase
     end
 

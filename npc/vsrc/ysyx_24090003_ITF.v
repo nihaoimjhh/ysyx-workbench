@@ -4,7 +4,8 @@ module ysyx_24090003_ITF(
     output [2:0]Itype
 );
 assign Itype = (inst[6:0]==7'b0010011)?3'b001:
-                3'b001;//addi
+               (inst[6:0]==7'b1110011)?3'b000:
+               3'b000;//addi
 
 
 

@@ -9,19 +9,19 @@ module ysyx_24090003_regcontrol(
     output [31:0] reg_read_data1,
     output [31:0] reg_read_data2
 );
-    reg [31:0] registers [31:0];
+    reg [31:0] gpr [31:0];
    
     // Read data
-    assign reg_read_data1 = registers[rs1];
-    assign reg_read_data2 = registers[rs2];
+    assign reg_read_data1 = gpr[rs1];
+    assign reg_read_data2 = gpr[rs2];
     // Write data
     always @(posedge cpu_clk) begin
        if (reg_write_enable) begin
-            registers[EXrd] <= reg_write_data;
+            gpr[EXrd] <= reg_write_data;
         end
         else 
         begin
-            registers[EXrd] <= registers[EXrd];
+            gpr[EXrd] <= gpr[EXrd];
         end
     end
     

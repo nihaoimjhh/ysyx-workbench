@@ -1,4 +1,5 @@
 (*dont_touch = "true"*)  // Prevent synthesis tool from optimizing the module
+
 module ysyx_24090003_EXU(
     input cpu_clk,
     input [31:0] imm,
@@ -36,7 +37,13 @@ module ysyx_24090003_EXU(
     reg [31:0]EXaddr_r;
     wire [31:0]alu_result;
     //Load operand
-
+import "DPI-C" function void finish_simulation();
+always@(*)begin
+    if(opcode==7'b1110011&&funct==3'b000)
+    begin
+        finish_simulation();
+    end
+end
 assign operand1 = operand1_r;
 assign operand2 = operand2_r;
 
@@ -79,6 +86,7 @@ always @(*) begin
                 end
             endcase
         end
+      
   default: begin
                 operand1_r = 0;
                 operand2_r = 0;
