@@ -42,6 +42,7 @@ int main(int argc, char **argv, char **env) {
 
     // Run simulation for 100 clock cycles
     for (int i = 0; i >-1; i++) {
+  
         if(i==0){
             top->cpu_rs = 1;
         }
@@ -50,26 +51,26 @@ int main(int argc, char **argv, char **env) {
         }
         // Toggle clock
         top->cpu_clk = !top->cpu_clk;
-        if(i%4==0||i%4==1){    
+        if(i%4==1||i%4==2){    
              top->addr_read_data = instructions[instruction_index];
             }
-        else if(i%4==3||i%4==2){
-            top->addr_read_data = 0 ;//
-            }
+     
         else {
             top->addr_read_data = 0x0;
             }
+        
         if(i%4==0){
+              printf("addr_read_data = %s\n",std::bitset<32>(instructions[instruction_index]).to_string().c_str());
              instruction_index++;
          }
         // Print out the instruction
         // Evaluate model
+        
+        
         top->eval();
         // Dump trace data
         tfp->dump(i);
-        if(i%4==0){
-        printf("addr_read_data = %s\n",std::bitset<32>(top->addr_read_data).to_string().c_str());}
-        if (finish==1) {
+      if (finish==1) {
                 printf("ebreak,excute %d instructions\n",instruction_index);
                 break;
                  top->final();
@@ -79,6 +80,7 @@ int main(int argc, char **argv, char **env) {
                 delete top;
         }
     }
+        
 
     // Final model cleanup
     top->final();

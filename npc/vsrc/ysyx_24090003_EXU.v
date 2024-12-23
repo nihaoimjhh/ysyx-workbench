@@ -9,16 +9,16 @@ module ysyx_24090003_EXU(
     input [4:0] rd,
     input [31:0] reg_read_data1,
     input [31:0] reg_read_data2,
-    output reg[31:0] EXnpc,
-    output reg[31:0] EXspc,
-    output reg[31:0] EXaddr,
-    output reg[31:0] addr_write_data,
-    output reg[31:0] reg_write_data,
-    output reg [4:0] EXrd,
-    output reg reg_write_enable,
-    output reg addr_write_enable,
-    output reg npc_write_enable,
-    output reg spc_write_enable
+    output [31:0] EXnpc,
+    output [31:0] EXspc,
+    output [31:0] EXaddr,
+    output [31:0] addr_write_data,
+    output [31:0] reg_write_data,
+    output  [4:0] EXrd,
+    output  reg_write_enable,
+    output  addr_write_enable,
+    output  npc_write_enable,
+    output  spc_write_enable
     );
     reg [31:0] operand1_r;
     reg [31:0] operand2_r;
@@ -44,9 +44,20 @@ always@(*)begin
         finish_simulation();
     end
 end
+
+//能实现写值的前提是指令长度必须为一个周期，不然时钟上升的时候寄存器那边捕获不到值
 assign operand1 = operand1_r;
 assign operand2 = operand2_r;
-
+assign reg_write_data = reg_write_data_r;
+assign EXrd = EXrd_r;
+assign addr_write_data = addr_write_data_r;
+assign EXnpc = EXnpc_r;
+assign EXspc = EXspc_r;//
+assign EXaddr = EXaddr_r;
+assign reg_write_enable = reg_write_data_enable_r;
+assign addr_write_enable = addr_write_data_enable_r;
+assign npc_write_enable = npc_write_enable_r;
+assign spc_write_enable = spc_write_enable_r;
 always @(*) begin
     case (opcode)
         7'b0010011: begin
@@ -104,48 +115,8 @@ always @(*) begin
             end
     endcase
 end
-//write back
-always @(posedge cpu_clk) begin
-    reg_write_data <= reg_write_data_r;
-    EXrd <= EXrd_r;
-    addr_write_data <= addr_write_data_r;
-    EXnpc <= EXnpc_r;
-    EXspc <= EXspc_r;//
-    EXaddr <= EXaddr_r;
-    case (reg_write_data_enable_r)
-        1: begin
-            reg_write_enable <= 1;  
-        end
-        0: begin
-            reg_write_enable <= 0;
-        end
-    endcase
-    case (addr_write_data_enable_r)
-        1: begin
-            addr_write_enable <= 1;  
-        end
-        0: begin
-            addr_write_enable <= 0;
-        end
-    endcase
-    case (npc_write_enable_r)
-        1: begin
-            npc_write_enable <= 1;  
-        end
-        0: begin
-            npc_write_enable <= 0;
-        end
-    endcase
-    case (spc_write_enable_r)
-        1: begin
-            spc_write_enable <= 1;  
-        end
-        0: begin
-            spc_write_enable <= 0;
-        end
-    endcase
 
-end
+
 
 
 
