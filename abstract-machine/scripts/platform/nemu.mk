@@ -11,7 +11,8 @@ CFLAGS    += -fdata-sections -ffunction-sections
 LDFLAGS   += -T $(AM_HOME)/scripts/linker.ld \
              --defsym=_pmem_start=0x80000000 --defsym=_entry_offset=0x0
 LDFLAGS   += --gc-sections -e _start
-NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt
+NEMUFLAGS += -l $(shell dirname $(IMAGE).elf)/nemu-log.txt -b
+
 
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
 CFLAGS += -I$(AM_HOME)/am/src/platform/nemu/include
@@ -22,8 +23,56 @@ image: $(IMAGE).elf
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
 
+#变成.bin文件
 run: image
 	$(MAKE) -C $(NEMU_HOME) ISA=$(ISA) run ARGS="$(NEMUFLAGS)" IMG=$(IMAGE).bin
-
+#和nemu的接口
 gdb: image
 	$(MAKE) -C $(NEMU_HOME) ISA=$(ISA) gdb ARGS="$(NEMUFLAGS)" IMG=$(IMAGE).bin
+$(info FILE: $(shell pwd)/$(shell ls | grep -E 'Makefile$$|\.mk$$'))
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+$(info )
+
+$(info MAKE: - $(MAKE))
+$(info )
+$(info AM_SRCS :)
+$(foreach src,$(AM_SRCS),$(info - $(src)))
+$(info )
+$(info CFLAGS: - $(CFLAGS))
+$(info )
+$(info LDFLAGS: - $(LDFLAGS))
+$(info )
+$(info NEMUFLAGS: - $(NEMUFLAGS))
+$(info )
+$(info mainargs: - $(mainargs))
+$(info )
+
+$(info OBJDUMP: - $(OBJDUMP))
+$(info )
+$(info IMAGE: - $(IMAGE))
+$(info )
+$(info IMAGE_REL: - $(IMAGE_REL))
+$(info )
+$(info NEMU_HOME: - $(NEMU_HOME))
+$(info )
+$(info ISA: - $(ISA))
+$(info )

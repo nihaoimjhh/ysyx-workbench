@@ -49,6 +49,8 @@ CFLAGS_TRACE += -DITRACE_COND=$(if $(CONFIG_ITRACE_COND),$(call remove_quote,$(C
 CFLAGS  += $(CFLAGS_BUILD) $(CFLAGS_TRACE) -D__GUEST_ISA__=$(GUEST_ISA)
 LDFLAGS += $(CFLAGS_BUILD)
 
+
+
 # Include rules for menuconfig
 include $(NEMU_HOME)/scripts/config.mk
 
@@ -59,3 +61,36 @@ else
 # Include rules to build NEMU
 include $(NEMU_HOME)/scripts/native.mk
 endif
+$(info FILE: $(shell pwd)/$(shell ls | grep -E 'Makefile$$|\.mk$$'))
+$(info )
+$(info ENGINE = $(ENGINE))
+$(info )
+$(info NAME = $(NAME))
+$(info )
+$(info FILELIST_MK = $(FILELIST_MK))
+$(info )
+
+$(info DIRS-BLACKLIST-y: )
+$(foreach dir,$(DIRS-BLACKLIST-y),$(info - $(dir)))
+$(info )
+$(info SRCS-BLACKLIST-y :)
+$(foreach src,$(SRCS-BLACKLIST-y),$(info - $(src)))
+$(info )
+$(info SRCS-y :)
+$(foreach src,$(SRCS-y),$(info - $(src)))
+$(info )
+$(info SRCS :)
+$(foreach src,$(SRCS),$(info - $(src)))
+$(info )
+$(info CC = $(CC))
+$(info )
+$(info CFLAGS_BUILD = $(CFLAGS_BUILD))
+$(info )
+$(info CFLAGS_TRACE = $(CFLAGS_TRACE))
+$(info )
+$(info CFLAGS = $(CFLAGS))
+$(info )
+$(info LDFLAGS = $(LDFLAGS))
+$(info )
+$(info LINKAGE = $(LINKAGE))
+$(info )

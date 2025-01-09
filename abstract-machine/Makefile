@@ -12,12 +12,14 @@ ifeq ($(MAKECMDGOALS),)
   MAKECMDGOALS  = image
   .DEFAULT_GOAL = image
 endif
-
+#规定目标就是镜像文件，整个am就是输出镜像文件给nemu使用，因为nemu只有一个端口，在monitor里面实现，使用getopt来读取文件，需要提供文件的位置，读取之后就
+#可以运行了
 ### Override checks when `make clean/clean-all/html`
 ifeq ($(findstring $(MAKECMDGOALS),clean|clean-all|html),)
 
 ### Print build info message
 $(info # Building $(NAME)-$(MAKECMDGOALS) [$(ARCH)])
+### Echo variables for debugging
 
 ### Check: environment variable `$AM_HOME` looks sane
 ifeq ($(wildcard $(AM_HOME)/am/include/am.h),)
@@ -25,15 +27,15 @@ ifeq ($(wildcard $(AM_HOME)/am/include/am.h),)
 endif
 
 ### Check: environment variable `$ARCH` must be in the supported list
-ARCHS = $(basename $(notdir $(shell ls $(AM_HOME)/scripts/*.mk)))
+ARCHS = $(basename $(notdir $(shell ls $(AM_HOME)/scripts/*.mk)))#把scripts文件夹下的所有mk文件的文件名去掉后缀等价于loongarch32r-nemu mips32-nemu native riscv32e-nemu riscv32e-npc riscv32-nemu riscv64-nemu spike x86_64-qemu x86-nemu x86-qemu
 ifeq ($(filter $(ARCHS), $(ARCH)), )
   $(error Expected $$ARCH in {$(ARCHS)}, Got "$(ARCH)")
 endif
 
 ### Extract instruction set architecture (`ISA`) and platform from `$ARCH`. Example: `ARCH=x86_64-qemu -> ISA=x86_64; PLATFORM=qemu`
-ARCH_SPLIT = $(subst -, ,$(ARCH))
-ISA        = $(word 1,$(ARCH_SPLIT))
-PLATFORM   = $(word 2,$(ARCH_SPLIT))
+ARCH_SPLIT = $(subst -, ,$(ARCH))#把riscv-nemu分割成riscv和nemu
+ISA        = $(word 1,$(ARCH_SPLIT))#riscv
+PLATFORM   = $(word 2,$(ARCH_SPLIT))#nemu
 
 ### Check if there is something to build
 ifeq ($(flavor SRCS), undefined)
@@ -46,14 +48,14 @@ endif
 ## 2. General Compilation Targets
 
 ### Create the destination directory (`build/$ARCH`)
-WORK_DIR  = $(shell pwd)
-DST_DIR   = $(WORK_DIR)/build/$(ARCH)
+WORK_DIR  = $(shell pwd)#在构建的时候，会把当前的路径赋值给WORK_DIR，这个路径是在makefile文件所在的路径，先是cputest然后构建lib由于130行的在make -C，所以会把lib的路径赋值给WORK_DIR那么就会是am的路径
+DST_DIR   = $(WORK_DIR)/build/$(ARCH)#是什么路径就在什么地方创建一个build文件夹
 $(shell mkdir -p $(DST_DIR))
 
 ### Compilation targets (a binary image or archive)
-IMAGE_REL = build/$(NAME)-$(ARCH)
-IMAGE     = $(abspath $(IMAGE_REL))
-ARCHIVE   = $(WORK_DIR)/build/$(NAME)-$(ARCH).a
+IMAGE_REL = build/$(NAME)-$(ARCH)##这个是镜像文件的相对路径RELATIVE
+IMAGE     = $(abspath $(IMAGE_REL))#这个是镜像文件的绝对路径,说是image其实就是在哪而已，并且最后和库文件一起打包成一个elf文件
+ARCHIVE   = $(WORK_DIR)/build/$(NAME)-$(ARCH).a#这个是库文件的绝对路径，有这个名字而已但是不一定有这个文件，archive是一个库文件，只会在archive这个目标下生成，这个目标只会在am和klib生成这个文件是一个.a文件，是一个静态库文件	
 
 ### Collect the files to be linked: object files (`.o`) and libraries (`.a`)
 OBJS      = $(addprefix $(DST_DIR)/, $(addsuffix .o, $(basename $(SRCS))))
@@ -76,8 +78,8 @@ OBJCOPY   = $(CROSS_COMPILE)objcopy
 READELF   = $(CROSS_COMPILE)readelf
 
 ### Compilation flags
-INC_PATH += $(WORK_DIR)/include $(addsuffix /include/, $(addprefix $(AM_HOME)/, $(LIBS)))
-INCFLAGS += $(addprefix -I, $(INC_PATH))
+INC_PATH += $(WORK_DIR)/include $(addsuffix /include/, $(addprefix $(AM_HOME)/, $(LIBS)))#work_dir有include文件夹，am和klib也有include文件夹，所以这里是把这三个文件夹的路径都加入到INC_PATH中
+INCFLAGS += $(addprefix -I, $(INC_PATH))#-I后面跟的是路径，这个是gcc的参数，表示头文件的路径
 
 ARCH_H := arch/$(ARCH).h
 CFLAGS   += -O2 -MMD -Wall -Werror $(INCFLAGS) \
@@ -90,7 +92,7 @@ CFLAGS   += -O2 -MMD -Wall -Werror $(INCFLAGS) \
 CXXFLAGS +=  $(CFLAGS) -ffreestanding -fno-rtti -fno-exceptions
 ASFLAGS  += -MMD $(INCFLAGS)
 LDFLAGS  += -z noexecstack
-
+#参数可以直接对宏进行处理 CFLAGS
 ## 4. Arch-Specific Configurations
 
 ### Paste in arch-specific configurations (e.g., from `scripts/x86_64-qemu.mk`)
@@ -123,7 +125,7 @@ $(DST_DIR)/%.o: %.cpp
 $(DST_DIR)/%.o: %.S
 	@mkdir -p $(dir $@) && echo + AS $<
 	@$(AS) $(ASFLAGS) -c -o $@ $(realpath $<)
-
+#全部文件变成.o文件包括c文件，cc文件，cpp文件，S文件
 ### Rule (recursive make): build a dependent library (am, klib, ...)
 $(LIBS): %:
 	@$(MAKE) -s -C $(AM_HOME)/$* archive
@@ -143,6 +145,46 @@ $(ARCHIVE): $(OBJS)
 
 ## 6. Miscellaneous
 
+$(info FILE: $(shell pwd)/$(shell ls | grep -E 'Makefile$$|\.mk$$'))
+$(info ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc)
+$(info MAKECMDGOALS: - $(MAKECMDGOALS))
+$(info )
+$(info NAME: - $(NAME))
+$(info )
+$(info ARCH: - $(ARCH))
+$(info )
+$(info AM_HOME: - $(AM_HOME))
+$(info )
+$(info ARCHS: - $(ARCHS))
+$(info )
+$(info ARCH_SPLIT: - $(ARCH_SPLIT))
+$(info )
+$(info ISA: - $(ISA))
+$(info )
+$(info PLATFORM: - $(PLATFORM))
+$(info )
+$(info SRCS: )
+$(foreach scr,$(SRCS),$(info - $(scr)))
+$(info )
+$(info OBJS: )
+$(foreach obj,$(OBJS),$(info - $(obj)))
+$(info )
+$(info LIBS: )
+$(foreach lib,$(LIBS),$(info - $(lib)))
+$(info )
+$(info WORK_DIR: - $(WORK_DIR))
+$(info )
+$(info DST_DIR: - $(DST_DIR))
+$(info )
+$(info IMAGE_REL: - $(IMAGE_REL))
+$(info )
+$(info IMAGE: - $(IMAGE))
+$(info )
+$(info ARCHIVE: - $(ARCHIVE))
+$(info )
+$(info INC_PATH: )
+$(foreach inc,$(INC_PATH),$(info - $(inc)))
+$(info )
 ### Build order control
 image: image-dep
 archive: $(ARCHIVE)

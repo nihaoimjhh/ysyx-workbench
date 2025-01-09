@@ -31,15 +31,55 @@ OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o)
 $(OBJ_DIR)/%.o: %.c
 	@echo + CC $<
 	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -E -o $(basename $@).i $< 
 	@$(CC) $(CFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
 
 $(OBJ_DIR)/%.o: %.cc
 	@echo + CXX $<
 	@mkdir -p $(dir $@)
+	@$(CXX) $(CFLAGS) $(CXXFLAGS) -E -o $(basename $@).i $<
 	@$(CXX) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
 	$(call call_fixdep, $(@:.o=.d), $@)
 
+$(info FILE: $(shell pwd)/$(shell ls | grep -E 'Makefile$$|\.mk$$'))
+$(info )
+$(info DEFAULT_GOAL: - $(DEFAULT_GOAL))
+$(info )
+$(info SHARE: - $(SHARE))
+$(info )
+$(info SO: - $(SO))
+$(info )
+$(info CFLAGS: - $(CFLAGS))
+$(info )
+$(info LDFLAGS: - $(LDFLAGS))
+$(info )
+$(info WORK_DIR: - $(WORK_DIR))
+$(info )
+$(info BUILD_DIR: - $(BUILD_DIR))
+$(info )
+$(info INC_PATH: - $(INC_PATH))
+$(info )
+$(info OBJ_DIR: - $(OBJ_DIR))
+$(info )
+$(info BINARY: - $(BINARY))
+$(info )
+$(info CC: - $(CC))
+$(info )
+$(info CXX: - $(CXX))
+$(info )
+$(info LD: - $(LD))
+$(info )
+$(info INCLUDES: - $(INCLUDES))
+$(info )
+$(info OBJS:)
+$(foreach obj,$(OBJS),$(info - $(obj)))
+$(info )
+$(info SRCS: )
+$(foreach scr,$(SRCS),$(info - $(scr)))
+$(info )
+$(info CXXSRC: - $(CXXSRC))
+$(info )
 # Depencies
 -include $(OBJS:.o=.d)
 
