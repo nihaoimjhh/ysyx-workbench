@@ -248,6 +248,7 @@ void sdb_mainloop() {
         if (cmd_table[i].handler(args) < 0) { return; }//实际函数处理，上面判断找到，顺便看看要不要退出。<0是为q准备的
         if (cmd!=NULL) strcpy(last_cmd, cmd);//如果不是空的话那么就把这次的命令赋值给上一次的命令
         if (args!=NULL) strcpy(last_args, args);
+        else last_args[0] = 0;
        
         
         break;//如果不是小于0的话那么会结束查询指令循环而不是直接返回值，结束这一轮指令的处理。继续上一个循环，持续不断获取指令.如果小于0那么不处理了，直接退出机器，然后执行主函数的返回看看机器是不是坏的
