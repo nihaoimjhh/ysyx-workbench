@@ -158,8 +158,7 @@ int iringbufmanage(char irb[][128],uint64_t g_nr_guest_inst,Decode *s){
 void iringbufprint(char irb[][128],int count){
   for(int i=0;i<11;i++){
       if(i==count){
-      printf("===>");
-      puts(irb[i]);
+      printf("\033[1;31m" "===>%s\n" "\033[0m",irb[i]); // 蓝色
       continue;
       }
       printf("    ");
