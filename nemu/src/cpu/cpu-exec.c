@@ -29,8 +29,8 @@ CPU_state cpu = {};
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
-int iringbufmanage(iringbuf *irb, uint64_t g_nr_guest_inst,Decode *s);
-void iringbufprint(iringbuf *irb,int count);
+int iringbufmanage(char irb[][128], uint64_t g_nr_guest_inst,Decode *s);
+void iringbufprint(char irb[][128],int count);
 void device_update();
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {//每次执行是运行cpu_excute,齐调用excute为核心函数，里面有trace，所以说每次执行较少步骤时候，每一次cpu执行该函数会执行,wp_check放这里再合适不过了
  int flag=0;
@@ -82,14 +82,15 @@ static void exec_once(Decode *s, vaddr_t pc) {
 }
 
 static void execute(uint64_t n) {//cpu执行的核心函数
+
   Decode s;
-  iringbuf irb[11];
+  char irb[11][128];
   int last_count=0;
   for (;n > 0; n --) {//命令执行循环
     exec_once(&s, cpu.pc);//真正执行的函数
     g_nr_guest_inst ++;//已执行过的命令数量
     last_count=iringbufmanage(irb,g_nr_guest_inst,&s);
-    trace_and_difftest(&s, cpu.pc);//每次执行一次就运行一下这个函数
+    trace_and_difftest(&s, cpu.pc);//每次执行一次就运行一下这个函数//这里有打印最后一次出错的信息
     if (nemu_state.state != NEMU_RUNNING) {
       if(nemu_state.state == NEMU_ABORT) {
         iringbufprint(irb,last_count);
@@ -147,25 +148,24 @@ void cpu_exec(uint64_t n) {//里面有execute
 }
 
 
-int iringbufmanage(iringbuf *irb,uint64_t g_nr_guest_inst,Decode *s){
+int iringbufmanage(char irb[][128],uint64_t g_nr_guest_inst,Decode *s){
   int count = g_nr_guest_inst % 11;
-  irb[count].pc = s->pc;
-  irb[count].snpc = s->snpc;
-  irb[count].dnpc = s->dnpc;
   if(s->logbuf!=NULL)
-  strcpy(irb[count].logbuf,s->logbuf); 
+  strcpy(irb[count],s->logbuf); 
   return count;
 }
 
-void iringbufprint(iringbuf *irb,int count){
+void iringbufprint(char irb[][128],int count){
   for(int i=0;i<11;i++){
       if(i==count){
       printf("===>");
-      puts(irb[i].logbuf);
+      puts(irb[i]);
       continue;
       }
       printf("    ");
-      puts(irb[i].logbuf);
+      puts(irb[i]);
   }
 
 }
+
+
