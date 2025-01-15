@@ -17,13 +17,23 @@
 #include <cpu/difftest.h>
 #include <locale.h>
 #include "/home/jinghanhui/ysyx-workbench/nemu/src/monitor/sdb/sdb.h"
-
+#include "/home/jinghanhui/ysyx-workbench/nemu/include/cpu/get_elf.h"
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.
  * You can modify this value as you want.
  */
 #define MAX_INST_TO_PRINT 10
+ extern   Elf32_Ehdr ehdr;
+ extern   Elf32_Shdr *shdr_pointer;
+ extern   char *strtab;
+ extern   int symlens;
+ extern   int symtab_index;
+ extern   int strtab_index;
+ extern   Elf32_Sym *symtab_pointer;
+
+
+
 
 CPU_state cpu = {};
 uint64_t g_nr_guest_inst = 0;
@@ -54,6 +64,9 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->snpc = pc;
   isa_exec_once(s);//执行命令
   cpu.pc = s->dnpc;
+
+  inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->isa.inst.val, s->dnpc, s->pc,symlens);
+
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);

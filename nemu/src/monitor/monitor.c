@@ -15,7 +15,9 @@
 
 #include <isa.h>
 #include <memory/paddr.h>
-
+#include "/home/jinghanhui/ysyx-workbench/nemu/include/cpu/get_elf.h"
+#include <elf.h>
+#define FUNC_INFO 18 //elf.h里面有定义
 void init_rand();
 void init_log(const char *log_file);
 void init_mem();
@@ -23,7 +25,7 @@ void init_difftest(char *ref_so_file, long img_size, int port);
 void init_device();
 void init_sdb();
 void init_disasm(const char *triple);
-
+void init_elf_read(char *elf_file);
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
   IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
@@ -38,13 +40,50 @@ static void welcome() {
 
 #ifndef CONFIG_TARGET_AM
 #include <getopt.h>
-
 void sdb_set_batch_mode();
 
 static char *log_file = NULL;
 static char *diff_so_file = NULL;
 static char *img_file = NULL;
+char *elf_file = NULL;
 static int difftest_port = 1234;
+
+
+
+
+
+    FILE *fp;
+    Elf32_Ehdr ehdr;
+    Elf32_Shdr *shdr_pointer;
+    char *strtab;
+    int symlens=0;
+    int symtab_index=0;
+    int strtab_index=0;
+    Elf32_Sym *symtab_pointer;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 static long load_img() {
   if (img_file == NULL) {
@@ -68,6 +107,40 @@ static long load_img() {
   return size;
 }
 
+
+
+void init_elf_read(char * elf_file){
+    if (elf_file != NULL) {
+    fp = elf_fileopen(elf_file);
+    if(fp==NULL){
+        printf("error\n");
+    }
+    else{
+    
+    if(elf32_Ehdr_read(fp, &ehdr)){
+        printf("error\n");
+    }
+    if(!(shdr_pointer=elf32_Shdr_read(fp, &ehdr))){
+        printf("error\n");
+    }
+    if((symtab_index = symtab_index_find(fp, shdr_pointer, &ehdr)) == -1) {
+        printf("symtab not found\n");
+    }
+  
+    if(!(symtab_pointer = symtab_read(fp, shdr_pointer, symtab_index))) {
+        printf("error\n");
+    }
+    if((strtab_index = strtab_index_find(fp, shdr_pointer, &ehdr)) == -1) {
+        printf("strtab not found\n");
+    }
+    if(!(strtab = strtab_read(fp, shdr_pointer, strtab_index))) {
+        printf("error\n");
+    }
+    symlens=symlen(symtab_pointer,shdr_pointer,symtab_index);
+    }
+    }
+    fclose(fp);
+}
 static int parse_args(int argc, char *argv[]) {
   const struct option table[] = {
     {"batch"    , no_argument      , NULL, 'b'},
@@ -75,6 +148,7 @@ static int parse_args(int argc, char *argv[]) {
     {"diff"     , required_argument, NULL, 'd'},
     {"port"     , required_argument, NULL, 'p'},
     {"help"     , no_argument      , NULL, 'h'},
+    {"ftrace"   , required_argument, NULL, 'f'},
     {0          , 0                , NULL,  0 },
   };
   int o;
@@ -84,6 +158,7 @@ static int parse_args(int argc, char *argv[]) {
       case 'p': sscanf(optarg, "%d", &difftest_port); break;
       case 'l': log_file = optarg; break;
       case 'd': diff_so_file = optarg; break;
+      case 'f': elf_file = optarg; break;
       case 1: img_file = optarg; return 0;
       default:
         printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
@@ -91,6 +166,7 @@ static int parse_args(int argc, char *argv[]) {
         printf("\t-l,--log=FILE           output log to FILE\n");
         printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
         printf("\t-p,--port=PORT          run DiffTest with port PORT\n");
+        printf("\t-f,--ftrace             input a .elf file to analyze\n");
         printf("\n");
         exit(0);
     }
@@ -103,7 +179,6 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Parse arguments. */
   parse_args(argc, argv);
-
   /* Set random seed. */
   init_rand();
 
@@ -121,7 +196,7 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Load the image to memory. This will overwrite the built-in image. */
   long img_size = load_img();
-
+  init_elf_read(elf_file);
   /* Initialize differential testing. */
   init_difftest(diff_so_file, img_size, difftest_port);
 
@@ -156,6 +231,7 @@ void am_init_monitor() {
   init_mem();
   init_isa();
   load_img();
+  init_elf_read(elf_file);
   IFDEF(CONFIG_DEVICE, init_device());
   welcome();
 }
