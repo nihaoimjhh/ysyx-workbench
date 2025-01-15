@@ -31,7 +31,7 @@
  extern   int symtab_index;
  extern   int strtab_index;
  extern   Elf32_Sym *symtab_pointer;
-
+int call_count=0;
 
 
 
@@ -65,7 +65,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   isa_exec_once(s);//执行命令
   cpu.pc = s->dnpc;
 
-  inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->isa.inst.val, s->dnpc, s->pc,symlens);
+  inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->isa.inst.val, s->dnpc, s->pc,symlens,&call_count);
 
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;

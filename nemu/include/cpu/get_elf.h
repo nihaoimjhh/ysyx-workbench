@@ -25,8 +25,8 @@ void elf32_Shdr_print(Elf32_Shdr *shdr_pointer, Elf32_Ehdr *ehdr);
 void elf32_Ehdr_print(Elf32_Ehdr *ehdr);
 char *strtab_read(FILE *fp, Elf32_Shdr *shdr_pointer, int strtab_index);
 void sym_nameprint(Elf32_Shdr *shdr_pointer,char *strtab,Elf32_Sym *symtab_pointer,int sym_func_index);
-void inst_print_funcname(Elf32_Shdr *shdr_pointer,char *strtab,Elf32_Sym *symtab_pointer,uint32_t inst,uint32_t dnpc ,uint32_t pc,int symlens);
-int catch_jar_jarl(uint32_t inst);
+void inst_print_funcname(Elf32_Shdr *shdr_pointer,char *strtab,Elf32_Sym *symtab_pointer,uint32_t inst,uint32_t dnpc ,uint32_t pc,int symlens,int *call_count);
+int catch_call_ret(uint32_t inst,uint32_t dnpc,uint32_t pc);
 void memory_free(Elf32_Shdr *shdr_pointer, Elf32_Sym *symtab_pointer, char *strtab);
 
 

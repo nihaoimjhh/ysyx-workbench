@@ -167,27 +167,41 @@ void memory_free(Elf32_Shdr *shdr_pointer, Elf32_Sym *symtab_pointer, char *strt
     free(symtab_pointer);
     free(strtab);
 }
-int catch_jar_jarl(uint32_t inst) {
-    if((inst&0x7f)==0x6f){//jal
-        return 0;
-    }
-    else if((inst&0x7067)==0x67){//jalr
-        return 1;
-    }
-    else return -1;
+int catch_call_ret(uint32_t inst,uint32_t dnpc,uint32_t pc){ 
+       if((inst&0x7f)==0x6f||(inst&0x7f)==0x67){//是不是jal,是不是jarl
+       if((inst&0xfffff)==0x8067){//是不是ret
+              return 1;
+         }
+         else{
+              return 0;
+         }
+        }
+        else
+            return -1;
+    
 }
-void inst_print_funcname(Elf32_Shdr *shdr_pointer,char *strtab,Elf32_Sym *symtab_pointer,uint32_t inst,uint32_t dnpc ,uint32_t pc,int symlens){
-    if(catch_jar_jarl(inst)==0){
+void inst_print_funcname(Elf32_Shdr *shdr_pointer,char *strtab,Elf32_Sym *symtab_pointer,uint32_t inst,uint32_t dnpc ,uint32_t pc,int symlens,int *call_count){
+    int i=0;
+    if(catch_call_ret(inst,dnpc,pc)==0){
         printf("%x:\t",pc);
+        for(i=0;i<*call_count;i++){
+            printf(" ");
+        }
         printf("\033[31m""call[""\033[0m");
         sym_nameprint(shdr_pointer,strtab,symtab_pointer, sym_func_index_find(symtab_pointer,dnpc,symlens));
         printf("\033[31m""]@0x%x\n""\033[0m",dnpc);
+        (*call_count)++;
+
     }
-    else if(catch_jar_jarl(inst)==1){
+    else if(catch_call_ret(inst,dnpc,pc)==1){
         printf("%x:\t",pc);
+        for(i=0;i<*call_count;i++){
+            printf(" ");
+        }
         printf("\033[32m""ret[""\033[0m");
         sym_nameprint(shdr_pointer,strtab,symtab_pointer, sym_func_index_find(symtab_pointer,dnpc,symlens));
         printf("\033[32m""]@0x%x\n""\033[0m",dnpc);
+        (*call_count)--;
     }   
   }
 char *strtab_read(FILE *fp, Elf32_Shdr *shdr_pointer, int strtab_index) {
