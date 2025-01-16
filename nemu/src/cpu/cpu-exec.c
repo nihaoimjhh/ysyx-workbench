@@ -24,14 +24,20 @@
  * You can modify this value as you want.
  */
 #define MAX_INST_TO_PRINT 10
+
+
+
+//函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
  extern   Elf32_Ehdr ehdr;
  extern   Elf32_Shdr *shdr_pointer;
  extern   char *strtab;
+ extern   char *shstrtab;
  extern   int symlens;
  extern   int symtab_index;
  extern   int strtab_index;
  extern   Elf32_Sym *symtab_pointer;
-int call_count=0;
+ int call_count=0;
+//函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
 
 
 
@@ -64,8 +70,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->snpc = pc;
   isa_exec_once(s);//执行命令
   cpu.pc = s->dnpc;
-
-  inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->isa.inst.val, s->dnpc, s->pc,symlens,&call_count);
+  IFDEF(CONFIG_FTRACE,  inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->isa.inst.val, s->dnpc, s->pc,symlens,&call_count); );
 
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
@@ -155,7 +160,7 @@ void cpu_exec(uint64_t n) {//里面有execute
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
           nemu_state.halt_pc);//有问题的处理，防御性编程
       // fall through
-
+     IFDEF(CONFIG_FTRACE,memory_free(shdr_pointer,symtab_pointer,strtab,shstrtab));
     case NEMU_QUIT: statistic();
   }
 }

@@ -28,6 +28,8 @@ void init_disasm(const char *triple);
 void init_elf_read(char *elf_file);
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+  Log("Ftrace: %s", MUXDEF(CONFIG_FTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
+  Log("Mtrace: %s", MUXDEF(CONFIG_MTRACE, ANSI_FMT("ON", ANSI_FG_GREEN), ANSI_FMT("OFF", ANSI_FG_RED)));
   IFDEF(CONFIG_TRACE, Log("If trace is enabled, a log file will be generated "
         "to record the trace. This may lead to a large log file. "
         "If it is not necessary, you can disable it in menuconfig"));
@@ -50,36 +52,17 @@ static int difftest_port = 1234;
 
 
 
-
-
+//FTACE所需要的结构体，直接穿进cpu-exec.c
     FILE *fp;
     Elf32_Ehdr ehdr;
     Elf32_Shdr *shdr_pointer;
     char *strtab;
+    char *shstrtab;
     int symlens=0;
     int symtab_index=0;
     int strtab_index=0;
     Elf32_Sym *symtab_pointer;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//FTACE所需要的结构体，直接穿进cpu-exec.c
 
 
 
@@ -106,40 +89,45 @@ static long load_img() {
   fclose(fp);
   return size;
 }
-
-
-
-void init_elf_read(char * elf_file){
-    if (elf_file != NULL) {
-    fp = elf_fileopen(elf_file);
-    if(fp==NULL){
-        printf("error\n");
+void load_elf(char * elf_file){
+    if (elf_file != NULL){
+       fp = elf_fileopen(elf_file);//打开文件
+    
+      if(fp==NULL){
+          printf("\033[1;31m""Error\n""" "\033[0m");
+      }
+      else{  
+        if(elf32_Ehdr_read(fp, &ehdr)){//读取elf文件头
+            printf("\033[1;31m""error\n""" "\033[0m");
+        }
+        if(!(shdr_pointer=elf32_Shdr_read(fp, &ehdr))){//通过头找到节头读取节头
+            printf("\033[1;31m""error\n""\033[0m");
+        }
+        if(!(shstrtab = shstrtab_read(fp, shdr_pointer, &ehdr))) {//通过节头和elf文件头找到shstrtab读取shstrtab，这样才能通过shstrtab找到strtab和symtab
+            printf("\033[1;31m""shstrtab not found\n""\033[0m");
+          }
+        if((symtab_index = symtab_index_find(fp, shdr_pointer, &ehdr,shstrtab)) == -1) {//通过节头找到shstrtab通过shstrtab找到strtab的索引，通过strtab的索引找到strtab,之所以要elf文件头是因为ehdr里面有整个节头个数，这样才能遍历找到symtab的索引
+            printf("\033[1;31m""symtab not found\n""\033[0m");
+        }
+        if(!(symtab_pointer = symtab_read(fp, shdr_pointer, symtab_index))) {//通过symtab的索引找到symtab在elf文件的偏移读取symtab
+            printf("\033[1;31m""error\n""\033[0m");
+        }
+        if((strtab_index = strtab_index_find(fp, shdr_pointer, &ehdr,shstrtab)) == -1) {
+            printf("\033[1;31m""strtab not found\n""\033[0m");
+        }
+        if(!(strtab = strtab_read(fp, shdr_pointer, strtab_index))) {
+           printf("\033[1;31m""error\n""\033[0m");
+        }
+        symlens=symlen(symtab_pointer,shdr_pointer,symtab_index);
+        fseek(fp, 0, SEEK_END);
+        long size = ftell(fp);
+        Log("The elf is %s, size = %ld", elf_file, size);
+        fclose(fp);
+      }
     }
     else{
-    
-    if(elf32_Ehdr_read(fp, &ehdr)){
-        printf("error\n");
+      Log("No elf_file is given.");
     }
-    if(!(shdr_pointer=elf32_Shdr_read(fp, &ehdr))){
-        printf("error\n");
-    }
-    if((symtab_index = symtab_index_find(fp, shdr_pointer, &ehdr)) == -1) {
-        printf("symtab not found\n");
-    }
-  
-    if(!(symtab_pointer = symtab_read(fp, shdr_pointer, symtab_index))) {
-        printf("error\n");
-    }
-    if((strtab_index = strtab_index_find(fp, shdr_pointer, &ehdr)) == -1) {
-        printf("strtab not found\n");
-    }
-    if(!(strtab = strtab_read(fp, shdr_pointer, strtab_index))) {
-        printf("error\n");
-    }
-    symlens=symlen(symtab_pointer,shdr_pointer,symtab_index);
-    }
-    }
-    fclose(fp);
 }
 static int parse_args(int argc, char *argv[]) {
   const struct option table[] = {
@@ -148,17 +136,17 @@ static int parse_args(int argc, char *argv[]) {
     {"diff"     , required_argument, NULL, 'd'},
     {"port"     , required_argument, NULL, 'p'},
     {"help"     , no_argument      , NULL, 'h'},
-    {"ftrace"   , required_argument, NULL, 'f'},
+    {"elf_file" , required_argument, NULL, 'e'},
     {0          , 0                , NULL,  0 },
   };
   int o;
-  while ( (o = getopt_long(argc, argv, "-bhl:d:p:", table, NULL)) != -1) {
+  while ( (o = getopt_long(argc, argv, "-bhl:d:p:e:¹", table, NULL)) != -1) {
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;
       case 'p': sscanf(optarg, "%d", &difftest_port); break;
       case 'l': log_file = optarg; break;
       case 'd': diff_so_file = optarg; break;
-      case 'f': elf_file = optarg; break;
+      case 'e': elf_file = optarg; break;
       case 1: img_file = optarg; return 0;
       default:
         printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
@@ -166,7 +154,7 @@ static int parse_args(int argc, char *argv[]) {
         printf("\t-l,--log=FILE           output log to FILE\n");
         printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
         printf("\t-p,--port=PORT          run DiffTest with port PORT\n");
-        printf("\t-f,--ftrace             input a .elf file to analyze\n");
+        printf("\t-e,--elf_file           input a .elf file to run ftrace \n");
         printf("\n");
         exit(0);
     }
@@ -187,7 +175,6 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Initialize memory. */
   init_mem();
-
   /* Initialize devices. */
   IFDEF(CONFIG_DEVICE, init_device());
 
@@ -196,7 +183,8 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Load the image to memory. This will overwrite the built-in image. */
   long img_size = load_img();
-  init_elf_read(elf_file);
+
+  IFDEF(CONFIG_FTRACE,load_elf(elf_file));
   /* Initialize differential testing. */
   init_difftest(diff_so_file, img_size, difftest_port);
 
@@ -231,8 +219,6 @@ void am_init_monitor() {
   init_mem();
   init_isa();
   load_img();
-  init_elf_read(elf_file);
-  IFDEF(CONFIG_DEVICE, init_device());
-  welcome();
+  IFDEF(CONFIG_FTRACE,load_elf(elf_file));
 }
 #endif
