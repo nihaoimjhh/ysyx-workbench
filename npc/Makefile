@@ -4,10 +4,10 @@ TOPNAME= ysyx_24090003_cpu#顶层模块名称
 INC_PATH ?=
 VERILATOR=verilator#verilator别称
 VERILATOR_CFLAGS += -MMD  --build -cc -trace -O3 --x-assign fast --x-initial fast --noassert#verilator编译verilog生成c++对象的选项
-BUILD_DIR=./build#verilator编译的obj所在之处
+BUILD_DIR=$(NPC_HOME)/build#verilator编译的obj所在之处
 OBJ_DIR = $(BUILD_DIR)/obj_dir
-VSRCS = $(shell find $(abspath ./vsrc) -name "*.v")#verilog源文件列表
-CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")#testbench,以及nvborad的调用
+VSRCS = $(NPC_HOME)/src/cpu/*.v
+CSRCS = $(NPC_HOME)/src/npc-main.c#testbench,以及nvborad的调用
 INCFLAGS = $(addprefix -I, $(INC_PATH))#verilator加路径
 CXXFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""# 添加包含路径标志到 C++ 编译标志中，并定义顶层模块的名称 
 
