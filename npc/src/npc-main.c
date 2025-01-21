@@ -13,14 +13,20 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#ifndef __MEMORY_VADDR_H__
-#define __MEMORY_VADDR_H__
-
 #include <common.h>
+#include <sim_engine.h>
+#include <monitor/monitor.h>
 
-word_t vaddr_ifetch(vaddr_t addr, int len);
-word_t vaddr_read(vaddr_t addr, int len);
-void vaddr_write(vaddr_t addr, int len, word_t data);
+int finish=0;
+uint32_t instruction= 0;
+extern "C" void finish_simulation() {
+    Verilated::gotFinish(true);
+    finish=1;
 
+}
+int main(int argc, char *argv[]) {
+  init_monitor(argc, argv);
+  sim_engine();
+  return 0;
+}
 
-#endif

@@ -1,42 +1,24 @@
-/***************************************************************************************
-* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
-*
-* NEMU is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*          http://license.coscl.org.cn/MulanPSL2
-*
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-*
-* See the Mulan PSL v2 for more details.
-***************************************************************************************/
-
 #include <memory/paddr.h>
-void init_mem();
-
-
-static char *img_file = NULL;
-
-
-
-
-
-
-static long load_img() {
+#include <common.h>
+#include <stdio.h>
+#include <getopt.h>
+char *img_file = NULL;
+long load_img() {
   if (img_file == NULL) {
-    Log("No image is given. Use the default build-in image.");
+    printf("No image is given. Use the default build-in image.");
     return 4096; // built-in image size
   }
 
   FILE *fp = fopen(img_file, "rb");
-  Assert(fp, "Can not open '%s'", img_file);
+  if(fp == NULL) {
+    printf("Can not open '%s'", img_file);
+    return 0;
+  }
 
   fseek(fp, 0, SEEK_END);
   long size = ftell(fp);
 
-  Log("The image is %s, size = %ld", img_file, size);
+  printf("The image is %s, size = %ld", img_file, size);
 
   fseek(fp, 0, SEEK_SET);
   int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp);
@@ -45,11 +27,33 @@ static long load_img() {
   fclose(fp);
   return size;
 }
-
-
+static int parse_args(int argc, char *argv[]) {
+  const struct option table[] = {
+    {0          , 0                , NULL,  0 },
+  };
+  int o;
+  printf("Parsing the command line...\n");
+  while ( (o = getopt_long(argc, argv, "", table, NULL)) != -1) {
+    switch (o) {
+      case 1: img_file = optarg; return 0;
+      default:
+        printf("Usage: %s [image]\n", argv[0]);
+        exit(0);
+    }
+  }
+  if (optind < argc) {
+    img_file = argv[optind];
+  } else {
+    printf("Usage: %s [image]\n", argv[0]);
+    exit(0);
+  }
+  return 0;
+}
 void init_monitor(int argc, char *argv[]) {
+  printf("Initializing the monitor...\n");
 
-  init_mem();
+  parse_args(argc, argv);
+  printf("Image file set to: %s\n", img_file);
   long img_size = load_img();
-
+  printf("The image size is %ld\n", img_size);
 }

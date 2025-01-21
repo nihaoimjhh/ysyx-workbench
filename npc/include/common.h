@@ -1,4 +1,56 @@
+/***************************************************************************************
+* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
+*
+* NEMU is licensed under Mulan PSL v2.
+* You can use this software according to the terms and conditions of the Mulan PSL v2.
+* You may obtain a copy of Mulan PSL v2 at:
+*          http://license.coscl.org.cn/MulanPSL2
+*
+* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+*
+* See the Mulan PSL v2 for more details.
+***************************************************************************************/
+
+#ifndef __COMMON_H__
+#define __COMMON_H__
+
 #include <stdint.h>
-#define word_t uint32_t
-#define paddr_t uint32_t
-#define vaddr_t uint32_t
+#include <inttypes.h>
+#include <stdbool.h>
+#include <string.h>
+#include <verilated.h>
+#include "Vysyx_24090003_cpu.h"
+#include "verilated_vcd_c.h"
+#include <iostream>
+
+
+
+
+typedef uint32_t word_t;
+typedef int32_t  sword_t;
+typedef word_t vaddr_t;
+typedef uint32_t paddr_t;
+typedef uint16_t ioaddr_t;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
