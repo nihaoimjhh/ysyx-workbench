@@ -25,8 +25,8 @@ class Vysyx_24090003_cpu___024root final : public VerilatedModule {
     VL_OUT(EXaddr,31,0);
     IData/*31:0*/ ysyx_24090003_cpu__DOT__ysyx_24090003_IFU__DOT__pc_r;
     IData/*31:0*/ ysyx_24090003_cpu__DOT__ysyx_24090003_IFU__DOT__inst_r;
-    IData/*31:0*/ ysyx_24090003_cpu__DOT__ysyx_24090003_EXU__DOT__operand1_r;
     IData/*31:0*/ ysyx_24090003_cpu__DOT__ysyx_24090003_EXU__DOT__operand2_r;
+    IData/*31:0*/ ysyx_24090003_cpu__DOT__ysyx_24090003_EXU__DOT__reg_write_data_r;
     IData/*31:0*/ __VstlIterCount;
     IData/*31:0*/ __VactIterCount;
     VlUnpacked<IData/*31:0*/, 16> ysyx_24090003_cpu__DOT__ysyx_24090003_regcontrol__DOT__gpr;

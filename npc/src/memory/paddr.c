@@ -26,7 +26,7 @@ word_t paddr_read(paddr_t addr, int len) {
 
 int out_of_bound(paddr_t paddr){
      if (paddr<MBASE||paddr>MBASE+MSIZE){
-        printf("\033[1;31m""invalid addr :%x\n",paddr);
+        printf("\033[1;31m""invalid addr :%x\n""\033[0m",paddr);
         return 1;
      }
      else 

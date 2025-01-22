@@ -16,7 +16,7 @@ extern "C" {
 
 
     // DPI IMPORTS
-    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_EXU.v:38:30
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_EXU.v:36:30
     extern void finish_simulation();
 
 #ifdef __cplusplus

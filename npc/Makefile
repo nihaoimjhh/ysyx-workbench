@@ -10,7 +10,7 @@ VSRCS = $(NPC_HOME)/src/cpu/cpu_v/*.v
 CSRCS = $(NPC_HOME)/src/**/*.c#testbench,以及nvborad的调用
 INCFLAGS = $(addprefix -I, $(INC_PATH))#verilator加路径
 CXXFLAGS += $(INCFLAGS) -g# 添加包含路径标志到 C++ 编译标志中，并定义顶层模块的名称 
-
+ARGS= /home/jinghanhui/ysyx-workbench/am-kernels/tests/cpu-tests/build/dummy-riscv32-nemu.bin
 $(shell mkdir -p $(BUILD_DIR))#创建build文件夹如果存在就不创建切不报错-p的用处
 # 定义如何生成最终的可执行文件 $(BIN)
 $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
@@ -20,7 +20,7 @@ $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 all:$(BIN)
 
 run: $(BIN)
-	@$(BIN)
+	@$(BIN) $(ARGS)
 .PHONY:all clean run
 clean:
 	rm -rf $(BUILD_DIR)
