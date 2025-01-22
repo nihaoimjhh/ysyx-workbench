@@ -2,12 +2,12 @@ all:$(BIN)
 BIN = $(BUILD_DIR)/$(TOPNAME)
 TOPNAME= ysyx_24090003_cpu#顶层模块名称
 VERILATOR=verilator#verilator别称
-INC_PATH ?=$(NPC_HOME)/include $(NPC_HOME)/include/cpu $(NPC_HOME)/include/memory $(NPC_HOME)/include/sim_engine
+INC_PATH ?=$(NPC_HOME)/include $(NPC_HOME)/include/cpu $(NPC_HOME)/include/memory $(NPC_HOME)/include/sim_engine 
 VERILATOR_CFLAGS += -MMD  --build -cc -trace -O3 --x-assign fast --x-initial fast --noassert#verilator编译verilog生成c++对象的选项
 BUILD_DIR=$(NPC_HOME)/build#verilator编译的obj所在之处
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 VSRCS = $(NPC_HOME)/src/cpu/cpu_v/*.v
-CSRCS = $(NPC_HOME)/src/**/*.c#testbench,以及nvborad的调用
+CSRCS = $(NPC_HOME)/src/**/*.c#testbench
 INCFLAGS = $(addprefix -I, $(INC_PATH))#verilator加路径
 CXXFLAGS += $(INCFLAGS) -g# 添加包含路径标志到 C++ 编译标志中，并定义顶层模块的名称 
 $(shell mkdir -p $(BUILD_DIR))#创建build文件夹如果存在就不创建切不报错-p的用处

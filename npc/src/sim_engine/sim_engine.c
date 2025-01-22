@@ -1,5 +1,6 @@
 #include "common.h"
 #include "paddr.h"
+#include "cpu.h"
 extern int finish;
 extern uint32_t instruction;
 extern uint8_t pmem[MSIZE] ;
@@ -43,14 +44,27 @@ int sim_engine() {
             watchdog--;
         }
         if(finish_simulation(finish, watchdog,top, tfp)){
+            npc_state.state = NPC_END;
+            NPCTRAP(top->pc, top->gpr10);
             break;
         }
         instruction_count++;
+        
         top->eval();
         tfp->dump(i);
         printf("\n");
     
     }
+    switch (npc_state.state) {
+            case NPC_END: case NPC_ABORT:
+            if(npc_state.state==NPC_ABORT)
+                printf("\033[1;31m""ABORT""\033[0m\n");
+            else if (npc_state.halt_ret == 0)
+                printf("\033[1;32m""HIT GOOD TRAP\n""\033[0m\n");
+            else
+                printf("\033[1;31m""HIT BAD TRAP\n""\033[0m\n");
+                
+        }
     return 0;
 }
 int finish_simulation(int finish,int watchdog, Vysyx_24090003_cpu* top, VerilatedVcdC* tfp) {

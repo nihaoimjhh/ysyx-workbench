@@ -46,17 +46,21 @@ VM_USER_LDLIBS = \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
+	hostcall \
 	paddr \
 	monitor \
 	npc-main \
 	sim_engine \
+	state \
 
 # User .cpp directories (from .cpp's on Verilator command line)
 VM_USER_DIR = \
 	/home/jinghanhui/ysyx-workbench/npc/src \
+	/home/jinghanhui/ysyx-workbench/npc/src/hostcall \
 	/home/jinghanhui/ysyx-workbench/npc/src/memory \
 	/home/jinghanhui/ysyx-workbench/npc/src/monitor \
 	/home/jinghanhui/ysyx-workbench/npc/src/sim_engine \
+	/home/jinghanhui/ysyx-workbench/npc/src/utils \
 
 
 ### Default rules...
@@ -68,6 +72,8 @@ include $(VERILATOR_ROOT)/include/verilated.mk
 ### Executable rules... (from --exe)
 VPATH += $(VM_USER_DIR)
 
+hostcall.o: /home/jinghanhui/ysyx-workbench/npc/src/hostcall/hostcall.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 paddr.o: /home/jinghanhui/ysyx-workbench/npc/src/memory/paddr.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 monitor.o: /home/jinghanhui/ysyx-workbench/npc/src/monitor/monitor.c
@@ -75,6 +81,8 @@ monitor.o: /home/jinghanhui/ysyx-workbench/npc/src/monitor/monitor.c
 npc-main.o: /home/jinghanhui/ysyx-workbench/npc/src/npc-main.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 sim_engine.o: /home/jinghanhui/ysyx-workbench/npc/src/sim_engine/sim_engine.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+state.o: /home/jinghanhui/ysyx-workbench/npc/src/utils/state.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 
 ### Link rules... (from --exe)
