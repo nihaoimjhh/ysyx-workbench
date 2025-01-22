@@ -109,7 +109,7 @@ endif
 ### Rule (compile): a single `.c` -> `.o` (gcc)
 $(DST_DIR)/%.o: %.c
 	@mkdir -p $(dir $@) && echo + CC $<
-	@$(CC) -std=gnu11 $(CFLAGS) -c -o $@ $(realpath $<)
+	$(CC) -std=gnu11 $(CFLAGS) -c -o $@ $(realpath $<)
 
 ### Rule (compile): a single `.cc` -> `.o` (g++)
 $(DST_DIR)/%.o: %.cc
@@ -147,6 +147,8 @@ $(ARCHIVE): $(OBJS)
 
 $(info FILE: $(shell pwd)/$(shell ls | grep -E 'Makefile$$|\.mk$$'))
 $(info ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc)
+$(info CROSS_COMPILE: - $(CROSS_COMPILE))
+$(info )
 $(info MAKECMDGOALS: - $(MAKECMDGOALS))
 $(info )
 $(info NAME: - $(NAME))
@@ -184,6 +186,10 @@ $(info ARCHIVE: - $(ARCHIVE))
 $(info )
 $(info INC_PATH: )
 $(foreach inc,$(INC_PATH),$(info - $(inc)))
+$(info )
+
+$(info 8888888888888888888888888888888888888888888888888888888888888888888)
+$(info CxxFLAGS: - $(CXXFLAGS))
 $(info )
 ### Build order control
 image: image-dep

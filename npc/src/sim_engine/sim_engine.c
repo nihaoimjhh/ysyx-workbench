@@ -25,12 +25,13 @@ int sim_engine() {
         if(watchdog>20){
             finish = 1;
         }
-        if(i==0||i==1||i==2||i==3||i==4){
+        if(i==0||i==1||i==2||i==3){
             top->cpu_rs = 1;
         }
         else {
             top->cpu_rs = 0;
         }
+        top->addr_read_data = paddr_read(top->pc, 4);
         top->cpu_clk = !top->cpu_clk;
         top->addr_read_data = paddr_read(top->pc, 4);
         if(top->addr_read_data==0){
