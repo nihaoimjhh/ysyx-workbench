@@ -13,13 +13,14 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include <isa.h>
 #include <stdlib.h>
 /* We use the POSIX regex functions to process regular expressions.
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
-#include <memory/vaddr.h>
+#include <vaddr.h>
+#include "common.h"
+#include "reg.h"
 # define MAX_TOKENS 2000
 static word_t eval(int p,int q,bool *success);
 static int check_parentheses(int p,int q,bool *success);
@@ -72,7 +73,7 @@ void init_regex() {
     ret = regcomp(&re[i], rules[i].regex, REG_EXTENDED);
     if (ret != 0) {
       regerror(ret, &re[i], error_msg, 128);
-      panic("regex compilation failed: %s\n%s", error_msg, rules[i].regex);
+      printf("regex compilation failed: %s\n", error_msg);
     }
   }
 }
@@ -85,8 +86,6 @@ typedef struct token {
 static Token tokens[MAX_TOKENS] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 static bool make_token(char *e) {
-  printf("NR_REGEX:%d\n",NR_REGEX);
-  printf("NR_TOKENS:%d\n",MAX_TOKENS);
   word_t temp;
   int position = 0;//初始位置
   bool success=1;

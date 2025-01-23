@@ -13,45 +13,26 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#ifndef __COMMON_H__
-#define __COMMON_H__
+#ifndef __SDB_H__
+#define __SDB_H__
+#include "common.h"
+typedef struct watchpoint {
+  word_t ans;
+  char expr[200];
+  int remove;
+  int NO;
+  struct watchpoint *next;
 
-#include <stdint.h>
-#include <inttypes.h>
-#include <stdbool.h>
-#include <string.h>
-#include <verilated.h>
-#include "Vysyx_24090003_cpu.h"
-#include "verilated_vcd_c.h"
-#include <iostream>
+  /* TODO: Add more members if necessary */
 
-
-
-#define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
-
-typedef uint32_t word_t;
-typedef int32_t  sword_t;
-typedef word_t vaddr_t;
-typedef uint32_t paddr_t;
-typedef uint16_t ioaddr_t;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+} WP;
+word_t expr(char *e, bool *success);
+WP *wp_creat(char *args,word_t ans,bool *success);
+WP *free_wp(WP *wp,bool *success);
+void wp_print();
+void wp_remove(char *args);
+int wp_check();
+void init_sdb();
+void init_wp_pool();
+void sdb_mainloop();
 #endif

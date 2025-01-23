@@ -15,16 +15,22 @@
 #include "cpu.h"
 #include "common.h"
 #include "paddr.h"
+#include "sdb.h"
 extern NPCState npc_state;
 extern int dump_num;
 extern Vysyx_24090003_cpu* top;
 extern VerilatedVcdC* tfp;
+extern word_t gpr[16];
 int instruction_count = 0;
 int watchdog = 0;
 void execute(uint64_t n); 
 void exec_once();
 void isa_exec_once();
-
+static void trace_and_difftest(){
+          if(wp_check()){
+            npc_state.state = NPC_STOP;
+          }
+}//每次执行是运行cpu_excute,齐调用excute为核心函数，里面有trace，所以说每次执行较少步骤时候，每一次cpu执行该函数会执行,wp_check放这里再合适不过了
 void cpu_exec(uint64_t n) {//里面有execute
       switch (npc_state.state) {
             case NPC_END: case NPC_ABORT://机器终止或者运行结束则打印提示信息
@@ -58,6 +64,7 @@ void cpu_exec(uint64_t n) {//里面有execute
 void execute(uint64_t n) {//cpu执行的核心函数
   for (;n > 0; n --) {//命令执行循环
     exec_once();//真正执行的函数
+    trace_and_difftest();//检查是否有监视点
     if (npc_state.state != NPC_RUNNING) {
         if(npc_state.state == NPC_ABORT) {
            break; 
@@ -68,17 +75,21 @@ void execute(uint64_t n) {//cpu执行的核心函数
 }
 void exec_once() {
   isa_exec_once();//执行命令
+  instruction_count++;
+  printf("pc:%x  ",top->pc);
+  printf("addr_read_data:%x\n",top->addr_read_data);
+
 }
 void isa_exec_once(){
         int i;
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 2; i++) {
         top->cpu_clk = !top->cpu_clk;
         watchdog++;
         if(watchdog>20){
              npc_state.state = NPC_ABORT;
         }
         top->addr_read_data = paddr_read(top->pc, 4);
-        if(top->addr_read_data==0){
+                if(top->addr_read_data==0){
             if(top->pc==0){
                 printf("waiting to reset ....\n");
             }
@@ -86,10 +97,8 @@ void isa_exec_once(){
         else {
             watchdog--;
         }
-        instruction_count++;
         top->eval();
         tfp->dump(dump_num++);
-        
         printf("\n");
     }
 }

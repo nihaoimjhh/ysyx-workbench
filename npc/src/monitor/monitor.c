@@ -2,6 +2,7 @@
 #include <common.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <sdb.h>
 char *img_file = NULL;
 long load_img() {
   if (img_file == NULL) {
@@ -45,7 +46,7 @@ static int parse_args(int argc, char *argv[]) {
     img_file = argv[optind];
   } else {
     printf("Usage: %s [image]\n", argv[0]);
-    exit(0);
+    return 0;
   }
   return 0;
 }
@@ -56,4 +57,5 @@ void init_monitor(int argc, char *argv[]) {
   printf("Image file set to: %s\n", img_file);
   long img_size = load_img();
   printf("The image size is %ld\n", img_size);
+  init_sdb();//定要初始化啊，不然正则匹配就直接崩溃,gdb还乱跳，根本不可能调出来
 }

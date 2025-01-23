@@ -13,11 +13,12 @@ void init_sim_engine() {
     tfp->open("sim.vcd");
     top->cpu_rs = 1;
     top->cpu_clk = 0;
-    for(i=0;i<4;i++){
+    for(i=0;i<3;i++){
         top->cpu_clk=!top->cpu_clk;
         top->eval();
         tfp->dump(dump_num++);
     }
+    top->cpu_clk = 0;
     top->cpu_rs = 0;
     printf("start simulation\n");
 }

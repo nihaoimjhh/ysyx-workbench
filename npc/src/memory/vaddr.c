@@ -13,45 +13,10 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#ifndef __COMMON_H__
-#define __COMMON_H__
-
-#include <stdint.h>
-#include <inttypes.h>
-#include <stdbool.h>
-#include <string.h>
-#include <verilated.h>
-#include "Vysyx_24090003_cpu.h"
-#include "verilated_vcd_c.h"
-#include <iostream>
+#include "paddr.h"
 
 
+word_t vaddr_read(vaddr_t addr, int len) {
+  return paddr_read(addr, len);
+}
 
-#define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
-
-typedef uint32_t word_t;
-typedef int32_t  sword_t;
-typedef word_t vaddr_t;
-typedef uint32_t paddr_t;
-typedef uint16_t ioaddr_t;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif

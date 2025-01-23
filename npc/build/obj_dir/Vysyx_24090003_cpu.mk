@@ -39,17 +39,28 @@ VM_USER_CFLAGS = \
 	-I/home/jinghanhui/ysyx-workbench/npc/include/cpu \
 	-I/home/jinghanhui/ysyx-workbench/npc/include/memory \
 	-I/home/jinghanhui/ysyx-workbench/npc/include/sim_engine \
+	-I/home/jinghanhui/ysyx-workbench/npc/include/reg \
+	-I/home/jinghanhui/ysyx-workbench/npc/include/monitor \
+	-I/home/jinghanhui/ysyx-workbench/npc/include/monitor/sdb \
+	-g \
+	-O0 \
 
 # User LDLIBS (from -LDFLAGS on Verilator command line)
 VM_USER_LDLIBS = \
+	-lreadline \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
 	cpu-exec \
 	hostcall \
 	paddr \
+	vaddr \
 	monitor \
+	expr \
+	sdb \
+	watchpoint \
 	npc-main \
+	reg \
 	init_sim_engine \
 	sim_engine \
 	state \
@@ -61,6 +72,8 @@ VM_USER_DIR = \
 	/home/jinghanhui/ysyx-workbench/npc/src/hostcall \
 	/home/jinghanhui/ysyx-workbench/npc/src/memory \
 	/home/jinghanhui/ysyx-workbench/npc/src/monitor \
+	/home/jinghanhui/ysyx-workbench/npc/src/monitor/sdb \
+	/home/jinghanhui/ysyx-workbench/npc/src/reg \
 	/home/jinghanhui/ysyx-workbench/npc/src/sim_engine \
 	/home/jinghanhui/ysyx-workbench/npc/src/utils \
 
@@ -80,9 +93,19 @@ hostcall.o: /home/jinghanhui/ysyx-workbench/npc/src/hostcall/hostcall.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 paddr.o: /home/jinghanhui/ysyx-workbench/npc/src/memory/paddr.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+vaddr.o: /home/jinghanhui/ysyx-workbench/npc/src/memory/vaddr.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 monitor.o: /home/jinghanhui/ysyx-workbench/npc/src/monitor/monitor.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+expr.o: /home/jinghanhui/ysyx-workbench/npc/src/monitor/sdb/expr.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+sdb.o: /home/jinghanhui/ysyx-workbench/npc/src/monitor/sdb/sdb.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+watchpoint.o: /home/jinghanhui/ysyx-workbench/npc/src/monitor/sdb/watchpoint.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 npc-main.o: /home/jinghanhui/ysyx-workbench/npc/src/npc-main.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+reg.o: /home/jinghanhui/ysyx-workbench/npc/src/reg/reg.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 init_sim_engine.o: /home/jinghanhui/ysyx-workbench/npc/src/sim_engine/init_sim_engine.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
