@@ -3,7 +3,8 @@
 
 
 
-int sim_engine();
+void sim_engine();
+void init_sim_engine();
 
 
 

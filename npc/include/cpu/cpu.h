@@ -2,6 +2,7 @@
 #define __CPU_H__
 
 #include <utils.h>
+void cpu_exec(uint64_t n);
 void set_npc_state(int state, vaddr_t pc, int halt_ret);
 #define NPCTRAP(thispc, code) set_npc_state(NPC_END, thispc, code);
 
