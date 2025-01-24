@@ -42,12 +42,17 @@ VM_USER_CFLAGS = \
 	-I/home/jinghanhui/ysyx-workbench/npc/include/reg \
 	-I/home/jinghanhui/ysyx-workbench/npc/include/monitor \
 	-I/home/jinghanhui/ysyx-workbench/npc/include/monitor/sdb \
-	-g \
-	-O0 \
+	-I/usr/lib/llvm-14/include \
+	-std=c++14 \
+	-fno-exceptions \
+	-D_GNU_SOURCE \
+	-D__STDC_CONSTANT_MACROS \
+	-D__STDC_LIMIT_MACROS \
 
 # User LDLIBS (from -LDFLAGS on Verilator command line)
 VM_USER_LDLIBS = \
 	-lreadline \
+	-lLLVM-14 \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
@@ -63,6 +68,7 @@ VM_USER_CLASSES = \
 	reg \
 	init_sim_engine \
 	sim_engine \
+	disasm \
 	state \
 
 # User .cpp directories (from .cpp's on Verilator command line)
@@ -110,6 +116,8 @@ reg.o: /home/jinghanhui/ysyx-workbench/npc/src/reg/reg.c
 init_sim_engine.o: /home/jinghanhui/ysyx-workbench/npc/src/sim_engine/init_sim_engine.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 sim_engine.o: /home/jinghanhui/ysyx-workbench/npc/src/sim_engine/sim_engine.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+disasm.o: /home/jinghanhui/ysyx-workbench/npc/src/utils/disasm.cc
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 state.o: /home/jinghanhui/ysyx-workbench/npc/src/utils/state.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<

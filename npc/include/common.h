@@ -29,6 +29,14 @@
 
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
+#define ANSI_COLOR_GREEN_BIG   "\033[1;32m"
+#define ANSI_COLOR_GREEN_SMALL  "\033[32m"
+#define ANSI_COLOR_RED_BIG     "\033[1;31m"
+#define ANSI_COLOR_RED_SMALL     "\033[31m"
+#define ANSI_COLOR_BLUE_BIG    "\033[1;33m"
+#define ANSI_COLOR_BLUE_SMALL   "\033[33m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+#define INV(thispc,thisinst) check_ra(thispc,thisinst);
 typedef uint32_t word_t;
 typedef int32_t  sword_t;
 typedef word_t vaddr_t;

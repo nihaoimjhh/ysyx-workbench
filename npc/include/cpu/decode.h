@@ -13,13 +13,17 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#ifndef __RISCV_REG_H__
-#define __RISCV_REG_H__
+#ifndef __CPU_DECODE_H__
+#define __CPU_DECODE_H__
 
 #include <common.h>
-#include "decode.h"
-void isa_reg_display();
-word_t isa_reg_str2val(const char *name, bool *success);
-void check_ra(word_t thispc,word_t thisinst);
+
+typedef struct Decode {
+  vaddr_t pc;
+  paddr_t cpu_inst;
+  char logbuf[128];
+} Decode;
+
+
 
 #endif

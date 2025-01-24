@@ -2,20 +2,22 @@ all:$(BIN)
 BIN = $(BUILD_DIR)/$(TOPNAME)
 TOPNAME= ysyx_24090003_cpu#顶层模块名称
 VERILATOR=verilator#verilator别称
-INC_PATH ?=$(NPC_HOME)/include $(NPC_HOME)/include/cpu $(NPC_HOME)/include/memory $(NPC_HOME)/include/sim_engine $(NPC_HOME)/include/reg $(NPC_HOME)/include/monitor $(NPC_HOME)/include/monitor/sdb
+INC_PATH ?=$(NPC_HOME)/include $(NPC_HOME)/include/cpu $(NPC_HOME)/include/memory $(NPC_HOME)/include/sim_engine $(NPC_HOME)/include/reg $(NPC_HOME)/include/monitor $(NPC_HOME)/include/monitor/sdb /usr/lib/llvm-14/include 
 VERILATOR_CFLAGS += -MMD  --build -cc -trace -O3 --x-assign fast --x-initial fast --noassert#verilator编译verilog生成c++对象的选项
 BUILD_DIR=$(NPC_HOME)/build#verilator编译的obj所在之处
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 VSRCS = $(NPC_HOME)/src/cpu/cpu_v/*.v
-CSRCS = $(NPC_HOME)/src/**/*.c  $(NPC_HOME)/src/monitor/sdb/*.c#testbench
+CXXSRCS =  $(NPC_HOME)/src/utils/*.cc $(NPC_HOME)/src/**/*.c  $(NPC_HOME)/src/monitor/sdb/*.c#testbench
 INCFLAGS = $(addprefix -I, $(INC_PATH))#verilator加路径
-CXXFLAGS += $(INCFLAGS) -g -O0# 添加包含路径标志到 C++ 编译标志中，并定义顶层模块的名称 
-LDFLAGS += -lreadline
+CXXFLAGS += $(INCFLAGS) -std=c++14   -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS 
+# -D__STDC_FORMAT_MACROS  # 这是正常解析filelist之后手动加的宏，但是加上之后说是重复定义了所以先注释掉，后续有问题就加上
+LDFLAGS += -lreadline -lLLVM-14
+# 添加 LLVM 相关的编译和链接标志
 $(shell mkdir -p $(BUILD_DIR))#创建build文件夹如果存在就不创建切不报错-p的用处
 # 定义如何生成最终的可执行文件 $(BIN)
-$(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
+$(BIN): $(VSRCS) $(CXXSRCS)
 	@rm -rf $(OBJ_DIR)  # 在每次构建之前，删除对象目录
-	$(VERILATOR) $(VERILATOR_CFLAGS) --top-module $(TOPNAME) $(VSRCS) --exe  $(NPC_HOME)/src/npc-main.c $(CSRCS) $(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) --Mdir $(OBJ_DIR) -o $(BIN)
+	$(VERILATOR) $(VERILATOR_CFLAGS) --top-module $(TOPNAME) $(VSRCS) --exe  $(NPC_HOME)/src/npc-main.c $(CXXSRCS)  $(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) --Mdir $(OBJ_DIR) -o $(BIN)
 
 all:$(BIN)
 
@@ -29,7 +31,3 @@ clean:
 	-@rm -f ./*.vcd
 sim:
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-
-
-
-

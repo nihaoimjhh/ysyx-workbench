@@ -3,6 +3,18 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <sdb.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void init_disasm(const char *triple);
+void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+
+#ifdef __cplusplus
+}
+#endif
+
+void init_disasm(const char *triple);
 char *img_file = NULL;
 long load_img() {
   if (img_file == NULL) {
@@ -51,11 +63,12 @@ static int parse_args(int argc, char *argv[]) {
   return 0;
 }
 void init_monitor(int argc, char *argv[]) {
-  printf("Initializing the monitor...\n");
+  printf(ANSI_COLOR_GREEN_SMALL "Initializing the monitor...\n" ANSI_COLOR_RESET);
 
   parse_args(argc, argv);
   printf("Image file set to: %s\n", img_file);
   long img_size = load_img();
   printf("The image size is %ld\n", img_size);
   init_sdb();//定要初始化啊，不然正则匹配就直接崩溃,gdb还乱跳，根本不可能调出来
+  init_disasm("riscv32");
 }

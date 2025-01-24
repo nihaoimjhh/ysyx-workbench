@@ -16,16 +16,32 @@
 #include "common.h"
 #include "paddr.h"
 #include "sdb.h"
+#include "locale.h"
+#include "decode.h"
+#include "reg.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void init_disasm(const char *triple);
+void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+
+#ifdef __cplusplus
+}
+#endif
+
 extern NPCState npc_state;
 extern int dump_num;
 extern Vysyx_24090003_cpu* top;
 extern VerilatedVcdC* tfp;
 extern word_t gpr[16];
+extern word_t cpu_inst;
 int instruction_count = 0;
 int watchdog = 0;
 void execute(uint64_t n); 
-void exec_once();
-void isa_exec_once();
+void exec_once(Decode *s);
+void isa_exec_once(Decode *s);
+void ifetch(Decode *s);
 static void trace_and_difftest(){
           if(wp_check()){
             npc_state.state = NPC_STOP;
@@ -62,8 +78,9 @@ void cpu_exec(uint64_t n) {//里面有execute
       }
 }
 void execute(uint64_t n) {//cpu执行的核心函数
+  Decode s;
   for (;n > 0; n --) {//命令执行循环
-    exec_once();//真正执行的函数
+    exec_once(&s);//真正执行的函数
     trace_and_difftest();//检查是否有监视点
     if (npc_state.state != NPC_RUNNING) {
         if(npc_state.state == NPC_ABORT) {
@@ -73,32 +90,51 @@ void execute(uint64_t n) {//cpu执行的核心函数
     }//确保机器一直正常运行
   }
 }
-void exec_once() {
-  isa_exec_once();//执行命令
-  instruction_count++;
-  printf("pc:%x  ",top->pc);
-  printf("addr_read_data:%x\n",top->addr_read_data);
+void exec_once(Decode *s) {
+  int i;  
+  ifetch(s);
+  isa_exec_once(s);//执行命令
+  INV(s->pc,s->cpu_inst);
+  char *p = s->logbuf;
+  p += snprintf(p, sizeof(s->logbuf), "0x%08""x"":", s->pc);
+  int ilen = 4;
+  uint8_t *inst = (uint8_t *)&s->cpu_inst;
+  for (i = ilen - 1; i >= 0; i --) {
+    p += snprintf(p, 4, " %02x", inst[i]);
+  }
+  int ilen_max = 4;
+  int space_len = ilen_max - ilen;
 
+  if (space_len < 0) space_len = 0;
+  space_len = space_len * 3 + 1;
+  memset(p, ' ', space_len);
+  p += space_len;
+  disassemble(p, s->logbuf + sizeof(s->logbuf) - p,s->pc, (uint8_t *)&s->cpu_inst, ilen);//为什么非得用cpu_inst,inst不行吗?事实证明不行，不知道为啥
+  instruction_count++;
+  printf("%s\n",s->logbuf);
 }
-void isa_exec_once(){
-        int i;
+void isa_exec_once(Decode *s) {
+    int i;
     for (i = 0; i < 2; i++) {
         top->cpu_clk = !top->cpu_clk;
         watchdog++;
-        if(watchdog>20){
-             npc_state.state = NPC_ABORT;
-        }
-        top->addr_read_data = paddr_read(top->pc, 4);
-                if(top->addr_read_data==0){
-            if(top->pc==0){
-                printf("waiting to reset ....\n");
-            }
-        }
-        else {
-            watchdog--;
-        }
         top->eval();
         tfp->dump(dump_num++);
-        printf("\n");
+        s->cpu_inst = cpu_inst;//其实是上一次的指令，之所以放在这里是因为eval之后inst才会更新，所以不如隔一下，这样能保持pc和inst一致
+    }
+}
+void ifetch(Decode *s) {
+    s->pc = top->pc;//最近的pc
+    top->addr_read_data = paddr_read(top->pc, 4);
+    if(watchdog>20){
+      npc_state.state = NPC_ABORT;
+    }
+    if(top->addr_read_data==0){
+      if(top->pc==0){
+        printf("waiting to reset ....\n");
+      }
+    }
+    else {
+        watchdog--;
     }
 }

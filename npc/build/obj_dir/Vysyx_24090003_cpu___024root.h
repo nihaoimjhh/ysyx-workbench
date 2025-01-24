@@ -17,7 +17,6 @@ class Vysyx_24090003_cpu___024root final : public VerilatedModule {
     VL_IN8(cpu_rs,0,0);
     VL_OUT8(addr_write_enable,0,0);
     CData/*2:0*/ ysyx_24090003_cpu__DOT__ysyx_24090003_IDU__DOT__ysyx_24090003_immT__DOT__Itype;
-    CData/*0:0*/ ysyx_24090003_cpu__DOT__ysyx_24090003_EXU__DOT__reg_write_data_enable_r;
     CData/*3:0*/ ysyx_24090003_cpu__DOT__ysyx_24090003_EXU__DOT__EXrd_r;
     CData/*0:0*/ __Vtrigrprev__TOP__cpu_clk;
     CData/*0:0*/ __VactContinue;
