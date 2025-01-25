@@ -1,4 +1,5 @@
 all:$(BIN)
+KCONFIG_CONFIG := $(NPC_HOME)/include/generate/autoconfig
 BIN = $(BUILD_DIR)/$(TOPNAME)
 TOPNAME= ysyx_24090003_cpu#顶层模块名称
 VERILATOR=verilator#verilator别称
@@ -22,12 +23,14 @@ $(BIN): $(VSRCS) $(CXXSRCS)
 all:$(BIN)
 
 run: $(BIN)
-	@$(BIN) $(ARGS) $(IMG)
+	@$(BIN) $(ARGS) $(IMG) 
 .PHONY:all clean run
 sys:
 	cp $(NPC_HOME)/src/cpu/cpu_v/*.v /home/jinghanhui/cpu_sys/cpu/cpu.srcs/sources_1/new/
+
 clean:
 	rm -rf $(BUILD_DIR)
 	-@rm -f ./*.vcd
+
 sim:
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!

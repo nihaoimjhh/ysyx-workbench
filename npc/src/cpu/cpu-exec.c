@@ -19,6 +19,7 @@
 #include "locale.h"
 #include "decode.h"
 #include "reg.h"
+#include "get_elf.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,6 +39,30 @@ extern word_t gpr[16];
 extern word_t cpu_inst;
 int instruction_count = 0;
 int watchdog = 0;
+
+
+
+//函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
+ extern   Elf32_Ehdr ehdr;
+ extern   Elf32_Shdr *shdr_pointer;
+ extern   char *strtab;
+ extern   char *shstrtab;
+ extern   int symlens;
+ extern   int symtab_index;
+ extern   int strtab_index;
+ extern   Elf32_Sym *symtab_pointer;
+ int call_count=0;
+//函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
+
+
+
+
+
+
+
+
+
+
 void execute(uint64_t n); 
 void exec_once(Decode *s);
 void isa_exec_once(Decode *s);
@@ -94,7 +119,9 @@ void exec_once(Decode *s) {
   int i;  
   ifetch(s);
   isa_exec_once(s);//执行命令
+  inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->cpu_inst, top->pc, s->pc,symlens,&call_count);
   INV(s->pc,s->cpu_inst);
+
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), "0x%08""x"":", s->pc);
   int ilen = 4;

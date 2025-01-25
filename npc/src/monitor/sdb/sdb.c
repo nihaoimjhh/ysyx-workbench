@@ -20,7 +20,7 @@
 #include "vaddr.h"//只放vaddr.h找不到，上面有提示加文件夹
 #include "reg.h"//只放vaddr.h找不到，上面有提示加文件夹
 #include "paddr.h"
-
+#include "macro.h"
 static int is_batch_mode = false;
 
 void init_regex();
@@ -45,6 +45,7 @@ static char* rl_gets() {
 }
 
 static int cmd_c(char *args) {
+
   cpu_exec(-1);
   return 0;
 }
@@ -201,6 +202,7 @@ void sdb_mainloop() {
   char last_args[20] = {};
   char *args = NULL;
   if (is_batch_mode) {
+    printf(ANSI_COLOR_GREEN_BIG "'batch' mode is on. npc will run in a tight loop.\n" ANSI_COLOR_RESET);
     cmd_c(NULL);
     return;
   }

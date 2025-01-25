@@ -21,6 +21,7 @@
 #include <vaddr.h>
 #include "common.h"
 #include "reg.h"
+#include "macro.h"
 # define MAX_TOKENS 2000
 static word_t eval(int p,int q,bool *success);
 static int check_parentheses(int p,int q,bool *success);

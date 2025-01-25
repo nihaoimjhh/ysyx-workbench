@@ -57,6 +57,7 @@ VM_USER_LDLIBS = \
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
 	cpu-exec \
+	get_elf \
 	hostcall \
 	paddr \
 	vaddr \
@@ -94,6 +95,8 @@ include $(VERILATOR_ROOT)/include/verilated.mk
 VPATH += $(VM_USER_DIR)
 
 cpu-exec.o: /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu-exec.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+get_elf.o: /home/jinghanhui/ysyx-workbench/npc/src/cpu/get_elf.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 hostcall.o: /home/jinghanhui/ysyx-workbench/npc/src/hostcall/hostcall.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<

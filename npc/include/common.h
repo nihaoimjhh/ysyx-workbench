@@ -26,8 +26,7 @@
 #include <iostream>
 
 
-
-#define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
+#define FUNC_INFO 18 //elf.h里面有定义
 
 #define ANSI_COLOR_GREEN_BIG   "\033[1;32m"
 #define ANSI_COLOR_GREEN_SMALL  "\033[32m"
