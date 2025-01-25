@@ -27,7 +27,8 @@ run: $(BIN)
 .PHONY:all clean run
 sys:
 	cp $(NPC_HOME)/src/cpu/cpu_v/*.v /home/jinghanhui/cpu_sys/cpu/cpu.srcs/sources_1/new/
-
+vcd:${BIN} 
+	@gtkwave sim.vcd
 clean:
 	rm -rf $(BUILD_DIR)
 	-@rm -f ./*.vcd

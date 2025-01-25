@@ -39,7 +39,7 @@ extern word_t gpr[16];
 extern word_t cpu_inst;
 int instruction_count = 0;
 int watchdog = 0;
-
+Decode s;//主体逻辑规定我的这个结构体只能放在这里不能像nemu一样放在执行里面，那样会有问题
 
 
 //函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
@@ -103,7 +103,6 @@ void cpu_exec(uint64_t n) {//里面有execute
       }
 }
 void execute(uint64_t n) {//cpu执行的核心函数
-  Decode s;
   for (;n > 0; n --) {//命令执行循环
     exec_once(&s);//真正执行的函数
     trace_and_difftest();//检查是否有监视点
@@ -119,11 +118,11 @@ void exec_once(Decode *s) {
   int i;  
   ifetch(s);
   isa_exec_once(s);//执行命令
-  inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->cpu_inst, top->pc, s->pc,symlens,&call_count);
+  inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->cpu_inst, s->dnpc, s->pc,symlens,&call_count);
   INV(s->pc,s->cpu_inst);
 
   char *p = s->logbuf;
-  p += snprintf(p, sizeof(s->logbuf), "0x%08""x"":", s->pc);
+  p += snprintf(p, sizeof(s->logbuf), "0x%08""x"":", s->pc);//直接看宏展开看的照着抄
   int ilen = 4;
   uint8_t *inst = (uint8_t *)&s->cpu_inst;
   for (i = ilen - 1; i >= 0; i --) {
@@ -147,7 +146,7 @@ void isa_exec_once(Decode *s) {
         watchdog++;
         top->eval();
         tfp->dump(dump_num++);
-        s->cpu_inst = cpu_inst;//其实是上一次的指令，之所以放在这里是因为eval之后inst才会更新，所以不如隔一下，这样能保持pc和inst一致
+        s->dnpc=top->pc;//这个时候pc已经更新但是还没执行，是名副其实的dnpc
     }
 }
 void ifetch(Decode *s) {

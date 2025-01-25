@@ -18,7 +18,7 @@ extern "C" {
     // DPI IMPORTS
     // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_EXU.v:44:30
     extern void finish_simulation();
-    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_regcontrol.v:51:34
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_regcontrol.v:18:34
     extern void set_gpr(int index, int value);
     // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_IFU.v:19:34
     extern void set_inst(int value);

@@ -62,7 +62,7 @@ char *img_file = NULL;
 char *elf_file= NULL;
 long load_img() {
   if (img_file == NULL) {
-    printf(ANSI_COLOR_RED_BIG "No image is given. Use the default build-in image." ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_RED_BIG "No image is given. Use the default build-in image.\n" ANSI_COLOR_RESET);
     return 4096; // built-in image size
   }
 
@@ -75,7 +75,7 @@ long load_img() {
   fseek(fp, 0, SEEK_END);
   long size = ftell(fp);
 
-  printf("The image is %s, size = %ld", img_file, size);
+  printf("The image is %s, size = %ld\n", img_file, size);
 
   fseek(fp, 0, SEEK_SET);
   int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp);
@@ -118,12 +118,12 @@ void load_elf(char * elf_file){
         symlens=symlen(symtab_pointer,shdr_pointer,symtab_index);
         fseek(fp, 0, SEEK_END);
         long size = ftell(fp);
-        printf("The elf is %s, size = %ld", elf_file, size);
+        printf("The elf is %s, size = %ld\n", elf_file, size);
         fclose(fp);
       }
     }
     else{
-      printf(ANSI_COLOR_RED_BIG "No elf_file is given." ANSI_COLOR_RESET);
+      printf(ANSI_COLOR_RED_BIG "No elf_file is given.\n" ANSI_COLOR_RESET);
     }
 }
 static int parse_args(int argc, char *argv[]) {

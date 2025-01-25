@@ -33,22 +33,6 @@ class Vysyx_24090003_cpu VL_NOT_FINAL : public VerilatedModel {
     VL_OUT(&pc,31,0);
     VL_OUT(&addr_write_data,31,0);
     VL_OUT(&EXaddr,31,0);
-    VL_OUT(&gpr0,31,0);
-    VL_OUT(&gpr1,31,0);
-    VL_OUT(&gpr2,31,0);
-    VL_OUT(&gpr3,31,0);
-    VL_OUT(&gpr4,31,0);
-    VL_OUT(&gpr5,31,0);
-    VL_OUT(&gpr6,31,0);
-    VL_OUT(&gpr7,31,0);
-    VL_OUT(&gpr8,31,0);
-    VL_OUT(&gpr9,31,0);
-    VL_OUT(&gpr10,31,0);
-    VL_OUT(&gpr11,31,0);
-    VL_OUT(&gpr12,31,0);
-    VL_OUT(&gpr13,31,0);
-    VL_OUT(&gpr14,31,0);
-    VL_OUT(&gpr15,31,0);
 
     // CELLS
     // Public to allow access to /* verilator public */ items.

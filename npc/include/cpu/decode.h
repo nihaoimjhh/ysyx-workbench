@@ -20,6 +20,7 @@
 
 typedef struct Decode {
   vaddr_t pc;
+  vaddr_t dnpc;
   paddr_t cpu_inst;
   char logbuf[128];
 } Decode;

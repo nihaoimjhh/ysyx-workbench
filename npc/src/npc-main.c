@@ -17,9 +17,10 @@
 #include <sim_engine.h>
 #include <cpu.h>
 #include <monitor/monitor.h>
+#include "decode.h"
 extern NPCState npc_state;
 extern uint32_t gpr[16];
-word_t cpu_inst;
+extern Decode s;
 extern Vysyx_24090003_cpu* top;
 extern VerilatedVcdC* tfp;
 extern "C" void finish_simulation() {
@@ -36,7 +37,7 @@ extern "C" void set_gpr(int index, uint32_t value) {
     }
 }
 extern "C" void set_inst(uint32_t value) {
-        cpu_inst = value;
+        s.cpu_inst = value;
 }
 int main(int argc, char *argv[]) {
   init_monitor(argc, argv);
