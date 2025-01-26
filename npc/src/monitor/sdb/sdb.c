@@ -17,7 +17,6 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
-#include "vaddr.h"//只放vaddr.h找不到，上面有提示加文件夹
 #include "reg.h"//只放vaddr.h找不到，上面有提示加文件夹
 #include "paddr.h"
 #include "macro.h"
@@ -103,7 +102,7 @@ static int cmd_x(char *args){
 		 printf("Some errors have occurred Please enter the correct expression\n"); return 0;}
 	 else{
 		 for(i=0;i<N;i++){
-		   result=paddr_read(addr,4);
+		   result=pmem_read(addr,4);
 			 printf("%#x\t%x\n",addr,result);
 			 addr+=4;
 		 }

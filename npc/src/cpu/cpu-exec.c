@@ -20,6 +20,7 @@
 #include "decode.h"
 #include "reg.h"
 #include "get_elf.h"
+#include "iringbuf.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -62,7 +63,7 @@ Decode s;//主体逻辑规定我的这个结构体只能放在这里不能像nem
 
 
 
-
+uint64_t g_nr_guest_inst = 0;
 void execute(uint64_t n); 
 void exec_once(Decode *s);
 void isa_exec_once(Decode *s);
@@ -103,11 +104,16 @@ void cpu_exec(uint64_t n) {//里面有execute
       }
 }
 void execute(uint64_t n) {//cpu执行的核心函数
+  char irb[11][128];
+  int last_count=0;
   for (;n > 0; n --) {//命令执行循环
     exec_once(&s);//真正执行的函数
+    g_nr_guest_inst ++;
+    last_count=iringbufmanage(irb,g_nr_guest_inst,&s);
     trace_and_difftest();//检查是否有监视点
     if (npc_state.state != NPC_RUNNING) {
         if(npc_state.state == NPC_ABORT) {
+           iringbufprint(irb,last_count);
            break; 
          };//如果状态不是运行状态，那么就是终止状态，那么就打印错误信
       break;
@@ -151,7 +157,7 @@ void isa_exec_once(Decode *s) {
 }
 void ifetch(Decode *s) {
     s->pc = top->pc;//最近的pc
-    top->addr_read_data = paddr_read(top->pc, 4);
+    top->addr_read_data = pmem_read(top->pc, 4);
     if(watchdog>20){
       npc_state.state = NPC_ABORT;
     }

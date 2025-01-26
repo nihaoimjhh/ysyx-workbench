@@ -1,4 +1,4 @@
-#include "/home/jinghanhui/ysyx-workbench/nemu/include/cpu/get_elf.h"
+#include "get_elf.h"
 FILE *elf_fileopen( char *filename) {
     FILE *fp=fopen(filename,"rb");
     if(fp==NULL){

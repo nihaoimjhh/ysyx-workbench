@@ -41,6 +41,7 @@ VM_USER_CFLAGS = \
 	-I/home/jinghanhui/ysyx-workbench/npc/include/sim_engine \
 	-I/home/jinghanhui/ysyx-workbench/npc/include/reg \
 	-I/home/jinghanhui/ysyx-workbench/npc/include/monitor \
+	-I/home/jinghanhui/ysyx-workbench/npc/include/tracetool \
 	-I/home/jinghanhui/ysyx-workbench/npc/include/monitor/sdb \
 	-I/usr/lib/llvm-14/include \
 	-std=c++14 \
@@ -57,10 +58,8 @@ VM_USER_LDLIBS = \
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
 	cpu-exec \
-	get_elf \
 	hostcall \
 	paddr \
-	vaddr \
 	monitor \
 	expr \
 	sdb \
@@ -69,6 +68,8 @@ VM_USER_CLASSES = \
 	reg \
 	init_sim_engine \
 	sim_engine \
+	get_elf \
+	iringbuf \
 	disasm \
 	state \
 
@@ -82,6 +83,7 @@ VM_USER_DIR = \
 	/home/jinghanhui/ysyx-workbench/npc/src/monitor/sdb \
 	/home/jinghanhui/ysyx-workbench/npc/src/reg \
 	/home/jinghanhui/ysyx-workbench/npc/src/sim_engine \
+	/home/jinghanhui/ysyx-workbench/npc/src/tracetool \
 	/home/jinghanhui/ysyx-workbench/npc/src/utils \
 
 
@@ -96,13 +98,9 @@ VPATH += $(VM_USER_DIR)
 
 cpu-exec.o: /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu-exec.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
-get_elf.o: /home/jinghanhui/ysyx-workbench/npc/src/cpu/get_elf.c
-	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 hostcall.o: /home/jinghanhui/ysyx-workbench/npc/src/hostcall/hostcall.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 paddr.o: /home/jinghanhui/ysyx-workbench/npc/src/memory/paddr.c
-	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
-vaddr.o: /home/jinghanhui/ysyx-workbench/npc/src/memory/vaddr.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 monitor.o: /home/jinghanhui/ysyx-workbench/npc/src/monitor/monitor.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
@@ -119,6 +117,10 @@ reg.o: /home/jinghanhui/ysyx-workbench/npc/src/reg/reg.c
 init_sim_engine.o: /home/jinghanhui/ysyx-workbench/npc/src/sim_engine/init_sim_engine.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 sim_engine.o: /home/jinghanhui/ysyx-workbench/npc/src/sim_engine/sim_engine.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+get_elf.o: /home/jinghanhui/ysyx-workbench/npc/src/tracetool/get_elf.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+iringbuf.o: /home/jinghanhui/ysyx-workbench/npc/src/tracetool/iringbuf.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 disasm.o: /home/jinghanhui/ysyx-workbench/npc/src/utils/disasm.cc
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<

@@ -18,10 +18,10 @@
  * Type 'man regex' for more information about POSIX regex functions.
  */
 #include <regex.h>
-#include <vaddr.h>
 #include "common.h"
 #include "reg.h"
 #include "macro.h"
+#include "paddr.h"
 # define MAX_TOKENS 2000
 static word_t eval(int p,int q,bool *success);
 static int check_parentheses(int p,int q,bool *success);
@@ -303,7 +303,7 @@ static word_t eval(int p,int q,bool *success){//求val1和val2代表的值,最�
 			 case TK_OR: return val1||val2; break;
 			 case DEREF: 
 						 if(val2>=0x80000000&&val2<=0x87ffffff){
-							 return vaddr_read((vaddr_t)val2,4);
+							 return pmem_read((paddr_t)val2,4);
 						 }
 						 else{
 							 printf("Invalid memory address:Hexadecimal:%#x  decimal:%u\taddr hould in [0x80000000,0x87ffffff]\n",val2,val2);
