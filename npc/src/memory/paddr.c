@@ -5,8 +5,10 @@ uint8_t pmem[MSIZE] ;
 uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - MBASE; }
 
 word_t pmem_read(paddr_t addr, int len) {
-      if (out_of_bound(addr))
+      if (out_of_bound(addr)){
+          printf(ANSI_COLOR_RED_BIG "pmem_read out of bound\n" ANSI_COLOR_RESET);
           return 0;
+       }
       else{
           word_t ret = host_read(guest_to_host(addr), len);
           return ret;
@@ -15,8 +17,10 @@ word_t pmem_read(paddr_t addr, int len) {
 
 
 void pmem_write(paddr_t addr,  word_t data ,int len) {
-      if (out_of_bound(addr))
+      if (out_of_bound(addr)){
+            printf(ANSI_COLOR_RED_BIG "pmem_write out of bound\n" ANSI_COLOR_RESET);
         return ;
+     }
       else{
           host_write(guest_to_host(addr), len, data);
       }

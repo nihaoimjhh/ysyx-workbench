@@ -5,7 +5,7 @@ TOPNAME= ysyx_24090003_cpu#顶层模块名称
 VERILATOR=verilator#verilator别称
 INC_PATH ?=$(NPC_HOME)/include $(NPC_HOME)/include/cpu $(NPC_HOME)/include/memory $(NPC_HOME)/include/sim_engine $(NPC_HOME)/include/reg $(NPC_HOME)/include/monitor  $(NPC_HOME)/include/tracetool \
 $(NPC_HOME)/include/monitor/sdb /usr/lib/llvm-14/include 
-VERILATOR_CFLAGS += -MMD  --build -cc -trace -O3 --x-assign fast --x-initial fast --noassert#verilator编译verilog生成c++对象的选项
+VERILATOR_CFLAGS += -MMD  --build -cc -trace -O3 --x-assign fast --x-initial fast --noassert  #-Wall#verilator编译verilog生成c++对象的选项
 BUILD_DIR=$(NPC_HOME)/build#verilator编译的obj所在之处
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 VSRCS = $(NPC_HOME)/src/cpu/cpu_v/*.v

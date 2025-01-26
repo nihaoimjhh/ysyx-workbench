@@ -28,11 +28,6 @@ class Vysyx_24090003_cpu VL_NOT_FINAL : public VerilatedModel {
     // propagate new values into/out from the Verilated model.
     VL_IN8(&cpu_clk,0,0);
     VL_IN8(&cpu_rs,0,0);
-    VL_OUT8(&addr_write_enable,0,0);
-    VL_IN(&addr_read_data,31,0);
-    VL_OUT(&pc,31,0);
-    VL_OUT(&addr_write_data,31,0);
-    VL_OUT(&EXaddr,31,0);
 
     // CELLS
     // Public to allow access to /* verilator public */ items.

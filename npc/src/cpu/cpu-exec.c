@@ -39,7 +39,6 @@ extern VerilatedVcdC* tfp;
 extern word_t gpr[16];
 extern word_t cpu_inst;
 int instruction_count = 0;
-int watchdog = 0;
 Decode s;//主体逻辑规定我的这个结构体只能放在这里不能像nemu一样放在执行里面，那样会有问题
 
 
@@ -67,7 +66,6 @@ uint64_t g_nr_guest_inst = 0;
 void execute(uint64_t n); 
 void exec_once(Decode *s);
 void isa_exec_once(Decode *s);
-void ifetch(Decode *s);
 static void trace_and_difftest(){
           if(wp_check()){
             npc_state.state = NPC_STOP;
@@ -88,9 +86,6 @@ void cpu_exec(uint64_t n) {//里面有execute
               case NPC_END: 
               case NPC_ABORT:
                   if(npc_state.state==NPC_ABORT){
-                     if(watchdog>20){
-                        printf("\033[1;31m""WATCHDOG""\033[0m\n");
-                        }
                       printf("\033[1;31m""ABORT""\033[0m\n");
                   }
                   else if (npc_state.halt_ret == 0){
@@ -122,11 +117,8 @@ void execute(uint64_t n) {//cpu执行的核心函数
 }
 void exec_once(Decode *s) {
   int i;  
-  ifetch(s);
-  isa_exec_once(s);//执行命令
   inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->cpu_inst, s->dnpc, s->pc,symlens,&call_count);
   INV(s->pc,s->cpu_inst);
-
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), "0x%08""x"":", s->pc);//直接看宏展开看的照着抄
   int ilen = 4;
@@ -144,29 +136,13 @@ void exec_once(Decode *s) {
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,s->pc, (uint8_t *)&s->cpu_inst, ilen);//为什么非得用cpu_inst,inst不行吗?事实证明不行，不知道为啥
   instruction_count++;
   printf("%s\n",s->logbuf);
+  isa_exec_once(s);//执行命令,前面已经取到了命令，但是没有执行，这里执行。如果把这个放在前面那么执行了之后就是下一个pc和dnpc和inst了，因为是组合逻辑，所以这里执行。
 }
 void isa_exec_once(Decode *s) {
     int i;
     for (i = 0; i < 2; i++) {
         top->cpu_clk = !top->cpu_clk;
-        watchdog++;
         top->eval();
         tfp->dump(dump_num++);
-        s->dnpc=top->pc;//这个时候pc已经更新但是还没执行，是名副其实的dnpc
-    }
-}
-void ifetch(Decode *s) {
-    s->pc = top->pc;//最近的pc
-    top->addr_read_data = pmem_read(top->pc, 4);
-    if(watchdog>20){
-      npc_state.state = NPC_ABORT;
-    }
-    if(top->addr_read_data==0){
-      if(top->pc==0){
-        printf("waiting to reset ....\n");
-      }
-    }
-    else {
-        watchdog--;
     }
 }

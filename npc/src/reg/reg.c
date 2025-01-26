@@ -19,6 +19,7 @@
 #include "decode.h"
 extern Vysyx_24090003_cpu* top;
 extern word_t gpr[16];
+extern Decode s;
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
   "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5"
@@ -28,7 +29,7 @@ void isa_reg_display() {
      int i;
 	printf("Register Information:\n");
 	printf("Name\thex\t\tdec\n");
-	printf("%-4s\t%#-8x\t%-8u\n","dnpc",top->pc,top->pc);//local-in		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],gpr[i],gpr[i]);//local-include有定义这个宏clude有定义这个宏
+	printf("%-4s\t%#-8x\t%-8u\n","dnpc",s.dnpc,s.dnpc);//local-in		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],gpr[i],gpr[i]);//local-include有定义这个宏clude有定义这个宏
 	 for(i=0;i<15;i++){
 		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],gpr[i],gpr[i]);//local-include有定义这个宏
 	 

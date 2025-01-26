@@ -16,14 +16,20 @@ extern "C" {
 
 
     // DPI IMPORTS
-    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_IFU.v:21:40
-    extern svBitVecVal cpu_pmem_read(const svBitVecVal* addr);
-    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_EXU.v:47:30
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_cpu.v:28:29
+    extern int cpu_pmem_read(int addr);
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_cpu.v:29:30
+    extern void cpu_pmem_write(int addr, int data, char wmask);
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_EXU.v:46:30
     extern void finish_simulation();
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_IFU.v:21:34
+    extern void set_dnpc(int value);
     // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_regcontrol.v:18:34
     extern void set_gpr(int index, int value);
-    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_IFU.v:20:34
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_IFU.v:18:34
     extern void set_inst(int value);
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_IFU.v:20:34
+    extern void set_pc(int value);
 
 #ifdef __cplusplus
 }

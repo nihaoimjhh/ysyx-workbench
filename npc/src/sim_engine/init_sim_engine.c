@@ -1,4 +1,6 @@
 #include <common.h>
+#include "decode.h"
+extern Decode s;
 Vysyx_24090003_cpu* top;
 VerilatedVcdC* tfp;
 uint64_t dump_num = 0;
@@ -17,10 +19,10 @@ void init_sim_engine() {
     for(i=0;i<3;i++){
         top->cpu_clk=!top->cpu_clk;
         top->cpu_rs = 1;
-        top->addr_read_data = 0;
         top->eval();
         tfp->dump(dump_num++);
     }
     top->cpu_rs = 0;
+
     printf(ANSI_COLOR_GREEN_BIG "start simulation\n" ANSI_COLOR_RESET);
 }
