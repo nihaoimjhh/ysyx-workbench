@@ -47,15 +47,15 @@ extern "C" void set_dnpc(vaddr_t value) {
         s.dnpc = value;
 }
 extern "C" int cpu_pmem_read(paddr_t addr) {
-        return pmem_read(addr, 4);
+        return paddr_read(addr, 4);
 }
 extern "C" void cpu_pmem_write(paddr_t addr, word_t data, uint8_t wmask) {
        if(wmask==0xf)
-            pmem_write(addr, data, 4);
+            paddr_write(addr, data, 4);
        else if(wmask==0x3)
-            pmem_write(addr, data, 2);
+            paddr_write(addr, data, 2);
        else if(wmask==0x1)
-            pmem_write(addr, data, 1);
+            paddr_write(addr, data, 1);
        else if(wmask==0x0){
             return;
        }
