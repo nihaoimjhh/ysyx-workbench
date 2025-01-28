@@ -22,8 +22,8 @@ typedef struct paddr_write_logbuf{
   }paddr_write_logbuf;
 paddr_read_logbuf paddr_read_logbufs[10];
 paddr_write_logbuf paddr_write_logbufs[10];
-void paddr_read_logbuf_write(paddr_t addr,int len,word_t data);
-void paddr_write_logbuf_write(paddr_t addr,int len,word_t data);
+void paddr_read_logbuf_write(paddr_t addr,word_t data,int len);
+void paddr_write_logbuf_write(paddr_t addr,word_t data,int len);
 void paddr_read_logbuf_print();
 void paddr_write_logbuf_print();
 
@@ -36,7 +36,7 @@ word_t pmem_read(paddr_t addr, int len) {
 
 
 void pmem_write(paddr_t addr,  word_t data ,int len) {
-          host_write(guest_to_host(addr), len, data);
+          host_write(guest_to_host(addr), data,len);
 }
 
 
@@ -44,7 +44,7 @@ void pmem_write(paddr_t addr,  word_t data ,int len) {
 word_t paddr_read(paddr_t addr, int len) {
     if(!out_of_bound(addr)){
         paddr_read_logbuf_write(addr,len,pmem_read(addr,len));
-        paddr_read_logbuf_print();
+        //paddr_read_logbuf_print();
         return pmem_read(addr, len);
     }
     else{
@@ -55,9 +55,9 @@ word_t paddr_read(paddr_t addr, int len) {
 
 void paddr_write(paddr_t addr,  word_t data,int len) {
     if(!out_of_bound(addr)){
-        paddr_write_logbuf_write(addr,len,data);
+        paddr_write_logbuf_write(addr,data,len);
         paddr_write_logbuf_print();
-        pmem_write(addr, len, data);
+        pmem_write(addr,data,len);
     }
     else{
       printf(ANSI_COLOR_RED_BIG "pmem_read out of bound\n" ANSI_COLOR_RESET); 
@@ -65,7 +65,7 @@ void paddr_write(paddr_t addr,  word_t data,int len) {
     }
 }
 
-void paddr_read_logbuf_write(paddr_t addr,int len,word_t data){ 
+void paddr_read_logbuf_write(paddr_t addr,word_t data,int len){ 
   paddr_read_logbuf_count%=10;
   paddr_read_logbufs[paddr_read_logbuf_count].addr=addr;
   paddr_read_logbufs[paddr_read_logbuf_count].len=len;
@@ -73,7 +73,7 @@ void paddr_read_logbuf_write(paddr_t addr,int len,word_t data){
   paddr_read_logbuf_count++;
 }
 
-void paddr_write_logbuf_write(paddr_t addr,int len,word_t data){
+void paddr_write_logbuf_write(paddr_t addr,word_t data,int len){
   paddr_write_logbuf_count%=10;
   paddr_write_logbufs[paddr_write_logbuf_count].addr=addr;
   paddr_write_logbufs[paddr_write_logbuf_count].len=len;

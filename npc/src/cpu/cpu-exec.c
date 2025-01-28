@@ -38,7 +38,6 @@ extern Vysyx_24090003_cpu* top;
 extern VerilatedVcdC* tfp;
 extern word_t gpr[16];
 extern word_t cpu_inst;
-int instruction_count = 0;
 Decode s;//主体逻辑规定我的这个结构体只能放在这里不能像nemu一样放在执行里面，那样会有问题
 
 
@@ -103,7 +102,6 @@ void execute(uint64_t n) {//cpu执行的核心函数
   int last_count=0;
   for (;n > 0; n --) {//命令执行循环
     exec_once(&s);//真正执行的函数
-    g_nr_guest_inst ++;
     last_count=iringbufmanage(irb,g_nr_guest_inst,&s);
     trace_and_difftest();//检查是否有监视点
     if (npc_state.state != NPC_RUNNING) {
@@ -117,6 +115,7 @@ void execute(uint64_t n) {//cpu执行的核心函数
 }
 void exec_once(Decode *s) {
   int i;  
+  isa_exec_once(s);
   inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->cpu_inst, s->dnpc, s->pc,symlens,&call_count);
   INV(s->pc,s->cpu_inst);
   char *p = s->logbuf;
@@ -134,9 +133,7 @@ void exec_once(Decode *s) {
   memset(p, ' ', space_len);
   p += space_len;
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,s->pc, (uint8_t *)&s->cpu_inst, ilen);//为什么非得用cpu_inst,inst不行吗?事实证明不行，不知道为啥
-  instruction_count++;
-  printf("%s\n",s->logbuf);
-  isa_exec_once(s);//执行命令,前面已经取到了命令，但是没有执行，这里执行。如果把这个放在前面那么执行了之后就是下一个pc和dnpc和inst了，因为是组合逻辑，所以这里执行。
+  printf("%ld: %s\n",g_nr_guest_inst,s->logbuf);
 }
 void isa_exec_once(Decode *s) {
     int i;
@@ -145,4 +142,5 @@ void isa_exec_once(Decode *s) {
         top->eval();
         tfp->dump(dump_num++);
     }
+    g_nr_guest_inst ++;
 }
