@@ -21,16 +21,10 @@
 #include "reg.h"
 #include "get_elf.h"
 #include "iringbuf.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 void init_disasm(const char *triple);
 void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 
-#ifdef __cplusplus
-}
-#endif
 
 extern NPCState npc_state;
 extern int dump_num;

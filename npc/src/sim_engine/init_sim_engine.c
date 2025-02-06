@@ -7,16 +7,8 @@ Vysyx_24090003_cpu* top;
 VerilatedVcdC* tfp;
 uint64_t dump_num = 0;
 word_t gpr[16];
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void init_disasm(const char *triple);
 void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 
-#ifdef __cplusplus
-}
-#endif
 //函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
  extern   Elf32_Ehdr ehdr;
  extern   Elf32_Shdr *shdr_pointer;

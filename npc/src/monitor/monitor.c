@@ -5,19 +5,9 @@
 #include <sdb.h>
 #include "get_elf.h"
 #include <elf.h>
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-void init_disasm(const char *triple);
-void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-
-#ifdef __cplusplus
-}
-#endif
-
-
-
+extern  void init_disasm(const char *triple);
+extern  void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 
 void init_elf_read(char *elf_file);
 //FTACE所需要的结构体，直接穿进cpu-exec.c

@@ -13,7 +13,7 @@ CXXSRCS =  $(NPC_HOME)/src/utils/*.cc $(NPC_HOME)/src/**/*.c  $(NPC_HOME)/src/mo
 INCFLAGS = $(addprefix -I, $(INC_PATH))#verilator加路径
 CXXFLAGS += $(INCFLAGS) -std=c++14   -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS 
 # -D__STDC_FORMAT_MACROS  # 这是正常解析filelist之后手动加的宏，但是加上之后说是重复定义了所以先注释掉，后续有问题就加上
-LDFLAGS += -lreadline -lLLVM-14
+LDFLAGS += -lreadline -lLLVM-14#动态库链接
 # 添加 LLVM 相关的编译和链接标志
 $(shell mkdir -p $(BUILD_DIR))#创建build文件夹如果存在就不创建切不报错-p的用处
 # 定义如何生成最终的可执行文件 $(BIN)

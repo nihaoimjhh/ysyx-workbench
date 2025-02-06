@@ -45,8 +45,7 @@ using namespace llvm;
 static llvm::MCDisassembler *gDisassembler = nullptr;
 static llvm::MCSubtargetInfo *gSTI = nullptr;
 static llvm::MCInstPrinter *gIP = nullptr;
-
-extern "C" void init_disasm(const char *triple) {
+void init_disasm(const char *triple) {
   llvm::InitializeAllTargetInfos();
   llvm::InitializeAllTargetMCs();
   llvm::InitializeAllAsmParsers();
@@ -92,7 +91,7 @@ extern "C" void init_disasm(const char *triple) {
     gIP->applyTargetSpecificCLOption("no-aliases");
 }
 
-extern "C" void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte) {
+void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte) {//这个函数是用来反汇编的在nemu里面是extern C 但是verilator用的是c++编译的所以不用extern C
   MCInst inst;
   llvm::ArrayRef<uint8_t> arr(code, nbyte);
   uint64_t dummy_size = 0;
