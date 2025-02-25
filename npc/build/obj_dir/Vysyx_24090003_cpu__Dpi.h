@@ -16,11 +16,11 @@ extern "C" {
 
 
     // DPI IMPORTS
-    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_cpu.v:28:29
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_cpu.v:29:29
     extern int cpu_pmem_read(int addr);
-    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_cpu.v:29:30
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_cpu.v:30:30
     extern void cpu_pmem_write(int addr, int data, char wmask);
-    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_EXU.v:46:30
+    // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_EXU.v:48:30
     extern void finish_simulation();
     // DPI import at /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu_v/ysyx_24090003_IFU.v:21:34
     extern void set_dnpc(int value);

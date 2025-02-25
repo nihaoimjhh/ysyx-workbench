@@ -57,6 +57,7 @@ VM_USER_LDLIBS = \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
+	dpi-c \
 	cpu-exec \
 	hostcall \
 	paddr \
@@ -76,6 +77,7 @@ VM_USER_CLASSES = \
 # User .cpp directories (from .cpp's on Verilator command line)
 VM_USER_DIR = \
 	/home/jinghanhui/ysyx-workbench/npc/src \
+	/home/jinghanhui/ysyx-workbench/npc/src/DPIC \
 	/home/jinghanhui/ysyx-workbench/npc/src/cpu \
 	/home/jinghanhui/ysyx-workbench/npc/src/hostcall \
 	/home/jinghanhui/ysyx-workbench/npc/src/memory \
@@ -96,6 +98,8 @@ include $(VERILATOR_ROOT)/include/verilated.mk
 ### Executable rules... (from --exe)
 VPATH += $(VM_USER_DIR)
 
+dpi-c.o: /home/jinghanhui/ysyx-workbench/npc/src/DPIC/dpi-c.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 cpu-exec.o: /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu-exec.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 hostcall.o: /home/jinghanhui/ysyx-workbench/npc/src/hostcall/hostcall.c

@@ -49,6 +49,7 @@ void init_elf_read(char *elf_file);
 void init_disasm(const char *triple);
 void sdb_set_batch_mode();
 char *img_file = NULL;
+char *diff_so_file = NULL;
 char *elf_file= NULL;
 long load_img() {
   if (img_file == NULL) {
@@ -120,17 +121,23 @@ static int parse_args(int argc, char *argv[]) {
   const struct option table[] = {
     {"batch"    , no_argument      , NULL, 'b'},
     {"elf_file" , required_argument, NULL, 'e'},
+    {"diff"     , required_argument, NULL, 'd'},
     {0          , 0                , NULL,  0 },
   };
   int o;
   printf("Parsing the command line...\n");
-  while ( (o = getopt_long(argc, argv, "-be:", table, NULL)) != -1) {//不要参数的后面不要引号就行
+  while ( (o = getopt_long(argc, argv, "-be:d:", table, NULL)) != -1) {//不要参数的后面不要引号就行
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;
       case 'e': elf_file = optarg; break;
+      case 'd': diff_so_file = optarg; break;
       case 1: img_file = optarg; return 0;
       default:
         printf("Usage: %s [image]\n", argv[0]);
+        printf("\t-b,--batch              run with batch mode\n");
+        printf("\t-e,--elf_file           input a .elf file to run ftrace \n");
+        printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
+        printf("\n");
         exit(0);
     }
   }

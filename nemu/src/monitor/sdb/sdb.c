@@ -18,7 +18,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
-#include "memory/vaddr.h"//只放vaddr.h找不到，上面有提示加文件夹
+#include "memory/paddr.h"//只放vaddr.h找不到，上面有提示加文件夹
 
 static int is_batch_mode = false;
 
@@ -100,9 +100,9 @@ static int cmd_x(char *args){
 	 if(!success){
 		 printf("Some errors have occurred Please enter the correct expression\n"); return 0;}
 	 else{
-		 result=vaddr_read(addr,4);
 		 for(i=0;i<N;i++){
-			 printf("%#x\t%u\n",addr,result);
+		   result=paddr_read(addr,4);
+			 printf("%#x\t%x\n",addr,result);
 			 addr+=4;
 		 }
 	 }
