@@ -85,8 +85,6 @@ typedef struct token {
 static Token tokens[MAX_TOKENS] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 static bool make_token(char *e) {
-  printf("NR_REGEX:%d\n",NR_REGEX);
-  printf("NR_TOKENS:%d\n",MAX_TOKENS);
   word_t temp;
   int position = 0;//初始位置
   bool success=1;

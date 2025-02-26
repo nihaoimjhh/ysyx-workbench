@@ -59,6 +59,7 @@ VM_USER_LDLIBS = \
 VM_USER_CLASSES = \
 	dpi-c \
 	cpu-exec \
+	dut \
 	hostcall \
 	paddr \
 	monitor \
@@ -79,6 +80,7 @@ VM_USER_DIR = \
 	/home/jinghanhui/ysyx-workbench/npc/src \
 	/home/jinghanhui/ysyx-workbench/npc/src/DPIC \
 	/home/jinghanhui/ysyx-workbench/npc/src/cpu \
+	/home/jinghanhui/ysyx-workbench/npc/src/cpu/difftest \
 	/home/jinghanhui/ysyx-workbench/npc/src/hostcall \
 	/home/jinghanhui/ysyx-workbench/npc/src/memory \
 	/home/jinghanhui/ysyx-workbench/npc/src/monitor \
@@ -101,6 +103,8 @@ VPATH += $(VM_USER_DIR)
 dpi-c.o: /home/jinghanhui/ysyx-workbench/npc/src/DPIC/dpi-c.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 cpu-exec.o: /home/jinghanhui/ysyx-workbench/npc/src/cpu/cpu-exec.c
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+dut.o: /home/jinghanhui/ysyx-workbench/npc/src/cpu/difftest/dut.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 hostcall.o: /home/jinghanhui/ysyx-workbench/npc/src/hostcall/hostcall.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<

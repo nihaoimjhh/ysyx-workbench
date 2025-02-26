@@ -9,7 +9,7 @@ VERILATOR_CFLAGS += -MMD  --build -cc -trace -O3 --x-assign fast --x-initial fas
 BUILD_DIR=$(NPC_HOME)/build#verilator编译的obj所在之处
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 VSRCS = $(NPC_HOME)/src/cpu/cpu_v/*.v
-CXXSRCS =  $(NPC_HOME)/src/utils/*.cc $(NPC_HOME)/src/**/*.c  $(NPC_HOME)/src/monitor/sdb/*.c#testbench
+CXXSRCS =  $(NPC_HOME)/src/utils/*.cc $(NPC_HOME)/src/**/*.c  $(NPC_HOME)/src/monitor/sdb/*.c $(NPC_HOME)/src/cpu/difftest/*.c#testbench
 INCFLAGS = $(addprefix -I, $(INC_PATH))#verilator加路径
 CXXFLAGS += $(INCFLAGS) -std=c++14   -fno-exceptions -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS 
 # -D__STDC_FORMAT_MACROS  # 这是正常解析filelist之后手动加的宏，但是加上之后说是重复定义了所以先注释掉，后续有问题就加上

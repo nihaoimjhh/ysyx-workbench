@@ -6,10 +6,18 @@ extern Decode s;
 Vysyx_24090003_cpu* top;
 VerilatedVcdC* tfp;
 uint64_t dump_num = 0;
-word_t gpr[16];
+extern CPU_state cpu;
 void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 
+void init_difftest(char *ref_so_file, long img_size, int port);//放在这里是因为只有复位之后的pc才是好的，所以只能放在这里
 //函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
+extern char *diff_so_file;
+extern long img_size;
+extern int port;
+extern int difftest_port;
+
+
+
  extern   Elf32_Ehdr ehdr;
  extern   Elf32_Shdr *shdr_pointer;
  extern   char *strtab;
@@ -41,6 +49,7 @@ void init_sim_engine() {
         tfp->dump(dump_num++);
     }
     //之所以这里放一个itrace是因为对应上si然后和指令也对上了，所以放这里，更主要的是这个时候已经取到指，但是没写值而已也就是没有真正的执行。itrace真正工作是跟踪，所以放在这里,si执行显示的指令，很符合直觉
+    init_difftest(diff_so_file, img_size, difftest_port);//so文件名字用来找函数用的
     g_nr_guest_inst ++;
     inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s.cpu_inst, s.dnpc, s.pc,symlens,&call_count);
     INV(s.pc,s.cpu_inst);

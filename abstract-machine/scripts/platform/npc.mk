@@ -14,12 +14,14 @@ LDFLAGS   += -T $(AM_HOME)/scripts/linker.ld \
 LDFLAGS   += --gc-sections -e _start
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
 .PHONY: $(AM_HOME)/am/src/riscv/npc/trm.c
-NPCFLAGS +=  -e $(IMAGE).elf
+NPCFLAGS +=  -e $(IMAGE).elf -d /home/jinghanhui/ysyx-workbench/nemu/build/riscv32-nemu-interpreter-so
 image: $(IMAGE).elf
 	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
-run: image
+nemu-so: 
+	$(MAKE) -C $(NEMU_HOME)
+run: image nemu-so
 	$(MAKE) -C $(NPC_HOME) run ARGS="$(NPCFLAGS)" IMG=$(IMAGE).bin
 #和nemu的接口
 gdb: image

@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include "local-include/reg.h"
+
 //#include <string.h>
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -23,12 +24,16 @@ const char *regs[] = {
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
-void isa_reg_display() {
+void isa_reg_display() {	 
      int i;
-	 for(i=0;i<ARRLEN(regs);i++){
-		 printf("%s\t%#x\t%u\n",regs[i],gpr(i),gpr(i));//local-include有定义这个宏
+	printf("Register Information:\n");
+	printf("Name\thex\t\tdec\n");
+	printf("%-4s\t%#-8x\t%-8u\n","dnpc",cpu.pc,cpu.pc);//local-in		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],cpu.gpr[i],cpu.gpr[i]);//local-include有定义这个宏clude有定义这个宏
+	 for(i=0;i<31;i++){
+		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],cpu.gpr[i],cpu.gpr[i]);//local-include有定义这个宏
 	 
 	 }
+
 }
 word_t isa_reg_str2val(const char *s, bool *success) {	
 	 int i=0;//为什么有时候不初始化会报错呢，上面那个没初始化都不报错，

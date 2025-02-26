@@ -14,11 +14,11 @@
 ***************************************************************************************/
 
 #include "reg.h"
-//#include <string.h>
+#include "common.h"//#include <string.h>
 #include "utils.h"
 #include "decode.h"
 extern Vysyx_24090003_cpu* top;
-extern word_t gpr[16];
+extern CPU_state cpu;
 extern Decode s;
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -29,9 +29,9 @@ void isa_reg_display() {
      int i;
 	printf("Register Information:\n");
 	printf("Name\thex\t\tdec\n");
-	printf("%-4s\t%#-8x\t%-8u\n","dnpc",s.dnpc,s.dnpc);//local-in		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],gpr[i],gpr[i]);//local-include有定义这个宏clude有定义这个宏
+	printf("%-4s\t%#-8x\t%-8u\n","dnpc",s.dnpc,s.dnpc);//local-in		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],cpu.gpr[i],cpu.gpr[i]);//local-include有定义这个宏clude有定义这个宏
 	 for(i=0;i<15;i++){
-		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],gpr[i],gpr[i]);//local-include有定义这个宏
+		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],cpu.gpr[i],cpu.gpr[i]);//local-include有定义这个宏
 	 
 	 }
 }
@@ -42,12 +42,12 @@ word_t isa_reg_str2val(const char *s, bool *success) {
 	 strncpy(tempreg,s+1,4);//去掉$符号这样才能搜索，末尾直接填最大值如果 source 的长度小于 n，strncpy 会将 destination 的剩余部分用 null 字符 '\0' 填充，直到复制的字符数达到 n。
 	 
 	 if(strcmp(s,temp0)==0){//第一个是自带$的
-		 return gpr[0];//local-include有定义这个宏
+		 return cpu.gpr[0];//local-include有定义这个宏
 	 }
 	else{
 	     for(i=1;i<15;i++){//有这个宏就用
 			 if(strcmp(tempreg,regs[i])==0){
-				 return gpr[i];//local-include有定义这个宏
+				 return cpu.gpr[i];//local-include有定义这个宏
 			 }
 		 }
 		 if(i==15){
@@ -58,10 +58,25 @@ word_t isa_reg_str2val(const char *s, bool *success) {
      return 0;
 }
 void check_ra(word_t thispc,word_t thisinst) {
-	if(gpr[1]==666&&thisinst!=0x00100073){
+	if(cpu.gpr[1]==666&&thisinst!=0x00100073){
 		printf(ANSI_COLOR_RED_BIG "have not this inst at pc %#x\n" ANSI_COLOR_RESET,thispc);
 		npc_state.state=NPC_ABORT;
 	}
 	else 
 		return;    
+}
+bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) { 
+      for(int i=0;i<15;i++){
+         if(ref_r->gpr[i]!=cpu.gpr[i]){
+             printf("reg[%d]:%s is different, ref is %x, dut is %x\n",i,regs[i],ref_r->gpr[i],cpu.gpr[i]);
+             return false;
+         }
+      }  
+      if(ref_r->pc!=cpu.pc){
+          printf("pc is different, ref is %x, dut is %x\n",ref_r->pc,cpu.pc);
+          return false;
+      }
+      else{
+          return true;
+      }
 }

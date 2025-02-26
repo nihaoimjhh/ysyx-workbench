@@ -5,10 +5,9 @@
 #include <sdb.h>
 #include "get_elf.h"
 #include <elf.h>
+#include "difftest.h"
 
-extern  void init_disasm(const char *triple);
-extern  void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-
+void init_difftest(char *ref_so_file, long img_size, int port);
 void init_elf_read(char *elf_file);
 //FTACE所需要的结构体，直接穿进cpu-exec.c
     FILE *fp;
@@ -48,9 +47,17 @@ void init_elf_read(char *elf_file);
 
 void init_disasm(const char *triple);
 void sdb_set_batch_mode();
+long img_size = 0;
 char *img_file = NULL;
 char *diff_so_file = NULL;
 char *elf_file= NULL;
+int difftest_port = 1234;
+
+
+
+
+
+
 long load_img() {
   if (img_file == NULL) {
     printf(ANSI_COLOR_RED_BIG "No image is given. Use the default build-in image.\n" ANSI_COLOR_RESET);
@@ -148,7 +155,7 @@ void init_monitor(int argc, char *argv[]) {
 
   parse_args(argc, argv);
   printf("Image file set to: %s\n", img_file);
-  long img_size = load_img(); 
+  img_size = load_img(); 
    load_elf(elf_file);
   printf("The image size is %ld\n", img_size);
   init_sdb();//定要初始化啊，不然正则匹配就直接崩溃,gdb还乱跳，根本不可能调出来

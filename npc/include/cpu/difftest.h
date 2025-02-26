@@ -13,14 +13,24 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#ifndef __RISCV_REG_H__
-#define __RISCV_REG_H__
+#ifndef __CPU_DIFFTEST_H__
+#define __CPU_DIFFTEST_H__
 
 #include <common.h>
-#include "decode.h"
-void isa_reg_display();
-word_t isa_reg_str2val(const char *name, bool *success);
-void check_ra(word_t thispc,word_t thisinst);
 
-bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc);
+extern void (*ref_difftest_memcpy)(paddr_t addr, void *buf, size_t n, bool direction);
+extern void (*ref_difftest_regcpy)(void *dut, bool direction);
+extern void (*ref_difftest_exec)(uint64_t n);
+extern void (*ref_difftest_raise_intr)(uint64_t NO);
+void difftest_step(vaddr_t pc, vaddr_t npc);
+static inline bool difftest_check_reg(const char *name, vaddr_t pc, word_t ref, word_t dut) {
+  if (ref != dut) {
+    // Log("%s is different after executing instruction at pc = " FMT_WORD
+    //     ", right = " FMT_WORD ", wrong = " FMT_WORD ", diff = " FMT_WORD,
+    //     name, pc, ref, dut, ref ^ dut);
+    return false;
+  }
+  return true;
+}
+
 #endif

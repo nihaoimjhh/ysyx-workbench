@@ -21,7 +21,7 @@
 #include "reg.h"
 #include "get_elf.h"
 #include "iringbuf.h"
-
+#include "difftest.h"
 void init_disasm(const char *triple);
 void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 
@@ -30,10 +30,10 @@ extern NPCState npc_state;
 extern int dump_num;
 extern Vysyx_24090003_cpu* top;
 extern VerilatedVcdC* tfp;
-extern word_t gpr[16];
+
 extern word_t cpu_inst;
 Decode s;//主体逻辑规定我的这个结构体只能放在这里不能像nemu一样放在执行里面，那样会有问题
-
+CPU_state cpu;
 
 //函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
  extern   Elf32_Ehdr ehdr;
@@ -59,7 +59,8 @@ uint64_t g_nr_guest_inst = 0;
 void execute(uint64_t n); 
 void exec_once(Decode *s);
 void isa_exec_once(Decode *s);
-static void trace_and_difftest(){
+static void trace_and_difftest(Decode *_this, vaddr_t dnpc){
+   difftest_step(_this->pc, dnpc);//定义了CONFIG_DIFFTEST,才会调用difftest_step(_this->pc, dnpc);
           if(wp_check()){
             npc_state.state = NPC_STOP;
           }
@@ -97,7 +98,7 @@ void execute(uint64_t n) {//cpu执行的核心函数
   for (;n > 0; n --) {//命令执行循环
     exec_once(&s);//真正执行的函数
     last_count=iringbufmanage(irb,g_nr_guest_inst,&s);
-    trace_and_difftest();//检查是否有监视点
+    trace_and_difftest(&s, cpu.pc);//检查是否有监视点
     if (npc_state.state != NPC_RUNNING) {
         if(npc_state.state == NPC_ABORT) {
            iringbufprint(irb,last_count);

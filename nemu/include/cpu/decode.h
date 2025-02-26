@@ -23,7 +23,9 @@ typedef struct Decode {
   vaddr_t snpc; // static next pc
   vaddr_t dnpc; // dynamic next pc
   ISADecodeInfo isa;
-  IFDEF(CONFIG_ITRACE, char logbuf[128]);
+  // IFDEF(CONFIG_ITRACE, char logbuf[128]);
+  //上面那个编译可执行程序没问题但是变成so文件就会出现问题，所以改成下面这个
+  char logbuf[128];
 } Decode;
 
 

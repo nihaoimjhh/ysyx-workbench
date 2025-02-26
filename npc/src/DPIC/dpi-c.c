@@ -3,21 +3,21 @@
 #include "decode.h"
 #include "paddr.h"
 extern NPCState npc_state;
-extern word_t gpr[16];
+extern CPU_state cpu;
 extern Decode s;
 extern Vysyx_24090003_cpu* top;
 extern VerilatedVcdC* tfp;
 extern "C" void finish_simulation() {
     Verilated::gotFinish(true);
     npc_state.state = NPC_END;
-    NPCTRAP(s.pc,gpr[10] );
+    NPCTRAP(s.pc,cpu.gpr[10] );
     top->final();
     tfp->close();
     //cpu要top->eval();还要dump，直接删了会导致报错，并且无法用finish判断有点奇怪
 }
 extern "C" void set_gpr(int index, word_t value) {
     if (index >= 0 && index < 16) {
-        gpr[index] = value;
+        cpu.gpr[index] = value;
     }
 }
 extern "C" void set_inst(word_t value) {
@@ -25,6 +25,7 @@ extern "C" void set_inst(word_t value) {
 }
 extern "C" void set_pc(vaddr_t value) {
         s.pc = value;
+        cpu.pc = value;
 }
 extern "C" void set_dnpc(vaddr_t value) {
         s.dnpc = value;
