@@ -38,7 +38,7 @@ void isa_reg_display() {
 word_t isa_reg_str2val(const char *s, bool *success) {	
 	 int i=0;//为什么有时候不初始化会报错呢，上面那个没初始化都不报错，
 	 char temp0[3]="$0";
-	 char tempreg[4]={};
+	 char tempreg[5]={};
 	 strncpy(tempreg,s+1,4);//去掉$符号这样才能搜索，末尾直接填最大值如果 source 的长度小于 n，strncpy 会将 destination 的剩余部分用 null 字符 '\0' 填充，直到复制的字符数达到 n。
 	 
 	 if(strcmp(s,temp0)==0){//第一个是自带$的
