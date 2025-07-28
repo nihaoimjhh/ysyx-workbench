@@ -1,0 +1,19 @@
+{
+  "configurations": [
+    {
+      "name": "linux-gcc-x64",
+      "includePath": [
+        "/home/jinghanhui/ysyx-workbench/nemu/include/**",
+        "/home/jinghanhui/ysyx-workbench/nemu/src/isa/riscv32/include/**"
+      ],
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "${default}",
+      "cppStandard": "${default}",
+      "intelliSenseMode": "linux-gcc-x64",
+      "compilerArgs": [
+        ""
+      ]
+    }
+  ],
+  "version": 4
+}

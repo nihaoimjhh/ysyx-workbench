@@ -1,0 +1,74 @@
+.
+├── include
+│   ├── common.h
+│   ├── cpu
+│   │   ├── cpu.h
+│   │   ├── decode.h
+│   │   └── difftest.h
+│   ├── macro.h
+│   ├── memory
+│   │   ├── host.h
+│   │   ├── paddr.h
+│   │   └── vaddr.h
+│   ├── monitor
+│   │   ├── monitor.h
+│   │   └── sdb
+│   │       └── sdb.h
+│   ├── reg
+│   │   └── reg.h
+│   ├── sim_engine
+│   │   └── sim_engine.h
+│   ├── tracetool
+│   │   ├── get_elf.h
+│   │   └── iringbuf.h
+│   └── utils.h
+├── Makefile
+├── src
+│   ├── cpu
+│   │   ├── cpu-exec.c
+│   │   ├── cpu_v
+│   │   │   ├── ysyx_24090003_ALU.v
+│   │   │   ├── ysyx_24090003_cpu.v
+│   │   │   ├── ysyx_24090003_EXU.v
+│   │   │   ├── ysyx_24090003_IDU.v
+│   │   │   ├── ysyx_24090003_IFU.v
+│   │   │   ├── ysyx_24090003_ImmT.v
+│   │   │   ├── ysyx_24090003_ITF.v
+│   │   │   └── ysyx_24090003_regcontrol.v
+│   │   └── difftest
+│   │       └── dut.c
+│   ├── DPIC
+│   │   └── dpi-c.c
+│   ├── hostcall
+│   │   └── hostcall.c
+│   ├── memory
+│   │   └── paddr.c
+│   ├── monitor
+│   │   ├── monitor.c
+│   │   └── sdb
+│   │       ├── expr.c
+│   │       ├── sdb.c
+│   │       ├── sdb.h
+│   │       └── watchpoint.c
+│   ├── n
+│   │   ├── init_sim_engine.c
+│   │   └── sim_engine.c
+│   ├── npc-main.c
+│   ├── reg
+│   │   └── reg.c
+│   ├── sim_engine
+│   │   ├── init_sim_engine.c
+│   │   └── sim_engine.c
+│   ├── tracetool
+│   │   ├── get_elf.c
+│   │   └── iringbuf.c
+│   └── utils
+│       ├── disasm.cc
+│       └── state.c
+├── tools
+│   └── load_image
+│       ├── load_image.c
+│       └── main.c
+└── tree.txt
+
+24 directories, 47 files

@@ -1,0 +1,20 @@
+{
+     "files.associations": {
+          "*.hex": "code-text-binary",
+          "*.v": "verilog",
+          "sim_engine.h": "c",
+          "common.h": "c",
+          "unistd.h": "c",
+          "paddr.h": "c",
+          "utils.h": "c",
+          "cpu.h": "c",
+          "sdb.h": "c",
+          "regex.h": "c",
+          "vaddr.h": "c",
+          "elf.h": "c",
+          "get_elf.h": "c",
+          "iringbuf.h": "c",
+          "reg.h": "c",
+          "decode.h": "c"
+     }
+}

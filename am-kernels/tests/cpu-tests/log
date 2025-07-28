@@ -1,0 +1,187 @@
+# Building dummy-run [riscv32e-npc]
+FILE: /home/jinghanhui/ysyx-workbench/am-kernels/tests/cpu-tests/Makefile
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+CROSS_COMPILE: - riscv64-linux-gnu-
+
+MAKECMDGOALS: - run
+
+NAME: - dummy
+
+ARCH: - riscv32e-npc
+
+AM_HOME: - /home/jinghanhui/ysyx-workbench/abstract-machine
+
+ARCHS: - loongarch32r-nemu mips32-nemu native riscv32e-nemu riscv32e-npc riscv32-nemu riscv64-nemu spike x86_64-qemu x86-nemu x86-qemu
+
+ARCH_SPLIT: - riscv32e npc
+
+ISA: - riscv32e
+
+PLATFORM: - npc
+
+SRCS: 
+- tests/dummy.c
+
+OBJS: 
+- /home/jinghanhui/ysyx-workbench/am-kernels/tests/cpu-tests/build/riscv32e-npc/tests/dummy.o
+
+LIBS: 
+- am
+- klib
+
+WORK_DIR: - /home/jinghanhui/ysyx-workbench/am-kernels/tests/cpu-tests
+
+DST_DIR: - /home/jinghanhui/ysyx-workbench/am-kernels/tests/cpu-tests/build/riscv32e-npc
+
+IMAGE_REL: - build/dummy-riscv32e-npc
+
+IMAGE: - /home/jinghanhui/ysyx-workbench/am-kernels/tests/cpu-tests/build/dummy-riscv32e-npc
+
+ARCHIVE: - /home/jinghanhui/ysyx-workbench/am-kernels/tests/cpu-tests/build/dummy-riscv32e-npc.a
+
+INC_PATH: 
+- /home/jinghanhui/ysyx-workbench/am-kernels/tests/cpu-tests/include
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/include/
+- /home/jinghanhui/ysyx-workbench/abstract-machine/klib/include/
+
+8888888888888888888888888888888888888888888888888888888888888888888
+CxxFLAGS: - -O2 -MMD -Wall -Werror -I/home/jinghanhui/ysyx-workbench/am-kernels/tests/cpu-tests/include -I/home/jinghanhui/ysyx-workbench/abstract-machine/am/include/ -I/home/jinghanhui/ysyx-workbench/abstract-machine/klib/include/ -D__ISA__=\"riscv32e\" -D__ISA_RISCV32E__ -D__ARCH__=riscv32e-npc -D__ARCH_RISCV32E_NPC -D__PLATFORM__=npc -D__PLATFORM_NPC -DARCH_H=\"arch/riscv.h\" -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -fvisibility=hidden -fno-pic -march=rv64g -mcmodel=medany -mstrict-align -march=rv32e_zicsr -mabi=ilp32e   -static -fdata-sections -ffunction-sections -DMAINARGS=\"\" -ffreestanding -fno-rtti -fno-exceptions
+
+# Building am-archive [riscv32e-npc]
+FILE: /home/jinghanhui/ysyx-workbench/abstract-machine/am/Makefile
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+CROSS_COMPILE: - riscv64-linux-gnu-
+
+MAKECMDGOALS: - archive
+
+NAME: - am
+
+ARCH: - riscv32e-npc
+
+AM_HOME: - /home/jinghanhui/ysyx-workbench/abstract-machine
+
+ARCHS: - loongarch32r-nemu mips32-nemu native riscv32e-nemu riscv32e-npc riscv32-nemu riscv64-nemu spike x86_64-qemu x86-nemu x86-qemu
+
+ARCH_SPLIT: - riscv32e npc
+
+ISA: - riscv32e
+
+PLATFORM: - npc
+
+SRCS: 
+- src/riscv/npc/start.S
+- src/riscv/npc/trm.c
+- src/riscv/npc/ioe.c
+- src/riscv/npc/timer.c
+- src/riscv/npc/input.c
+- src/riscv/npc/cte.c
+- src/riscv/npc/trap.S
+- src/platform/dummy/vme.c
+- src/platform/dummy/mpe.c
+- src/riscv/npc/libgcc/div.S
+- src/riscv/npc/libgcc/muldi3.S
+- src/riscv/npc/libgcc/multi3.c
+- src/riscv/npc/libgcc/ashldi3.c
+- src/riscv/npc/libgcc/unused.c
+
+OBJS: 
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/start.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/trm.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/ioe.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/timer.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/input.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/cte.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/trap.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/platform/dummy/vme.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/platform/dummy/mpe.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/libgcc/div.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/libgcc/muldi3.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/libgcc/multi3.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/libgcc/ashldi3.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc/src/riscv/npc/libgcc/unused.o
+
+LIBS: 
+- am
+- klib
+
+WORK_DIR: - /home/jinghanhui/ysyx-workbench/abstract-machine/am
+
+DST_DIR: - /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/riscv32e-npc
+
+IMAGE_REL: - build/am-riscv32e-npc
+
+IMAGE: - /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/am-riscv32e-npc
+
+ARCHIVE: - /home/jinghanhui/ysyx-workbench/abstract-machine/am/build/am-riscv32e-npc.a
+
+INC_PATH: 
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/src
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/include
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/include/
+- /home/jinghanhui/ysyx-workbench/abstract-machine/klib/include/
+
+8888888888888888888888888888888888888888888888888888888888888888888
+CxxFLAGS: - -O2 -MMD -Wall -Werror -I/home/jinghanhui/ysyx-workbench/abstract-machine/am/src -I/home/jinghanhui/ysyx-workbench/abstract-machine/am/include -I/home/jinghanhui/ysyx-workbench/abstract-machine/am/include/ -I/home/jinghanhui/ysyx-workbench/abstract-machine/klib/include/ -D__ISA__=\"riscv32e\" -D__ISA_RISCV32E__ -D__ARCH__=riscv32e-npc -D__ARCH_RISCV32E_NPC -D__PLATFORM__=npc -D__PLATFORM_NPC -DARCH_H=\"arch/riscv.h\" -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -fvisibility=hidden -fno-pic -march=rv64g -mcmodel=medany -mstrict-align -march=rv32e_zicsr -mabi=ilp32e   -static -fdata-sections -ffunction-sections -DMAINARGS=\"\" -ffreestanding -fno-rtti -fno-exceptions
+
++ CC src/riscv/npc/trm.c
++ AR -> build/am-riscv32e-npc.a
+# Building klib-archive [riscv32e-npc]
+FILE: /home/jinghanhui/ysyx-workbench/abstract-machine/klib/Makefile
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+CROSS_COMPILE: - riscv64-linux-gnu-
+
+MAKECMDGOALS: - archive
+
+NAME: - klib
+
+ARCH: - riscv32e-npc
+
+AM_HOME: - /home/jinghanhui/ysyx-workbench/abstract-machine
+
+ARCHS: - loongarch32r-nemu mips32-nemu native riscv32e-nemu riscv32e-npc riscv32-nemu riscv64-nemu spike x86_64-qemu x86-nemu x86-qemu
+
+ARCH_SPLIT: - riscv32e npc
+
+ISA: - riscv32e
+
+PLATFORM: - npc
+
+SRCS: 
+- src/string.c
+- src/stdlib.c
+- src/stdio.c
+- src/int64.c
+- src/cpp.c
+
+OBJS: 
+- /home/jinghanhui/ysyx-workbench/abstract-machine/klib/build/riscv32e-npc/src/string.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/klib/build/riscv32e-npc/src/stdlib.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/klib/build/riscv32e-npc/src/stdio.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/klib/build/riscv32e-npc/src/int64.o
+- /home/jinghanhui/ysyx-workbench/abstract-machine/klib/build/riscv32e-npc/src/cpp.o
+
+LIBS: 
+- am
+- klib
+
+WORK_DIR: - /home/jinghanhui/ysyx-workbench/abstract-machine/klib
+
+DST_DIR: - /home/jinghanhui/ysyx-workbench/abstract-machine/klib/build/riscv32e-npc
+
+IMAGE_REL: - build/klib-riscv32e-npc
+
+IMAGE: - /home/jinghanhui/ysyx-workbench/abstract-machine/klib/build/klib-riscv32e-npc
+
+ARCHIVE: - /home/jinghanhui/ysyx-workbench/abstract-machine/klib/build/klib-riscv32e-npc.a
+
+INC_PATH: 
+- /home/jinghanhui/ysyx-workbench/abstract-machine/klib/include
+- /home/jinghanhui/ysyx-workbench/abstract-machine/am/include/
+- /home/jinghanhui/ysyx-workbench/abstract-machine/klib/include/
+
+8888888888888888888888888888888888888888888888888888888888888888888
+CxxFLAGS: - -O2 -MMD -Wall -Werror -I/home/jinghanhui/ysyx-workbench/abstract-machine/klib/include -I/home/jinghanhui/ysyx-workbench/abstract-machine/am/include/ -I/home/jinghanhui/ysyx-workbench/abstract-machine/klib/include/ -D__ISA__=\"riscv32e\" -D__ISA_RISCV32E__ -D__ARCH__=riscv32e-npc -D__ARCH_RISCV32E_NPC -D__PLATFORM__=npc -D__PLATFORM_NPC -DARCH_H=\"arch/riscv.h\" -fno-asynchronous-unwind-tables -fno-builtin -fno-stack-protector -Wno-main -U_FORTIFY_SOURCE -fvisibility=hidden -fno-pic -march=rv64g -mcmodel=medany -mstrict-align -march=rv32e_zicsr -mabi=ilp32e   -static -fdata-sections -ffunction-sections -DMAINARGS=\"\" -ffreestanding -fno-rtti -fno-exceptions
+
++ LD -> build/dummy-riscv32e-npc.elf
+# Creating image [riscv32e-npc]
++ OBJCOPY -> build/dummy-riscv32e-npc.bin

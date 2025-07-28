@@ -1,0 +1,17 @@
+top = top
+SW1 (SW15, SW14, SW13, SW12)
+SW2 (SW3, SW2, SW1, SW0)
+LD (LD6, LD5,LD4,LD3,LD2,LD1,LD0)
+BTN (BTNL, BTNC, BTNR)
+
+
+
+
+
+
+
+
+
+
+
+

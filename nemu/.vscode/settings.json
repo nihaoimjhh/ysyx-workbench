@@ -1,0 +1,12 @@
+{
+	"files.associations": {
+		"*.hex": "code-text-binary",
+		"*.v": "verilog",
+		"*.vt": "c",
+		"*.c": "c",
+		"functional": "c",
+		"paddr.h": "c",
+		"compare": "c",
+		"cstdint": "c"
+	}
+}
