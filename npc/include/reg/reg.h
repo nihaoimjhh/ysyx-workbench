@@ -20,7 +20,6 @@
 #include "decode.h"
 void isa_reg_display();
 word_t isa_reg_str2val(const char *name, bool *success);
-void check_ra(word_t thispc,word_t thisinst);
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc);
 #endif

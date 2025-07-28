@@ -169,7 +169,7 @@ void cpu_exec(uint64_t n) {//里面有execute
 
 int iringbufmanage(char irb[][128],uint64_t g_nr_guest_inst,Decode *s){
   int count = g_nr_guest_inst % 11;
-  if(s->logbuf!=NULL)
+  // if(s->logbuf!=NULL)
   strcpy(irb[count],s->logbuf); 
   return count;
 }

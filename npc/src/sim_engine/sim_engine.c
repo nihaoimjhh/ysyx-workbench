@@ -3,8 +3,8 @@
 #include "cpu.h"
 #include "sdb.h"
 extern uint8_t pmem[MSIZE] ;
-extern Vysyx_24090003_cpu* top;
-extern VerilatedVcdC* tfp;
+extern Vysyx_24090003_computer* top;
+extern VerilatedFstC* tfp;
 void display_pmem();
 void sim_engine() {
     #ifdef CONFIG_TARGET_AM

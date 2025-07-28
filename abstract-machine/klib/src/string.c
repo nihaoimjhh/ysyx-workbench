@@ -73,14 +73,44 @@ void *memset(void *s, int c, size_t n) {
   return s;
 }
 
+// void *memmove(void *dst, const void *src, size_t n) {
+//   panic("Not implemented");
+// }
+
+// void *memcpy(void *out, const void *in, size_t n) {
+//   panic("Not implemented");
+// }
 void *memmove(void *dst, const void *src, size_t n) {
-  panic("Not implemented");
+  unsigned char *dest = (unsigned char *)dst;
+  const unsigned char *source = (const unsigned char *)src;
+  
+  // 处理内存区域重叠的情况
+  if (dest > source && dest < source + n) {
+    // 从后往前复制，防止覆盖源数据
+    for (size_t i = n; i > 0; i--) {
+      dest[i-1] = source[i-1];
+    }
+  } else {
+    // 从前往后复制
+    for (size_t i = 0; i < n; i++) {
+      dest[i] = source[i];
+    }
+  }
+  
+  return dst;
 }
 
 void *memcpy(void *out, const void *in, size_t n) {
-  panic("Not implemented");
+  unsigned char *dest = (unsigned char *)out;
+  const unsigned char *source = (const unsigned char *)in;
+  
+  // 逐字节复制
+  for (size_t i = 0; i < n; i++) {
+    dest[i] = source[i];
+  }
+  
+  return out;
 }
-
 int memcmp(const void *s1, const void *s2, size_t n) {
   const unsigned char *p1,*p2;
   p1=(const unsigned char*)s1;

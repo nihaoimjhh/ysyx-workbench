@@ -21,8 +21,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <verilated.h>
-#include "Vysyx_24090003_cpu.h"
-#include "verilated_vcd_c.h"
+#include "Vysyx_24090003_computer.h"
+#include "verilated_fst_c.h"
 #include <iostream>
 
 
@@ -35,7 +35,6 @@
 #define ANSI_COLOR_BLUE_BIG    "\033[1;34m"
 #define ANSI_COLOR_BLUE_SMALL   "\033[34m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
-#define INV(thispc,thisinst) check_ra(thispc,thisinst);
 typedef uint32_t word_t;
 typedef int32_t  sword_t;
 typedef word_t vaddr_t;
@@ -49,11 +48,17 @@ typedef uint16_t ioaddr_t;
 
 
 
+/* 功能开关宏 */
+// #define ENABLE_FTRACE     1  // 函数追踪功能
+// #define ENABLE_DISASM     1  // 反汇编功能
+// #define ENABLE_DIFFTEST   1  // 差分测试功能
+// #define ENABLE_MTRACE 1   // 设置为1开启内存访问追踪，0关闭
 
 
-
-
-
+#define ENABLE_FTRACE     0  // 函数追踪功能
+#define ENABLE_DISASM     0  // 反汇编功能
+#define ENABLE_DIFFTEST   0  // 差分测试功能
+#define ENABLE_MTRACE 0   // 设置为1开启内存访问追踪，0关闭
 
 
 

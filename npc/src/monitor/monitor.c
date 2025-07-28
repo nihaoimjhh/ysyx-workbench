@@ -7,157 +7,206 @@
 #include <elf.h>
 #include "difftest.h"
 
+/* 函数声明 */
+// 外部函数声明
 void init_difftest(char *ref_so_file, long img_size, int port);
 void init_elf_read(char *elf_file);
-//FTACE所需要的结构体，直接穿进cpu-exec.c
-    FILE *fp;
-    Elf32_Ehdr ehdr;
-    Elf32_Shdr *shdr_pointer;
-    char *strtab;
-    char *shstrtab;
-    int symlens=0;
-    int symtab_index=0;
-    int strtab_index=0;
-    Elf32_Sym *symtab_pointer;
-//FTACE所需要的结构体，直接穿进cpu-exec.c
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void init_disasm(const char *triple);
 void sdb_set_batch_mode();
+
+// 内部函数声明
+static int parse_args(int argc, char *argv[]);
+static long load_img();
+static void load_elf(char *elf_file);
+
+/* 全局变量 - FTRACE功能相关 */
+FILE *fp;
+Elf32_Ehdr ehdr;
+Elf32_Shdr *shdr_pointer;
+char *strtab;
+char *shstrtab;
+int symlens = 0;
+int symtab_index = 0;
+int strtab_index = 0;
+Elf32_Sym *symtab_pointer;
+
+/* 全局变量 - 图像和差分测试相关 */
 long img_size = 0;
 char *img_file = NULL;
 char *diff_so_file = NULL;
-char *elf_file= NULL;
+char *elf_file = NULL;
 int difftest_port = 1234;
 
+/**
+ * 初始化监视器
+ * 解析命令行参数，加载镜像和ELF文件，初始化调试环境
+ */
+void init_monitor(int argc, char *argv[])
+{
+    printf(ANSI_COLOR_GREEN_SMALL "Initializing the monitor...\n" ANSI_COLOR_RESET);
+    // 添加到init_monitor函数中合适的位置，比如在printf("The image size is %ld\n", img_size);之后
+    // 显示各种trace功能的状态
+    printf("%sFtrace:%s %s\n", ANSI_COLOR_BLUE_BIG, ANSI_COLOR_RESET, ENABLE_FTRACE ? ANSI_COLOR_GREEN_BIG "ON" ANSI_COLOR_RESET : ANSI_COLOR_RED_BIG "OFF" ANSI_COLOR_RESET);
+    printf("%sDisasm:%s %s\n", ANSI_COLOR_BLUE_BIG, ANSI_COLOR_RESET, ENABLE_DISASM ? ANSI_COLOR_GREEN_BIG "ON" ANSI_COLOR_RESET : ANSI_COLOR_RED_BIG "OFF" ANSI_COLOR_RESET);
+    printf("%sDifftest:%s %s\n", ANSI_COLOR_BLUE_BIG, ANSI_COLOR_RESET, ENABLE_DIFFTEST ? ANSI_COLOR_GREEN_BIG "ON" ANSI_COLOR_RESET : ANSI_COLOR_RED_BIG "OFF" ANSI_COLOR_RESET);
+    printf("%sMtrace:%s %s\n", ANSI_COLOR_BLUE_BIG, ANSI_COLOR_RESET, ENABLE_MTRACE ? ANSI_COLOR_GREEN_BIG "ON" ANSI_COLOR_RESET : ANSI_COLOR_RED_BIG "OFF" ANSI_COLOR_RESET);
+    parse_args(argc, argv);
+    printf("Image file set to: %s\n", img_file);
+    img_size = load_img();
+    load_elf(elf_file);
+    printf("The image size is %ld\n", img_size);
+    init_sdb(); // 初始化调试器
+    init_disasm("riscv32");
+}
 
-
-
-
-
-long load_img() {
-  if (img_file == NULL) {
-    printf(ANSI_COLOR_RED_BIG "No image is given. Use the default build-in image.\n" ANSI_COLOR_RESET);
-    return 4096; // built-in image size
-  }
-
-  FILE *fp = fopen(img_file, "rb");
-  if(fp == NULL) {
-    printf("Can not open '%s'", img_file);
+/**
+ * 解析命令行参数
+ * 支持批处理模式、ELF文件和差分测试选项
+ */
+static int parse_args(int argc, char *argv[])
+{
+    const struct option table[] = {
+        {"batch", no_argument, NULL, 'b'},
+        {"elf_file", required_argument, NULL, 'e'},
+        {"diff", required_argument, NULL, 'd'},
+        {0, 0, NULL, 0},
+    };
+    int o;
+    printf("Parsing the command line...\n");
+    while ((o = getopt_long(argc, argv, "-be:d:", table, NULL)) != -1)
+    {
+        switch (o)
+        {
+        case 'b':
+            sdb_set_batch_mode();
+            break;
+        case 'e':
+            elf_file = optarg;
+            break;
+        case 'd':
+            diff_so_file = optarg;
+            break;
+        case 1:
+            img_file = optarg;
+            return 0;
+        default:
+            printf("Usage: %s [image]\n", argv[0]);
+            printf("\t-b,--batch              run with batch mode\n");
+            printf("\t-e,--elf_file           input a .elf file to run ftrace \n");
+            printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
+            printf("\n");
+            exit(0);
+        }
+    }
     return 0;
-  }
-
-  fseek(fp, 0, SEEK_END);
-  long size = ftell(fp);
-
-  printf("The image is %s, size = %ld\n", img_file, size);
-
-  fseek(fp, 0, SEEK_SET);
-  int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp);
-  assert(ret == 1);
-
-  fclose(fp);
-  return size;
 }
 
+/**
+ * 加载程序镜像
+ * 将程序镜像加载到内存中
+ *
+ * @return 镜像大小
+ */
+static long load_img()
+{
+    if (img_file == NULL)
+    {
+        printf(ANSI_COLOR_RED_BIG "No image is given. Use the default build-in image.\n" ANSI_COLOR_RESET);
+        return 4096; // built-in image size
+    }
 
-void load_elf(char * elf_file){
-    if (elf_file != NULL){
-       fp = elf_fileopen(elf_file);//打开文件
-    
-      if(fp==NULL){
-          printf("\033[1;31m""Error\n""" "\033[0m");
-      }
-      else{  
-        if(elf32_Ehdr_read(fp, &ehdr)){//读取elf文件头
-            printf("\033[1;31m""error\n""" "\033[0m");
-        }
-        if(!(shdr_pointer=elf32_Shdr_read(fp, &ehdr))){//通过头找到节头读取节头
-            printf("\033[1;31m""error\n""\033[0m");
-        }
-        if(!(shstrtab = shstrtab_read(fp, shdr_pointer, &ehdr))) {//通过节头和elf文件头找到shstrtab读取shstrtab，这样才能通过shstrtab找到strtab和symtab
-            printf("\033[1;31m""shstrtab not found\n""\033[0m");
-          }
-        if((symtab_index = symtab_index_find(fp, shdr_pointer, &ehdr,shstrtab)) == -1) {//通过节头找到shstrtab通过shstrtab找到strtab的索引，通过strtab的索引找到strtab,之所以要elf文件头是因为ehdr里面有整个节头个数，这样才能遍历找到symtab的索引
-            printf("\033[1;31m""symtab not found\n""\033[0m");
-        }
-        if(!(symtab_pointer = symtab_read(fp, shdr_pointer, symtab_index))) {//通过symtab的索引找到symtab在elf文件的偏移读取symtab
-            printf("\033[1;31m""error\n""\033[0m");
-        }
-        if((strtab_index = strtab_index_find(fp, shdr_pointer, &ehdr,shstrtab)) == -1) {
-            printf("\033[1;31m""strtab not found\n""\033[0m");
-        }
-        if(!(strtab = strtab_read(fp, shdr_pointer, strtab_index))) {
-           printf("\033[1;31m""error\n""\033[0m");
-        }
-        symlens=symlen(symtab_pointer,shdr_pointer,symtab_index);
-        fseek(fp, 0, SEEK_END);
-        long size = ftell(fp);
-        printf("The elf is %s, size = %ld\n", elf_file, size);
-        fclose(fp);
-      }
+    FILE *fp = fopen(img_file, "rb");
+    if (fp == NULL)
+    {
+        printf(ANSI_COLOR_RED_SMALL "Can not open '%s'\n" ANSI_COLOR_RESET, img_file);
+        return 0;
     }
-    else{
-      printf(ANSI_COLOR_RED_BIG "No elf_file is given.\n" ANSI_COLOR_RESET);
-    }
-}
-static int parse_args(int argc, char *argv[]) {
-  const struct option table[] = {
-    {"batch"    , no_argument      , NULL, 'b'},
-    {"elf_file" , required_argument, NULL, 'e'},
-    {"diff"     , required_argument, NULL, 'd'},
-    {0          , 0                , NULL,  0 },
-  };
-  int o;
-  printf("Parsing the command line...\n");
-  while ( (o = getopt_long(argc, argv, "-be:d:", table, NULL)) != -1) {//不要参数的后面不要引号就行
-    switch (o) {
-      case 'b': sdb_set_batch_mode(); break;
-      case 'e': elf_file = optarg; break;
-      case 'd': diff_so_file = optarg; break;
-      case 1: img_file = optarg; return 0;
-      default:
-        printf("Usage: %s [image]\n", argv[0]);
-        printf("\t-b,--batch              run with batch mode\n");
-        printf("\t-e,--elf_file           input a .elf file to run ftrace \n");
-        printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
-        printf("\n");
-        exit(0);
-    }
-  }
-  return 0;
-}
-void init_monitor(int argc, char *argv[]) {
-  printf(ANSI_COLOR_GREEN_SMALL "Initializing the monitor...\n" ANSI_COLOR_RESET);
 
-  parse_args(argc, argv);
-  printf("Image file set to: %s\n", img_file);
-  img_size = load_img(); 
-   load_elf(elf_file);
-  printf("The image size is %ld\n", img_size);
-  init_sdb();//定要初始化啊，不然正则匹配就直接崩溃,gdb还乱跳，根本不可能调出来
-  init_disasm("riscv32");
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
+
+    printf(ANSI_COLOR_BLUE_SMALL "The image is %s, size = %ld\n" ANSI_COLOR_RESET, img_file, size);
+
+    fseek(fp, 0, SEEK_SET);
+    int ret = fread(guest_to_host(RESET_VECTOR), size, 1, fp);
+    assert(ret == 1);
+
+    fclose(fp);
+    return size;
+}
+
+/**
+ * 加载ELF文件
+ * 用于函数追踪功能
+ *
+ * @param elf_file ELF文件路径
+ */
+static void load_elf(char *elf_file)
+{
+    if (elf_file != NULL)
+    {
+        fp = elf_fileopen(elf_file); // 打开文件
+
+        if (fp == NULL)
+        {
+            printf(ANSI_COLOR_RED_SMALL "Error opening ELF file\n" ANSI_COLOR_RESET);
+        }
+        else
+        {
+            // 读取ELF文件头
+            if (elf32_Ehdr_read(fp, &ehdr))
+            {
+                printf(ANSI_COLOR_RED_SMALL "Error reading ELF header\n" ANSI_COLOR_RESET);
+            }
+
+            // 通过头找到节头读取节头
+            if (!(shdr_pointer = elf32_Shdr_read(fp, &ehdr)))
+            {
+                printf(ANSI_COLOR_RED_SMALL "Error reading section headers\n" ANSI_COLOR_RESET);
+            }
+
+            // 读取节字符串表
+            if (!(shstrtab = shstrtab_read(fp, shdr_pointer, &ehdr)))
+            {
+                printf(ANSI_COLOR_RED_SMALL "shstrtab not found\n" ANSI_COLOR_RESET);
+            }
+
+            // 查找符号表索引
+            if ((symtab_index = symtab_index_find(fp, shdr_pointer, &ehdr, shstrtab)) == -1)
+            {
+                printf(ANSI_COLOR_RED_SMALL "symtab not found\n" ANSI_COLOR_RESET);
+            }
+
+            // 读取符号表
+            if (!(symtab_pointer = symtab_read(fp, shdr_pointer, symtab_index)))
+            {
+                printf(ANSI_COLOR_RED_SMALL "Error reading symtab\n" ANSI_COLOR_RESET);
+            }
+
+            // 查找字符串表索引
+            if ((strtab_index = strtab_index_find(fp, shdr_pointer, &ehdr, shstrtab)) == -1)
+            {
+                printf(ANSI_COLOR_RED_SMALL "strtab not found\n" ANSI_COLOR_RESET);
+            }
+
+            // 读取字符串表
+            if (!(strtab = strtab_read(fp, shdr_pointer, strtab_index)))
+            {
+                printf(ANSI_COLOR_RED_SMALL "Error reading strtab\n" ANSI_COLOR_RESET);
+            }
+
+            // 计算符号表长度
+            symlens = symlen(symtab_pointer, shdr_pointer, symtab_index);
+
+            // 显示ELF文件大小
+            fseek(fp, 0, SEEK_END);
+            long size = ftell(fp);
+            printf(ANSI_COLOR_BLUE_SMALL "The elf is %s, size = %ld\n" ANSI_COLOR_RESET, elf_file, size);
+            fclose(fp);
+        }
+    }
+    else
+    {
+        printf(ANSI_COLOR_RED_BIG "No elf_file is given.\n" ANSI_COLOR_RESET);
+    }
 }

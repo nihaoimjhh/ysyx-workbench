@@ -23,6 +23,28 @@
 static uint8_t *io_space = NULL;
 static uint8_t *p_space = NULL;
 
+//用来记录设备读写的次数
+int device_read_logbuf_count=0;
+int device_write_logbuf_count=0;
+typedef struct device_read_logbuf{
+  paddr_t addr;
+  int len;
+  word_t data;
+  const char *name; // 设备名称
+}device_read_logbuf;
+typedef struct device_write_logbuf{
+  paddr_t addr;
+  int len;
+  word_t data;
+  const char *name; // 设备名称
+}device_write_logbuf;
+device_read_logbuf device_read_logbufs[10];
+device_write_logbuf device_write_logbufs[10];
+void device_read_logbuf_write(paddr_t addr, int len, word_t data, const char *name);
+void device_write_logbuf_write(paddr_t addr, int len, word_t data, const char *name);
+void device_read_logbuf_print();
+void device_write_logbuf_print();
+
 uint8_t* new_space(int size) {
   uint8_t *p = p_space;
   // page aligned;
@@ -58,6 +80,9 @@ word_t map_read(paddr_t addr, int len, IOMap *map) {
   paddr_t offset = addr - map->low;
   invoke_callback(map->callback, offset, len, false); // prepare data to read
   word_t ret = host_read(map->space + offset, len);
+  
+  IFDEF(CONFIG_DTRACE, device_read_logbuf_write(addr, len, ret, map->name); device_read_logbuf_print());
+  
   return ret;
 }
 
@@ -66,5 +91,64 @@ void map_write(paddr_t addr, int len, word_t data, IOMap *map) {
   check_bound(map, addr);
   paddr_t offset = addr - map->low;
   host_write(map->space + offset, len, data);
+  
+  IFDEF(CONFIG_DTRACE, device_write_logbuf_write(addr, len, data, map->name); device_write_logbuf_print());
+  
   invoke_callback(map->callback, offset, len, true);
+}
+
+void device_read_logbuf_write(paddr_t addr, int len, word_t data, const char *name){
+  device_read_logbuf_count%=10;
+  device_read_logbufs[device_read_logbuf_count].addr=addr;
+  device_read_logbufs[device_read_logbuf_count].len=len;
+  device_read_logbufs[device_read_logbuf_count].data=data;
+  device_read_logbufs[device_read_logbuf_count].name=name;
+  device_read_logbuf_count++;
+}
+
+void device_write_logbuf_write(paddr_t addr, int len, word_t data, const char *name){
+  device_write_logbuf_count%=10;
+  device_write_logbufs[device_write_logbuf_count].addr=addr;
+  device_write_logbufs[device_write_logbuf_count].len=len;
+  device_write_logbufs[device_write_logbuf_count].data=data;
+  device_write_logbufs[device_write_logbuf_count].name=name;
+  device_write_logbuf_count++;
+}
+
+void device_read_logbuf_print(){
+  printf("\033[1;32m" "    device_read_logbuf\n" "\033[0m"); // 绿色
+  for(int i=0;i<10;i++){
+    if(i==(device_read_logbuf_count-1)%10){
+      printf("\033[1;31m" "===>device: %s addr:%x len:%d data:%x\n" "\033[0m",
+            device_read_logbufs[i].name,
+            device_read_logbufs[i].addr,
+            device_read_logbufs[i].len,
+            device_read_logbufs[i].data);
+      continue;//上面减一是因为存完logbuf之后又加了一
+    }
+    printf("    device: %s addr:%x len:%d data:%x\n",
+          device_read_logbufs[i].name,
+          device_read_logbufs[i].addr,
+          device_read_logbufs[i].len,
+          device_read_logbufs[i].data);
+  }
+}
+
+void device_write_logbuf_print(){
+  printf("\033[1;32m" "    device_write_logbuf\n" "\033[0m"); // 绿色
+  for(int i=0;i<10;i++){
+    if(i==(device_write_logbuf_count-1)%10){
+      printf("\033[1;31m" "===>device: %s addr:%x len:%d data:%x\n" "\033[0m",
+            device_write_logbufs[i].name,
+            device_write_logbufs[i].addr,
+            device_write_logbufs[i].len,
+            device_write_logbufs[i].data);
+      continue;//上面减一是因为存完logbuf之后又加了一
+    }
+    printf("    device: %s addr:%x len:%d data:%x\n",
+          device_write_logbufs[i].name,
+          device_write_logbufs[i].addr,
+          device_write_logbufs[i].len,
+          device_write_logbufs[i].data);
+  }
 }

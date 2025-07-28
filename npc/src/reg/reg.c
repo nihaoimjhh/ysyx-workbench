@@ -17,7 +17,7 @@
 #include "common.h"//#include <string.h>
 #include "utils.h"
 #include "decode.h"
-extern Vysyx_24090003_cpu* top;
+extern Vysyx_24090003_computer* top;
 extern CPU_state cpu;
 extern Decode s;
 const char *regs[] = {
@@ -30,7 +30,7 @@ void isa_reg_display() {
 	printf("Register Information:\n");
 	printf("Name\thex\t\tdec\n");
 	printf("%-4s\t%#-8x\t%-8u\n","dnpc",s.dnpc,s.dnpc);//local-in		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],cpu.gpr[i],cpu.gpr[i]);//local-include有定义这个宏clude有定义这个宏
-	 for(i=0;i<15;i++){
+	 for(i=0;i<16;i++){
 		 printf("%-4s\t%#-8x\t%-8u\n",regs[i],cpu.gpr[i],cpu.gpr[i]);//local-include有定义这个宏
 	 
 	 }
@@ -45,26 +45,19 @@ word_t isa_reg_str2val(const char *s, bool *success) {
 		 return cpu.gpr[0];//local-include有定义这个宏
 	 }
 	else{
-	     for(i=1;i<15;i++){//有这个宏就用
+	     for(i=1;i<16;i++){//有这个宏就用
 			 if(strcmp(tempreg,regs[i])==0){
 				 return cpu.gpr[i];//local-include有定义这个宏
 			 }
 		 }
-		 if(i==15){
+		 if(i==16){
 			 printf("Register %s was not found\n",s);
 			 *success=0;
 		 }
 	}
      return 0;
 }
-void check_ra(word_t thispc,word_t thisinst) {
-	if(cpu.gpr[1]==666&&thisinst!=0x00100073){
-		printf(ANSI_COLOR_RED_BIG "have not this inst at pc %#x\n" ANSI_COLOR_RESET,thispc);
-		npc_state.state=NPC_ABORT;
-	}
-	else 
-		return;    
-}
+
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) { 
       for(int i=0;i<15;i++){
          if(ref_r->gpr[i]!=cpu.gpr[i]){

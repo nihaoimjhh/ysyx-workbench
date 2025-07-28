@@ -1,5 +1,5 @@
 #include "decode.h"
-char irb[11][128];
+char irb[11][256];
 int iringbufmanage(char irb[][128],uint64_t g_nr_guest_inst,Decode *s){
   int count = g_nr_guest_inst % 11;
   if(s->logbuf!=NULL)
