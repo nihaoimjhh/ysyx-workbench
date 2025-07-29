@@ -1,0 +1,4 @@
+am-kernels/tests/cpu-tests/.result
+npc/build
+npc/sim.fst
+nemu/build
