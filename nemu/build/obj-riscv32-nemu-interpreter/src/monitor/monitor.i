@@ -3740,34 +3740,38 @@ void init_sdb();
 void init_disasm(const char *triple);
 void init_elf_read(char *elf_file);
 static void welcome() {
-  do { printf("\33[1;34m" "[%s:%d %s] " "Trace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 30, __func__, "\33[1;31m" "OFF" "\33[0m"); do { extern FILE* log_fp; extern 
+  do { printf("\33[1;34m" "[%s:%d %s] " "Trace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 30, __func__, "\33[1;32m" "ON" "\33[0m"); do { extern FILE* log_fp; extern 
 # 30 "src/monitor/monitor.c" 3 4
  _Bool 
 # 30 "src/monitor/monitor.c"
- log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "Trace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 30, __func__, "\33[1;31m" "OFF" "\33[0m"); fflush(log_fp); } } while (0); } while (0);
-  do { printf("\33[1;34m" "[%s:%d %s] " "Ftrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 31, __func__, "\33[1;31m" "OFF" "\33[0m"); do { extern FILE* log_fp; extern 
+ log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "Trace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 30, __func__, "\33[1;32m" "ON" "\33[0m"); fflush(log_fp); } } while (0); } while (0);
+  do { printf("\33[1;34m" "[%s:%d %s] " "Ftrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 31, __func__, "\33[1;32m" "ON" "\33[0m"); do { extern FILE* log_fp; extern 
 # 31 "src/monitor/monitor.c" 3 4
  _Bool 
 # 31 "src/monitor/monitor.c"
- log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "Ftrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 31, __func__, "\33[1;31m" "OFF" "\33[0m"); fflush(log_fp); } } while (0); } while (0);
-  do { printf("\33[1;34m" "[%s:%d %s] " "Mtrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 32, __func__, "\33[1;31m" "OFF" "\33[0m"); do { extern FILE* log_fp; extern 
+ log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "Ftrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 31, __func__, "\33[1;32m" "ON" "\33[0m"); fflush(log_fp); } } while (0); } while (0);
+  do { printf("\33[1;34m" "[%s:%d %s] " "Mtrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 32, __func__, "\33[1;32m" "ON" "\33[0m"); do { extern FILE* log_fp; extern 
 # 32 "src/monitor/monitor.c" 3 4
  _Bool 
 # 32 "src/monitor/monitor.c"
- log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "Mtrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 32, __func__, "\33[1;31m" "OFF" "\33[0m"); fflush(log_fp); } } while (0); } while (0);
-  do { printf("\33[1;34m" "[%s:%d %s] " "Dtrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 33, __func__, "\33[1;31m" "OFF" "\33[0m"); do { extern FILE* log_fp; extern 
+ log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "Mtrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 32, __func__, "\33[1;32m" "ON" "\33[0m"); fflush(log_fp); } } while (0); } while (0);
+  do { printf("\33[1;34m" "[%s:%d %s] " "Dtrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 33, __func__, "\33[1;32m" "ON" "\33[0m"); do { extern FILE* log_fp; extern 
 # 33 "src/monitor/monitor.c" 3 4
  _Bool 
 # 33 "src/monitor/monitor.c"
- log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "Dtrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 33, __func__, "\33[1;31m" "OFF" "\33[0m"); fflush(log_fp); } } while (0); } while (0);
- 
+ log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "Dtrace: %s" "\33[0m" "\n", "src/monitor/monitor.c", 33, __func__, "\33[1;32m" "ON" "\33[0m"); fflush(log_fp); } } while (0); } while (0);
+  do { printf("\33[1;34m" "[%s:%d %s] " "If trace is enabled, a log file will be generated " "to record the trace. This may lead to a large log file. " "If it is not necessary, you can disable it in menuconfig" "\33[0m" "\n", "src/monitor/monitor.c", 34, __func__); do { extern FILE* log_fp; extern 
+# 34 "src/monitor/monitor.c" 3 4
+ _Bool 
+# 34 "src/monitor/monitor.c"
+ log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "If trace is enabled, a log file will be generated " "to record the trace. This may lead to a large log file. " "If it is not necessary, you can disable it in menuconfig" "\33[0m" "\n", "src/monitor/monitor.c", 34, __func__); fflush(log_fp); } } while (0); } while (0)
 
                                                                     ;
-  do { printf("\33[1;34m" "[%s:%d %s] " "Build time: %s, %s" "\33[0m" "\n", "src/monitor/monitor.c", 37, __func__, "21:52:19", "Jul 28 2025"); do { extern FILE* log_fp; extern 
+  do { printf("\33[1;34m" "[%s:%d %s] " "Build time: %s, %s" "\33[0m" "\n", "src/monitor/monitor.c", 37, __func__, "14:24:53", "Jul 29 2025"); do { extern FILE* log_fp; extern 
 # 37 "src/monitor/monitor.c" 3 4
  _Bool 
 # 37 "src/monitor/monitor.c"
- log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "Build time: %s, %s" "\33[0m" "\n", "src/monitor/monitor.c", 37, __func__, "21:52:19", "Jul 28 2025"); fflush(log_fp); } } while (0); } while (0);
+ log_enable(); if (log_enable()) { fprintf(log_fp, "\33[1;34m" "[%s:%d %s] " "Build time: %s, %s" "\33[0m" "\n", "src/monitor/monitor.c", 37, __func__, "14:24:53", "Jul 29 2025"); fflush(log_fp); } } while (0); } while (0);
   printf("Welcome to %s-NEMU!\n", "\33[1;33m" "\33[1;41m" "riscv32" "\33[0m");
   printf("For help, type \"help\"\n");
 
@@ -4135,7 +4139,7 @@ void init_monitor(int argc, char *argv[]) {
 
   long img_size = load_img();
 
-  ;
+  load_elf(elf_file);
 
   init_difftest(diff_so_file, img_size, difftest_port);
 
@@ -4143,7 +4147,7 @@ void init_monitor(int argc, char *argv[]) {
   init_sdb();
 
 
- 
+  init_disasm( "riscv32" "-pc-linux-gnu" )
 
 
 

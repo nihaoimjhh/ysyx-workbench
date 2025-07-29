@@ -3603,7 +3603,7 @@ word_t map_read(paddr_t addr, int len, IOMap *map) {
                                                   );
   word_t ret = host_read(map->space + offset, len);
 
-  ;
+  device_read_logbuf_write(addr, len, ret, map->name); device_read_logbuf_print();
 
   return ret;
 }
@@ -3630,7 +3630,7 @@ void map_write(paddr_t addr, int len, word_t data, IOMap *map) {
   paddr_t offset = addr - map->low;
   host_write(map->space + offset, len, data);
 
-  ;
+  device_write_logbuf_write(addr, len, data, map->name); device_write_logbuf_print();
 
   invoke_callback(map->callback, offset, len, 
 # 97 "src/device/io/map.c" 3 4
@@ -3656,19 +3656,17 @@ void device_write_logbuf_write(paddr_t addr, int len, word_t data, const char *n
   device_write_logbufs[device_write_logbuf_count].name=name;
   device_write_logbuf_count++;
 }
-
 void device_read_logbuf_print(){
-  printf("\033[1;32m" "    device_read_logbuf\n" "\033[0m");
   for(int i=0;i<10;i++){
     if(i==(device_read_logbuf_count-1)%10){
-      printf("\033[1;31m" "===>device: %s addr:%x len:%d data:%x\n" "\033[0m",
+      printf("\033[1;34m" "===> READ device: %s addr:%x len:%d data:%x\n" "\033[0m",
             device_read_logbufs[i].name,
             device_read_logbufs[i].addr,
             device_read_logbufs[i].len,
             device_read_logbufs[i].data);
       continue;
     }
-    printf("    device: %s addr:%x len:%d data:%x\n",
+    printf("\033[1;34m" "     READ " "\033[0m" "device: %s addr:%x len:%d data:%x\n",
           device_read_logbufs[i].name,
           device_read_logbufs[i].addr,
           device_read_logbufs[i].len,
@@ -3677,17 +3675,16 @@ void device_read_logbuf_print(){
 }
 
 void device_write_logbuf_print(){
-  printf("\033[1;32m" "    device_write_logbuf\n" "\033[0m");
   for(int i=0;i<10;i++){
     if(i==(device_write_logbuf_count-1)%10){
-      printf("\033[1;31m" "===>device: %s addr:%x len:%d data:%x\n" "\033[0m",
+      printf("\033[1;31m" "===> WRITE device: %s addr:%x len:%d data:%x\n" "\033[0m",
             device_write_logbufs[i].name,
             device_write_logbufs[i].addr,
             device_write_logbufs[i].len,
             device_write_logbufs[i].data);
       continue;
     }
-    printf("    device: %s addr:%x len:%d data:%x\n",
+    printf("\033[1;31m" "     WRITE " "\033[0m" "device: %s addr:%x len:%d data:%x\n",
           device_write_logbufs[i].name,
           device_write_logbufs[i].addr,
           device_write_logbufs[i].len,

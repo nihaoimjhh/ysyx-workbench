@@ -3388,7 +3388,7 @@ void init_mem() {
 }
 
 word_t paddr_read(paddr_t addr, int len) {
-  if (__builtin_expect(in_pmem(addr), 1)) {
+  if (__builtin_expect(in_pmem(addr), 1)) {paddr_read_logbuf_write(addr,len,pmem_read(addr,len));paddr_read_logbuf_print();
       return pmem_read(addr, len);
   }
   return mmio_read(addr, len);
@@ -3398,7 +3398,7 @@ word_t paddr_read(paddr_t addr, int len) {
 }
 
 void paddr_write(paddr_t addr, int len, word_t data) {
-  if (__builtin_expect(in_pmem(addr), 1)) {
+  if (__builtin_expect(in_pmem(addr), 1)) {paddr_write_logbuf_write(addr,len,data);paddr_write_logbuf_print();
       pmem_write(addr, len, data);
       return;
   }
@@ -3422,24 +3422,22 @@ void paddr_write_logbuf_write(paddr_t addr,int len,word_t data){
   paddr_write_logbufs[paddr_write_logbuf_count].data=data;
   paddr_write_logbuf_count++;
 }
-
 void paddr_read_logbuf_print(){
-  printf("\033[1;31m" "    paddr_read_logbuf\n" "\033[0m");
   for(int i=0;i<10;i++){
     if(i==(paddr_read_logbuf_count-1)%10){
-      printf("\033[1;31m" "===>addr:%x len:%d data:%x\n" "\033[0m",paddr_read_logbufs[i].addr,paddr_read_logbufs[i].len,paddr_read_logbufs[i].data);
+      printf("\033[1;34m" "===> READ addr:%x len:%d data:%x\n" "\033[0m",paddr_read_logbufs[i].addr,paddr_read_logbufs[i].len,paddr_read_logbufs[i].data);
       continue;
     }
-    printf("    addr:%x len:%d data:%x\n",paddr_read_logbufs[i].addr,paddr_read_logbufs[i].len,paddr_read_logbufs[i].data);
+    printf("\033[1;34m" "     READ " "\033[0m" "addr:%x len:%d data:%x\n",paddr_read_logbufs[i].addr,paddr_read_logbufs[i].len,paddr_read_logbufs[i].data);
   }
 }
+
 void paddr_write_logbuf_print(){
-  printf("\033[1;31m" "    paddr_write_logbuf\n" "\033[0m");
   for(int i=0;i<10;i++){
     if(i==(paddr_write_logbuf_count-1)%10){
-      printf("\033[1;31m" "===>addr:%x len:%d data:%x\n" "\033[0m",paddr_write_logbufs[i].addr,paddr_write_logbufs[i].len,paddr_write_logbufs[i].data);
+      printf("\033[1;31m" "===> WRITE addr:%x len:%d data:%x\n" "\033[0m",paddr_write_logbufs[i].addr,paddr_write_logbufs[i].len,paddr_write_logbufs[i].data);
       continue;
     }
-    printf("    addr:%x len:%d data:%x\n",paddr_write_logbufs[i].addr,paddr_write_logbufs[i].len,paddr_write_logbufs[i].data);
+    printf("\033[1;31m" "     WRITE " "\033[0m" "addr:%x len:%d data:%x\n",paddr_write_logbufs[i].addr,paddr_write_logbufs[i].len,paddr_write_logbufs[i].data);
   }
 }

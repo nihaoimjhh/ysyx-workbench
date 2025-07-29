@@ -72646,12 +72646,14 @@ static inline void update_screen() {
                                              );
   SDL_RenderPresent(renderer);
 }
-# 74 "src/device/vga.c"
+# 78 "src/device/vga.c"
 void vga_update_screen() {
 
-
+  if (vgactl_port_base[1]) {
+    update_screen();
+    vgactl_port_base[1] = 0;
+  }
 }
-
 void init_vga() {
   vgactl_port_base = (uint32_t *)new_space(8);
   vgactl_port_base[0] = (screen_width() << 16) | screen_height();
@@ -72659,17 +72661,17 @@ void init_vga() {
 
 
   add_mmio_map("vgactl", 0xa0000100, vgactl_port_base, 8, 
-# 85 "src/device/vga.c" 3 4
+# 91 "src/device/vga.c" 3 4
                                                                   ((void *)0)
-# 85 "src/device/vga.c"
+# 91 "src/device/vga.c"
                                                                       );
 
 
   vmem = new_space(screen_size());
   add_mmio_map("vmem", 0xa1000000, vmem, screen_size(), 
-# 89 "src/device/vga.c" 3 4
+# 95 "src/device/vga.c" 3 4
                                                            ((void *)0)
-# 89 "src/device/vga.c"
+# 95 "src/device/vga.c"
                                                                );
   init_screen();
   memset(vmem, 0, screen_size());

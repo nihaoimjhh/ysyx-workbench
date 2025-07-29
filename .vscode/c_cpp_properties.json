@@ -1,0 +1,21 @@
+{
+  "configurations": [
+    {
+      "name": "linux-gcc-x64",
+      "includePath": [
+        "${workspaceFolder}/**"
+      ],
+      "defines": [],
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "c17",
+      "cppStandard": "gnu++17",
+      "intelliSenseMode": "linux-gcc-x64",
+      "configurationProvider": "ms-vscode.makefile-tools",
+      "forcedInclude": [
+        "/home/jinghanhui/ysyx-workbench/nemu/include/generated/autoconf.h",
+        "/home/jinghanhui/ysyx-workbench/nemu/include/utils.h"
+      ]
+    }
+  ],
+  "version": 4
+}

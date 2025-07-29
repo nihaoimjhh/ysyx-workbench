@@ -108,24 +108,22 @@ void paddr_write_logbuf_write(paddr_t addr,int len,word_t data){
   paddr_write_logbufs[paddr_write_logbuf_count].data=data;
   paddr_write_logbuf_count++;
 }
-
 void paddr_read_logbuf_print(){
-  printf("\033[1;31m" "    paddr_read_logbuf\n" "\033[0m"); // 蓝色
   for(int i=0;i<10;i++){
     if(i==(paddr_read_logbuf_count-1)%10){
-      printf("\033[1;31m" "===>addr:%x len:%d data:%x\n" "\033[0m",paddr_read_logbufs[i].addr,paddr_read_logbufs[i].len,paddr_read_logbufs[i].data);
+      printf("\033[1;34m" "===> READ addr:%x len:%d data:%x\n" "\033[0m",paddr_read_logbufs[i].addr,paddr_read_logbufs[i].len,paddr_read_logbufs[i].data);
       continue;//上面减一是因为存完logbuf之后又加了一
     }
-    printf("    addr:%x len:%d data:%x\n",paddr_read_logbufs[i].addr,paddr_read_logbufs[i].len,paddr_read_logbufs[i].data);
+    printf("\033[1;34m" "     READ " "\033[0m" "addr:%x len:%d data:%x\n",paddr_read_logbufs[i].addr,paddr_read_logbufs[i].len,paddr_read_logbufs[i].data);
   }
 }
+
 void paddr_write_logbuf_print(){
-  printf("\033[1;31m" "    paddr_write_logbuf\n" "\033[0m"); // 红色
   for(int i=0;i<10;i++){
     if(i==(paddr_write_logbuf_count-1)%10){
-      printf("\033[1;31m" "===>addr:%x len:%d data:%x\n" "\033[0m",paddr_write_logbufs[i].addr,paddr_write_logbufs[i].len,paddr_write_logbufs[i].data);
+      printf("\033[1;31m" "===> WRITE addr:%x len:%d data:%x\n" "\033[0m",paddr_write_logbufs[i].addr,paddr_write_logbufs[i].len,paddr_write_logbufs[i].data);
       continue;//上面减一是因为存完logbuf之后又加了一
     }
-    printf("    addr:%x len:%d data:%x\n",paddr_write_logbufs[i].addr,paddr_write_logbufs[i].len,paddr_write_logbufs[i].data);
+    printf("\033[1;31m" "     WRITE " "\033[0m" "addr:%x len:%d data:%x\n",paddr_write_logbufs[i].addr,paddr_write_logbufs[i].len,paddr_write_logbufs[i].data);
   }
 }

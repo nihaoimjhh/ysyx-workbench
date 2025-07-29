@@ -44,7 +44,7 @@ void test_expr(){
 
      if (fp == NULL) {
          perror("fopen");
-         exit(EXIT_FAILURE);
+         assert(0);
      }
      while (fgets(buffer, sizeof(buffer), fp) != NULL) {//一行一行的传入expr
          uint32_t answer;            // 用于存储答案。
