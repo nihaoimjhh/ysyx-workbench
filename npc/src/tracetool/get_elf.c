@@ -1,4 +1,6 @@
 #include "get_elf.h"
+#include "utils.h"   
+extern NPCState npc_state;
 FILE *elf_fileopen( char *filename) {
     FILE *fp=fopen(filename,"rb");
     if(fp==NULL){
@@ -155,6 +157,7 @@ void inst_print_funcname(Elf32_Shdr *shdr_pointer,char *strtab,Elf32_Sym *symtab
         int i=0;
         if(catch_call_ret(inst,dnpc,pc)==0){
             (*call_count)++;
+            npc_state.state = NPC_STOP;
             printf("\033[31m""%#x:""\033[0m",pc);
             for(i=0;i<*call_count;i++){
                 printf(" ");
@@ -168,6 +171,7 @@ void inst_print_funcname(Elf32_Shdr *shdr_pointer,char *strtab,Elf32_Sym *symtab
         }
         else if(catch_call_ret(inst,dnpc,pc)==1){
             (*call_count)--;
+            npc_state.state = NPC_STOP;
             printf("\033[32m""%#x:""\033[0m",pc);
             for(i=0;i<*call_count;i++){
             printf(" ");

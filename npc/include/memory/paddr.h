@@ -3,7 +3,7 @@
 #include "common.h"
 
 
-#define MSIZE 5000000
+#define MSIZE 0x800000
 #define MBASE 0x80000000
 #define PMEM_LEFT  ((paddr_t)MBASE)//上界
 #define PMEM_RIGHT ((paddr_t)MBASE + MSIZE - 1)//下界

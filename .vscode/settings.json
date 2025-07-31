@@ -6,6 +6,9 @@
 		"*.c": "c",
 		"am.h": "c",
 		"map.h": "c",
-		"getopt.h": "c"
+		"getopt.h": "c",
+		"utils.h": "c",
+		"common.h": "c",
+		"paddr.h": "c"
 	}
 }
