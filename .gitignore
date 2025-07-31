@@ -1,4 +1,5 @@
 am-kernels/tests/cpu-tests/.result
 npc/build
+abstract-machine/am/build
 npc/sim.fst
 nemu/build

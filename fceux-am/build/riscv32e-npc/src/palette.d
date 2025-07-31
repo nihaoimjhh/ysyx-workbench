@@ -1,0 +1,32 @@
+/home/jinghanhui/ysyx-workbench/fceux-am/build/riscv32e-npc/src/palette.o: \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/palette.cpp \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/types.h \
+ /home/jinghanhui/ysyx-workbench/abstract-machine/klib/include/klib.h \
+ /home/jinghanhui/ysyx-workbench/abstract-machine/am/include/am.h \
+ /home/jinghanhui/ysyx-workbench/abstract-machine/am/include/arch/riscv.h \
+ /home/jinghanhui/ysyx-workbench/abstract-machine/am/include/amdev.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/file.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/emufile.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/fceu.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/git.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/utils/md5.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/utils/../types.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/utils/valuearray.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/driver.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/mapinc.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/../types.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/../utils/memory.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/../x6502.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/../x6502struct.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/../fceu.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/../ppu.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/../sound.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/../state.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/../cart.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/boards/../unif.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/palette.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/palettes/palettes.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/palettes/rp2c04001.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/palettes/rp2c04002.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/palettes/rp2c04003.h \
+ /home/jinghanhui/ysyx-workbench/fceux-am/src/palettes/rp2c05004.h

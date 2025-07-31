@@ -191,7 +191,9 @@ void isa_exec_once(Decode *s) {
     for (i = 0; i < 2; i++) {
         top->i_clk = !top->i_clk;
         top->eval();
+        #if ENABLE_WAVE
         tfp->dump(dump_num++);
+        #endif
     }
     g_nr_guest_inst++;
 }
