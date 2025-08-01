@@ -169,7 +169,7 @@ void wp_print(){
 	 for(i=0;i<NR_WP;i++){
 		 if(wp_pool[i].remove==0){
 			 flag=1;
-			 printf("NO.%d\texpr:%s\tnowans:%u\n",wp_pool[i].NO,wp_pool[i].expr,wp_pool[i].ans);
+			 printf("NO.%d\texpr:%s\tnow:0x%x\n",wp_pool[i].NO,wp_pool[i].expr,wp_pool[i].ans);
 		 }
 	 }
 	 if(flag==0){
@@ -185,7 +185,7 @@ int wp_check(){
 		 else{
 			 newans=expr(wp_pool[i].expr,&success);
 			 if(newans!=wp_pool[i].ans){
-				 printf("expr:%s                 NO.%d\nOld value = %u\nNew value = %u\n",wp_pool[i].expr,i,wp_pool[i].ans,newans);
+				 printf("expr:%s                 NO.%d\nOld value = 0x%x\nNew value = 0x%x\n",wp_pool[i].expr,i,wp_pool[i].ans,newans);
 				 wp_pool[i].ans=newans;
 				 flag=1;
 			 }

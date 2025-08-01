@@ -9,6 +9,8 @@
 		"getopt.h": "c",
 		"utils.h": "c",
 		"common.h": "c",
-		"paddr.h": "c"
+		"paddr.h": "c",
+		"amtest.h": "c",
+		"cpu.h": "c"
 	}
 }

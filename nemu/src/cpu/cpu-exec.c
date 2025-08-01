@@ -1,17 +1,17 @@
 /***************************************************************************************
-* Copyright (c) 2014-2022 Zihao Yu, Nanjing University
-*
-* NEMU is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*          http://license.coscl.org.cn/MulanPSL2
-*
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-*
-* See the Mulan PSL v2 for more details.
-***************************************************************************************/
+ * Copyright (c) 2014-2022 Zihao Yu, Nanjing University
+ *
+ * NEMU is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ *
+ * See the Mulan PSL v2 for more details.
+ ***************************************************************************************/
 #include <cpu/cpu.h>
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
@@ -25,66 +25,70 @@
  */
 #define MAX_INST_TO_PRINT 10
 
+// 函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
+extern Elf32_Ehdr ehdr;
+extern Elf32_Shdr *shdr_pointer;
+extern char *strtab;
+extern char *shstrtab;
+extern int symlens;
+extern int symtab_index;
+extern int strtab_index;
+extern Elf32_Sym *symtab_pointer;
+int call_count = 0;
+// 函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
 
-
-//函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
- extern   Elf32_Ehdr ehdr;
- extern   Elf32_Shdr *shdr_pointer;
- extern   char *strtab;
- extern   char *shstrtab;
- extern   int symlens;
- extern   int symtab_index;
- extern   int strtab_index;
- extern   Elf32_Sym *symtab_pointer;
- int call_count=0;
-//函数需要的全局变量，用来打印函数名字，monitor.c里面的elf_file传进来
-
-
-
-CPU_state cpu = {};
+CPU_state cpu = {.mstatus = 0x1800};
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
-int iringbufmanage(char irb[][128], uint64_t g_nr_guest_inst,Decode *s);
-void iringbufprint(char irb[][128],int count);
+int iringbufmanage(char irb[][128], uint64_t g_nr_guest_inst, Decode *s);
+void iringbufprint(char irb[][128], int count);
 void device_update();
-static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {//每次执行是运行cpu_excute,齐调用excute为核心函数，里面有trace，所以说每次执行较少步骤时候，每一次cpu执行该函数会执行,wp_check放这里再合适不过了
- int flag=0;
+static void trace_and_difftest(Decode *_this, vaddr_t dnpc)
+{ // 每次执行是运行cpu_excute,齐调用excute为核心函数，里面有trace，所以说每次执行较少步骤时候，每一次cpu执行该函数会执行,wp_check放这里再合适不过了
+  int flag = 0;
 #ifdef CONFIG_ITRACE_COND
-  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
-
-#endif
-  if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
-  IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));//定义了CONFIG_DIFFTEST,才会调用difftest_step(_this->pc, dnpc);
-  IFDEF(CONFIG_WATCHPOINT, flag=wp_check());
-  if(flag==1){
-	nemu_state.state = NEMU_STOP;
+  if (ITRACE_COND)
+  {
+    log_write("%s\n", _this->logbuf);
   }
 
-
-
+#endif
+  if (g_print_step)
+  {
+    IFDEF(CONFIG_ITRACE, puts(_this->logbuf));
+  }
+  IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc)); // 定义了CONFIG_DIFFTEST,才会调用difftest_step(_this->pc, dnpc);
+  IFDEF(CONFIG_WATCHPOINT, flag = wp_check());
+  if (flag == 1)
+  {
+    nemu_state.state = NEMU_STOP;
+  }
 }
 
-static void exec_once(Decode *s, vaddr_t pc) {
+static void exec_once(Decode *s, vaddr_t pc)
+{
   s->pc = pc;
   s->snpc = pc;
-  isa_exec_once(s);//执行命令
+  isa_exec_once(s); // 执行命令
   cpu.pc = s->dnpc;
-  IFDEF(CONFIG_FTRACE,  inst_print_funcname(shdr_pointer,strtab,symtab_pointer,s->isa.inst.val, s->dnpc, s->pc,symlens,&call_count); );
+  IFDEF(CONFIG_FTRACE, inst_print_funcname(shdr_pointer, strtab, symtab_pointer, s->isa.inst.val, s->dnpc, s->pc, symlens, &call_count););
 
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
-  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);\
+  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
   int ilen = s->snpc - s->pc;
   int i;
   uint8_t *inst = (uint8_t *)&s->isa.inst.val;
-  for (i = ilen - 1; i >= 0; i --) {
+  for (i = ilen - 1; i >= 0; i--)
+  {
     p += snprintf(p, 4, " %02x", inst[i]);
   }
   int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
   int space_len = ilen_max - ilen;
 
-  if (space_len < 0) space_len = 0;
+  if (space_len < 0)
+    space_len = 0;
   space_len = space_len * 3 + 1;
   memset(p, ' ', space_len);
   p += space_len;
@@ -92,98 +96,118 @@ static void exec_once(Decode *s, vaddr_t pc) {
 #ifndef CONFIG_ISA_loongarch32r
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
-      MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
- printf("logbuf:%s\n",s->logbuf);
+              MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
+//  printf("logbuf:%s\n",s->logbuf);
 #else
   p[0] = '\0'; // the upstream llvm does not support loongarch32r
 #endif
 #endif
 }
 
-static void execute(uint64_t n) {//cpu执行的核心函数
+static void execute(uint64_t n)
+{ // cpu执行的核心函数
 
   Decode s;
   char irb[11][128];
-  int last_count=0;
-  for (;n > 0; n --) {//命令执行循环
-    exec_once(&s, cpu.pc);//真正执行的函数
-    g_nr_guest_inst ++;//已执行过的命令数量
-    last_count=iringbufmanage(irb,g_nr_guest_inst,&s);
-    trace_and_difftest(&s, cpu.pc);//每次执行一次就运行一下这个函数//这里有打印最后一次出错的信息
-    if (nemu_state.state != NEMU_RUNNING) {
-      if(nemu_state.state == NEMU_ABORT) {
-        iringbufprint(irb,last_count);
-        break; };//如果状态不是运行状态，那么就是终止状态，那么就打印错误信
-      break;}//确保机器一直正常运行
-    IFDEF(CONFIG_DEVICE, device_update());//外设
-    IFDEF(CONFIG_WATCHPOINT,wp_check() );//监视点check
+  int last_count = 0;
+  for (; n > 0; n--)
+  {                        // 命令执行循环
+    exec_once(&s, cpu.pc); // 真正执行的函数
+    g_nr_guest_inst++;     // 已执行过的命令数量
+    last_count = iringbufmanage(irb, g_nr_guest_inst, &s);
+    trace_and_difftest(&s, cpu.pc); // 每次执行一次就运行一下这个函数//这里有打印最后一次出错的信息
+    if (nemu_state.state != NEMU_RUNNING)
+    {
+      if (nemu_state.state == NEMU_ABORT)
+      {
+        iringbufprint(irb, last_count);
+        break;
+      }; // 如果状态不是运行状态，那么就是终止状态，那么就打印错误信
+      break;
+    }                                      // 确保机器一直正常运行
+    IFDEF(CONFIG_DEVICE, device_update()); // 外设
+    IFDEF(CONFIG_WATCHPOINT, wp_check());  // 监视点check
   }
 }
 
-static void statistic() {
+static void statistic()
+{
   IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));
 #define NUMBERIC_FMT MUXDEF(CONFIG_TARGET_AM, "%", "%'") PRIu64
   Log("host time spent = " NUMBERIC_FMT " us", g_timer);
   Log("total guest instructions = " NUMBERIC_FMT, g_nr_guest_inst);
-  if (g_timer > 0) Log("simulation frequency = " NUMBERIC_FMT " inst/s", g_nr_guest_inst * 1000000 / g_timer);
-  else Log("Finish running in less than 1 us and can not calculate the simulation frequency");
+  if (g_timer > 0)
+    Log("simulation frequency = " NUMBERIC_FMT " inst/s", g_nr_guest_inst * 1000000 / g_timer);
+  else
+    Log("Finish running in less than 1 us and can not calculate the simulation frequency");
 }
 
-void assert_fail_msg() {
+void assert_fail_msg()
+{
   isa_reg_display();
   statistic();
 }
 
 /* Simulate how the CPU works. */
-void cpu_exec(uint64_t n) {//里面有execute
-  g_print_step = (n < MAX_INST_TO_PRINT);//如果n小于规定数10那么就可以打印，把默认false置一
-  switch (nemu_state.state) {
-    case NEMU_END: case NEMU_ABORT://机器终止或者运行结束则打印提示信息
-      printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
-      return;//看有没有正确运行，坏了就直接返回。
-    default: nemu_state.state = NEMU_RUNNING;//如果不是上述条件那么状态就是润状态
+void cpu_exec(uint64_t n)
+{                                         // 里面有execute
+  g_print_step = (n < MAX_INST_TO_PRINT); // 如果n小于规定数10那么就可以打印，把默认false置一
+  switch (nemu_state.state)
+  {
+  case NEMU_END:
+  case NEMU_ABORT: // 机器终止或者运行结束则打印提示信息
+    printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
+    return; // 看有没有正确运行，坏了就直接返回。
+  default:
+    nemu_state.state = NEMU_RUNNING; // 如果不是上述条件那么状态就是润状态
   }
 
-  uint64_t timer_start = get_time();//记录运行起始时间
+  uint64_t timer_start = get_time(); // 记录运行起始时间
 
-  execute(n);//执行命令
+  execute(n); // 执行命令
 
-  uint64_t timer_end = get_time();//记录终止时间
-  g_timer += timer_end - timer_start;//花费时间
+  uint64_t timer_end = get_time();    // 记录终止时间
+  g_timer += timer_end - timer_start; // 花费时间
 
-  switch (nemu_state.state) {
-    case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;//搞完了就break
+  switch (nemu_state.state)
+  {
+  case NEMU_RUNNING:
+    nemu_state.state = NEMU_STOP;
+    break; // 搞完了就break
 
-    case NEMU_END: case NEMU_ABORT:
-      Log("nemu: %s at pc = " FMT_WORD,
-          (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
-           (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
-            ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
-          nemu_state.halt_pc);//有问题的处理，防御性编程
-      // fall through
-     IFDEF(CONFIG_FTRACE,memory_free(shdr_pointer,symtab_pointer,strtab,shstrtab));
-    case NEMU_QUIT: statistic();
+  case NEMU_END:
+  case NEMU_ABORT:
+    Log("nemu: %s at pc = " FMT_WORD,
+        (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) : (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) : ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
+        nemu_state.halt_pc); // 有问题的处理，防御性编程
+    // fall through
+    IFDEF(CONFIG_FTRACE, memory_free(shdr_pointer, symtab_pointer, strtab, shstrtab));
+  case NEMU_QUIT:
+    statistic();
   }
 }
 
-
-int iringbufmanage(char irb[][128],uint64_t g_nr_guest_inst,Decode *s){
+int iringbufmanage(char irb[][128], uint64_t g_nr_guest_inst, Decode *s)
+{
   int count = g_nr_guest_inst % 11;
   // if(s->logbuf!=NULL)
-  strcpy(irb[count],s->logbuf); 
+  strcpy(irb[count], s->logbuf);
   return count;
 }
 
-void iringbufprint(char irb[][128],int count){
-  for(int i=0;i<11;i++){
-      if(i==count){
-      printf("\033[1;31m" "===>%s\n" "\033[0m",irb[i]); // 蓝色
+void iringbufprint(char irb[][128], int count)
+{
+  for (int i = 0; i < 11; i++)
+  {
+    if (i == count)
+    {
+      printf("\033[1;31m"
+             "===>%s\n"
+             "\033[0m",
+             irb[i]); // 蓝色
       continue;
-      }
-      printf("    ");
-      puts(irb[i]);
+    }
+    printf("    ");
+    puts(irb[i]);
   }
-
 }
-
-

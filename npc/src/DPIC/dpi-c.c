@@ -65,7 +65,7 @@ extern "C" void cpu_pmem_write(paddr_t addr, word_t data, uint8_t wmask)
           static int counter = 0;
           counter++;
           if (counter == 3) {  // 每三次访问输出一次
-               printf("%c", (char)data);
+               putchar((char)data);
                counter = 0;  // 重置计数器
           }
      }
