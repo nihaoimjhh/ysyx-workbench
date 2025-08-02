@@ -11,6 +11,9 @@
 		"common.h": "c",
 		"paddr.h": "c",
 		"amtest.h": "c",
-		"cpu.h": "c"
+		"cpu.h": "c",
+		"decode.h": "c",
+		"locale.h": "c",
+		"functional": "c"
 	}
 }

@@ -21,6 +21,6 @@ void hello_intr() {
   iset(1);
   while (1) {
     // for (volatile int i = 0; i < 10000000; i++) ;
-    yield();
+    yield();//由于ecall所以会死在__am_asm_trap一直打印y
   }
 }

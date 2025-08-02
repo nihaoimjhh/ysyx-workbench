@@ -151,14 +151,6 @@ config ITRACE_COND
   string "Only trace instructions when the condition is true"
   default "true"
 
-
-config DIFFTEST
-  depends on TARGET_NATIVE_ELF
-  bool "Enable differential testing"
-  default n
-  help
-    Enable differential testing with a reference design.
-    Note that this will significantly reduce the performance of NEMU.
 config WATCHPOINT
   bool "Enable watchpoints"
   default y
@@ -171,6 +163,19 @@ config FTRACE
 config DTRACE
   bool "Enable dtrace"
   default y
+config ETRACE
+  bool "Enable etrace"
+  default y
+
+
+config DIFFTEST
+  depends on TARGET_NATIVE_ELF
+  bool "Enable differential testing"
+  default n
+  help
+    Enable differential testing with a reference design.
+    Note that this will significantly reduce the performance of NEMU.
+
 
 
 choice
