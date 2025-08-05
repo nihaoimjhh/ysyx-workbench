@@ -60,6 +60,7 @@ __am_asm_trap:
 
   mv a0, sp
   jal __am_irq_handle
+  mv sp, a0  // 这里是关键：将返回的新上下文地址设置为新的栈指针
 //跳转到C函数处理异常然后返回
   LOAD t1, OFFSET_STATUS(sp)
   LOAD t2, OFFSET_EPC(sp)
