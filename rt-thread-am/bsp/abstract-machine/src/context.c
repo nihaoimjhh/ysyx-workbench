@@ -43,7 +43,8 @@ static Context* ev_handler(Event e, Context *c) {
       switch_from = NULL;
       switch_to = NULL;
       return c;
-    case EVENT_IRQ_TIMER:
+    case EVENT_IRQ_TIMER://不加这个native会报错
+      // 处理时钟中断
       // 时钟中断，返回当前上下文即可
       return c;
     default: 

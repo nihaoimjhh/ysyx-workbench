@@ -87,21 +87,26 @@ void cpu_exec(uint64_t n) {
  * CPU执行核心函数
  */
 void execute(uint64_t n) {
+
+  #if ENABLE_DISASM
   char irb[11][128];
   int last_count=0;
+  #endif
   for (;n > 0; n--) {
     // 执行指令
     exec_once(&s);
-    
+    #if ENABLE_DISASM
     // 管理指令缓冲区
     last_count=iringbufmanage(irb,g_nr_guest_inst,&s);
-    
+    #endif
     // 执行差分测试和监视点检查
     trace_and_difftest(&s, cpu.pc);
     
     if (npc_state.state != NPC_RUNNING) {
         if(npc_state.state == NPC_ABORT) {
+          #if ENABLE_DISASM
            iringbufprint(irb,last_count);
+          #endif
            if (tfp) {
                tfp->flush();
            }
@@ -177,10 +182,11 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #if ENABLE_DIFFTEST
   difftest_step(_this->pc, dnpc);
 #endif
-  
+#if ENABLE_WP
   if(wp_check()) {
-    npc_state.state = NPC_STOP;
-  }
+    npc_state.state = NPC_STOP; 
+ }
+#endif
 }
 
 /**

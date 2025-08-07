@@ -26,4 +26,4 @@ run: image nemu-so
 #和nemu的接口
 gdb: image
 	$(MAKE) -C $(NPC_HOME) gdb ARGS="$(NPCFLAGS)" IMG=$(IMAGE).bin
-$(info image: $(IMAGE).bin)
+# $(info image: $(IMAGE).bin)

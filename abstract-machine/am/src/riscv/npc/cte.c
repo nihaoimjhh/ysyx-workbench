@@ -1,7 +1,6 @@
 #include <am.h>
 #include <riscv/riscv.h>
 #include <klib.h>
-
 static Context *(*user_handler)(Event, Context *) = NULL;
 
 Context *__am_irq_handle(Context *c)
@@ -11,6 +10,20 @@ Context *__am_irq_handle(Context *c)
     Event ev = {0};
     switch (c->mcause)
     {
+    case 11: { // 环境调用异常(ECALL from M-mode)
+      // 检查是否是yield调用(通过a7或a5寄存器传递-1)
+      #ifdef __riscv_e
+      if (c->gpr[15] == -1) { // a5寄存器
+      #else
+      if (c->gpr[17] == -1) { // a7寄存器
+      #endif
+        ev.event = EVENT_YIELD; // 识别为yield事件
+        c->mepc += 4; // 跳过ecall指令，防止重复执行
+      } else {
+        ev.event = EVENT_ERROR;
+      }
+      break;
+    }
     default:
       ev.event = EVENT_ERROR;
       break;
@@ -38,7 +51,33 @@ bool cte_init(Context *(*handler)(Event, Context *))
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg)
 {
-  return NULL;
+  // 在栈顶分配Context结构体空间
+  Context *ctx = (Context*)((uintptr_t)kstack.end - sizeof(Context));
+  
+  // 初始化所有寄存器为0
+  for (int i = 0; i < NR_REGS; i++) {
+    ctx->gpr[i] = 0;
+  }
+  
+  // 设置栈指针 - 指向Context结构体的起始位置
+  ctx->gpr[2] = (uintptr_t)ctx; // sp (x2)
+  
+  // 设置参数寄存器
+  ctx->gpr[10] = (uintptr_t)arg; // a0 (x10) - 函数参数
+  
+  // 设置程序计数器为入口函数地址
+  ctx->mepc = (uintptr_t)entry;
+  
+  // 设置mstatus寄存器，使能中断
+  ctx->mstatus = 0x1800; // 设置MPP=11(Machine mode)
+  
+  // mcause设置为0
+  ctx->mcause = 0;
+  
+  // 地址空间信息
+  ctx->pdir = NULL;
+  
+  return ctx;
 }
 
 void yield()
