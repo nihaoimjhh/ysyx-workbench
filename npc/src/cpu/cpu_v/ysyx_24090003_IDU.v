@@ -26,7 +26,7 @@ module ysyx_24090003_IDU (
 
     // 新增EXU控制信号
     output reg [3:0] o_alu_op,        // ALU操作码（4位）
-    output reg [1:0] o_alu_src1_sel,  // ALU第一操作数选择（00:reg_data1, 01:pc, 10:0）
+    output reg [1:0] o_alu_src1_sel,  // ALU第一操作数选择（00:reg_data1, 01:pc, 10sudo systemctl start gdm.service:0）
     output reg [1:0] o_alu_src2_sel,  // ALU第二操作数选择（00:reg_data2, 01:imm, 10:4）
     output reg       o_branch,        // 是否为条件分支指令
     output reg       o_jalr,          // 是否为JALR指令
@@ -63,39 +63,23 @@ module ysyx_24090003_IDU (
   wire [31:0] w_imm_j = {
     {12{i_inst[31]}}, i_inst[19:12], i_inst[20], i_inst[30:21], 1'b0
   };  // J型指令
-
-  // 指令类型识别
-  reg [2:0] r_instr_type;
+  reg [31:0] r_imm_out;
+    // 立即数选择 - 直接根据opcode选择立即数
   always @(*) begin
     case (o_opcode)
-      7'b1110011: r_instr_type = 3'b000;  // 系统指令(ebreak)
-      7'b0010011: r_instr_type = 3'b001;  // addi sltiu(I型)
-      7'b0000011: r_instr_type = 3'b001;  // lw (I型)
-      7'b1100111: r_instr_type = 3'b001;  // jalr (I型)
-      7'b0100011: r_instr_type = 3'b010;  // sw (S型)
-      7'b1100011: r_instr_type = 3'b011;  // bne (B型)
-      7'b0010111: r_instr_type = 3'b100;  // auipc (U型)
-      7'b0110111: r_instr_type = 3'b100;  // lui (U型)
-      7'b1101111: r_instr_type = 3'b101;  // jal (J型)
-      7'b0110011: r_instr_type = 3'b110;  // R型指令(如add,sub)
-      default: r_instr_type = 3'b000;  // 默认值
+      7'b1110011: r_imm_out = 32'b1;            // 系统指令(ebreak)，默认值
+      7'b0010011,                               // addi sltiu(I型)
+      7'b0000011,                               // lw (I型)
+      7'b1100111: r_imm_out = w_imm_i;          // jalr (I型)
+      7'b0100011: r_imm_out = w_imm_s;          // sw (S型)
+      7'b1100011: r_imm_out = w_imm_b;          // bne (B型)
+      7'b0010111,                               // auipc (U型)
+      7'b0110111: r_imm_out = w_imm_u;          // lui (U型)
+      7'b1101111: r_imm_out = w_imm_j;          // jal (J型)
+      7'b0110011: r_imm_out = 32'b0;            // R型指令无立即数
+      default:    r_imm_out = 32'b1;            // 默认值
     endcase
   end
-
-  // 立即数选择
-  reg [31:0] r_imm_out;
-  always @(*) begin
-    case (r_instr_type)
-      3'b001:  r_imm_out = w_imm_i;
-      3'b010:  r_imm_out = w_imm_s;
-      3'b011:  r_imm_out = w_imm_b;
-      3'b100:  r_imm_out = w_imm_u;
-      3'b101:  r_imm_out = w_imm_j;
-      3'b110:  r_imm_out = 32'b0;  // R型指令无立即数
-      default: r_imm_out = 32'b1;  // ebreak默认值
-    endcase
-  end
-
   assign o_imm = r_imm_out;
 
   // 控制信号生成

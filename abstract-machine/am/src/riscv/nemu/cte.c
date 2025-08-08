@@ -29,7 +29,7 @@ Context* __am_irq_handle(Context *c) {
         if (c->gpr[17] == -1) { // a7寄存器
         #endif
           ev.event = EVENT_YIELD; // 识别为yield事件
-          c->mepc += 4; // 跳过ecall指令，防止重复执行
+          c->mepc += 4; // 跳ecall指令，防止重复执行
         } else {
           ev.event = EVENT_ERROR;
         }

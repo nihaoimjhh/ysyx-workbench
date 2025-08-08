@@ -1,19 +1,28 @@
-module half_adder (
-    input  a,
-    input  b,
-    output sum,
-    output carry
+module adder_32bit (
+    input [31:0] a,
+    input [31:0] b,
+    input cin,
+    output [31:0] sum,
+    output cout
 );
-  // 使用与非门实现异或(XOR)和与(AND)
-  wire nand_ab;
-  wire nand_a_nand_ab;
-  wire nand_b_nand_ab;
+  wire [32:0] carry;
+  assign carry[0] = cin;
 
-  assign nand_ab = ~(a & b);  // NAND(a, b)
-  assign nand_a_nand_ab = ~(a & nand_ab);  // NAND(a, NAND(a, b))
-  assign nand_b_nand_ab = ~(b & nand_ab);  // NAND(b, NAND(a, b))
-  assign sum = ~(nand_a_nand_ab & nand_b_nand_ab);  // NAND(NAND(a, NAND(a,b)), NAND(b, NAND(a,b)))
-  assign carry = ~nand_ab;  // NOT(NAND(a, b)) = AND(a, b)
+  // 串联32个全加器
+  genvar i;
+  generate
+    for (i = 0; i < 32; i = i + 1) begin : gen_adders
+      full_adder fa (
+          .a(a[i]),
+          .b(b[i]),
+          .cin(carry[i]),
+          .sum(sum[i]),
+          .cout(carry[i+1])
+      );
+    end
+  endgenerate
+
+  assign cout = carry[32];
 endmodule
 
 // 全加器模块 - 使用半加器和与非门实现
@@ -51,29 +60,21 @@ module full_adder (
 endmodule
 
 // 32位加法器模块 - 使用全加器实现
-module adder_32bit (
-    input [31:0] a,
-    input [31:0] b,
-    input cin,
-    output [31:0] sum,
-    output cout
+
+module half_adder (
+    input  a,
+    input  b,
+    output sum,
+    output carry
 );
-  wire [32:0] carry;
-  assign carry[0] = cin;
+  // 使用与非门实现异或(XOR)和与(AND)
+  wire nand_ab;
+  wire nand_a_nand_ab;
+  wire nand_b_nand_ab;
 
-  // 串联32个全加器
-  genvar i;
-  generate
-    for (i = 0; i < 32; i = i + 1) begin : gen_adders
-      full_adder fa (
-          .a(a[i]),
-          .b(b[i]),
-          .cin(carry[i]),
-          .sum(sum[i]),
-          .cout(carry[i+1])
-      );
-    end
-  endgenerate
-
-  assign cout = carry[32];
+  assign nand_ab = ~(a & b);  // NAND(a, b)
+  assign nand_a_nand_ab = ~(a & nand_ab);  // NAND(a, NAND(a, b))
+  assign nand_b_nand_ab = ~(b & nand_ab);  // NAND(b, NAND(a, b))
+  assign sum = ~(nand_a_nand_ab & nand_b_nand_ab);  // NAND(NAND(a, NAND(a,b)), NAND(b, NAND(a,b)))
+  assign carry = ~nand_ab;  // NOT(NAND(a, b)) = AND(a, b)
 endmodule

@@ -1,4 +1,6 @@
 am-kernels/tests/cpu-tests/.result
+am-kernels/tests/am-tests/build
+nemu/tools/spike-diff/build
 npc/build
 abstract-machine/am/build
 npc/sim.fst
