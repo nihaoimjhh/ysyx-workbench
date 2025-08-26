@@ -21,7 +21,6 @@ int printf(const char *fmt, ...) {
   va_end(args);
   return len;
 }
-
 int vsprintf(char *out, const char *fmt, va_list ap) {
   int outindex = 0;
   int fmtindex = 0;
@@ -34,6 +33,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       // 解析标志、宽度等
       int width = 0;
       int zero_padding = 0;
+      int is_long = 0;  // 新增: 长整型标志
       
       // 检查是否有0填充
       if (fmt[fmtindex] == '0') {
@@ -47,11 +47,22 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         fmtindex++;
       }
       
+      // 检查是否为长整型
+      if (fmt[fmtindex] == 'l') {
+        is_long = 1;
+        fmtindex++;
+      }
+      
       // 根据格式符类型处理
       switch (fmt[fmtindex]) {
         case 'd': {
-          int num = va_arg(ap, int);
-          char num_str[32];
+          long long num;
+          if (is_long) {
+            num = va_arg(ap, long);  // 获取长整型参数
+          } else {
+            num = va_arg(ap, int);   // 获取普通整型参数
+          }
+          char num_str[64];  // 增大缓冲区，防止长整型溢出
           int num_index = 0;
           
           // 处理0值的特殊情况
@@ -120,10 +131,111 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       out[outindex++] = fmt[fmtindex++];
     }
   }
-  
   out[outindex] = '\0';
   return outindex;
 }
+// int vsprintf(char *out, const char *fmt, va_list ap) {
+//   int outindex = 0;
+//   int fmtindex = 0;
+  
+//   while (fmt[fmtindex] != '\0') {
+//     // 处理格式化标记
+//     if (fmt[fmtindex] == '%') {
+//       fmtindex++; // 跳过 '%'
+      
+//       // 解析标志、宽度等
+//       int width = 0;
+//       int zero_padding = 0;
+      
+//       // 检查是否有0填充
+//       if (fmt[fmtindex] == '0') {
+//         zero_padding = 1;
+//         fmtindex++;
+//       }
+      
+//       // 解析宽度
+//       while (fmt[fmtindex] >= '0' && fmt[fmtindex] <= '9') {
+//         width = width * 10 + (fmt[fmtindex] - '0');
+//         fmtindex++;
+//       }
+      
+//       // 根据格式符类型处理
+//       switch (fmt[fmtindex]) {
+//         case 'd': {
+//           int num = va_arg(ap, int);
+//           char num_str[32];
+//           int num_index = 0;
+          
+//           // 处理0值的特殊情况
+//           if (num == 0) {
+//             num_str[num_index++] = '0';
+//           } else {
+//             // 处理负数
+//             int is_negative = 0;
+//             if (num < 0) {
+//               is_negative = 1;
+//               num = -num;
+//             }
+            
+//             // 转换为字符串（反序）
+//             while (num > 0) {
+//               num_str[num_index++] = (num % 10) + '0';
+//               num /= 10;
+//             }
+            
+//             // 添加负号
+//             if (is_negative) {
+//               num_str[num_index++] = '-';
+//             }
+//           }
+          
+//           // 处理宽度和填充
+//           int padding = width - num_index;
+//           if (padding > 0 && zero_padding) {
+//             // 如果有负号，先输出负号
+//             if (num_index > 0 && num_str[num_index-1] == '-') {
+//               out[outindex++] = '-';
+//               num_index--;
+//               padding++;
+//             }
+            
+//             // 添加0填充
+//             while (padding-- > 0) {
+//               out[outindex++] = '0';
+//             }
+//           }
+          
+//           // 反向输出数字
+//           while (num_index > 0) {
+//             out[outindex++] = num_str[--num_index];
+//           }
+//           break;
+//         }
+        
+//         case 's': {
+//           char *str = va_arg(ap, char*);
+//           while (str && *str) {
+//             out[outindex++] = *str++;
+//           }
+//           break;
+//         }
+        
+//         default:
+//           // 未知格式符，原样输出
+//           out[outindex++] = '%';
+//           out[outindex++] = fmt[fmtindex];
+//       }
+      
+//       fmtindex++; // 移至下一字符
+//     } else {
+//       // 普通字符直接复制
+//       out[outindex++] = fmt[fmtindex++];
+//     }
+//   }
+  
+//   out[outindex] = '\0';
+//   return outindex;
+// }
 
 int sprintf(char *out, const char *fmt, ...) {
   va_list args;
