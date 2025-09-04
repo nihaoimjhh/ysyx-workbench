@@ -27,33 +27,44 @@ static void thread_wrapper(void *arg) {
   assert(0);
 }
 
+// static Context* ev_handler(Event e, Context *c) {
+//   switch (e.event) {
+//     case EVENT_YIELD:
+//       // 处理上下文切换
+//       if (switch_from != NULL) {
+//         // 保存当前上下文
+//         *switch_from = (rt_ubase_t)c;
+//       }
+//       if (switch_to != NULL) {
+//         // 切换到目标上下
+//         c = (Context *)(*switch_to);
+//       }
+//       // 清除全局变量
+//       switch_from = NULL;
+//       switch_to = NULL;
+//       return c;
+//     case EVENT_IRQ_TIMER://不加这个native会报错
+//       // 处理时钟中断
+//       // 时钟中断，返回当前上下文即可
+//       return c;
+//     default: 
+//       printf("Unhandled event ID = %d\n", e.event); 
+//       assert(0);
+//   }
+//   return c;
+// }
 static Context* ev_handler(Event e, Context *c) {
-  switch (e.event) {
-    case EVENT_YIELD:
-      // 处理上下文切换
-      if (switch_from != NULL) {
-        // 保存当前上下文
-        *switch_from = (rt_ubase_t)c;
-      }
-      if (switch_to != NULL) {
-        // 切换到目标上下文
-        c = (Context *)(*switch_to);
-      }
-      // 清除全局变量
-      switch_from = NULL;
-      switch_to = NULL;
-      return c;
-    case EVENT_IRQ_TIMER://不加这个native会报错
-      // 处理时钟中断
-      // 时钟中断，返回当前上下文即可
-      return c;
-    default: 
-      printf("Unhandled event ID = %d\n", e.event); 
-      assert(0);
+  // 不检查事件类型，直接执行上下文切换逻辑
+  if (switch_from != NULL) {
+    *switch_from = (rt_ubase_t)c;
   }
+  if (switch_to != NULL) {
+    c = (Context *)(*switch_to);
+  }
+  switch_from = NULL;
+  switch_to = NULL;
   return c;
 }
-
 void __am_cte_init() {
   cte_init(ev_handler);
 }

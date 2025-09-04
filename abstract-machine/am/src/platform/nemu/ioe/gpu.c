@@ -53,7 +53,7 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     for (int j = 0; j < h; j++) {
       for (int i = 0; i < w; i++) {
         if ((x + i < W) && (y + j < H)) {  // 确保在屏幕范围内
-          fb[(y + j) * W + (x + i)] = pixels[j * w + i];
+          fb[j* W  +y*W+x+i] = pixels[j * w + i];
         }
       }
     }
