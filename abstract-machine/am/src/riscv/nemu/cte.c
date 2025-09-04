@@ -64,7 +64,6 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   for (int i = 0; i < NR_REGS; i++) {
     ctx->gpr[i] = 0;
   }
-  
   // 设置栈指针 - 指向Context结构体的起始位置
   ctx->gpr[2] = (uintptr_t)ctx; // sp (x2)
   
@@ -74,11 +73,9 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   // 设置程序计数器为入口函数地址
   ctx->mepc = (uintptr_t)entry;
   
-  // 设置mstatus寄存器，使能中断
   ctx->mstatus = 0x1800; // 设置MPP=11(Machine mode)
   
-  // mcause设置为0
-  ctx->mcause = 0;
+  ctx->mcause = 11;
   
   // 地址空间信息
   ctx->pdir = NULL;

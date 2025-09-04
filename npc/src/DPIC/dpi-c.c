@@ -4,6 +4,7 @@
 #include "paddr.h"
 #include <stdio.h>
 #include <sys/time.h>
+#include "difftest.h"
 extern NPCState npc_state;
 extern CPU_state cpu;
 extern Decode s;
@@ -69,6 +70,7 @@ extern "C" int cpu_pmem_read(paddr_t addr)
           
           // 添加RTC外设访问追踪
           log_device_access("RTC", addr, result, 0);
+          difftest_skip_ref();
           return result;
      }
      else
@@ -93,6 +95,7 @@ extern "C" void cpu_pmem_write(paddr_t addr, word_t data, uint8_t wmask)
                counter = 0; // 重置计数器
           }
           fflush(stdout);
+          difftest_skip_ref();
      }
      else
      {

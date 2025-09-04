@@ -39,6 +39,7 @@
           "type_traits": "c",
           "typeinfo": "c",
           "*.def": "c",
-          "algorithm": "c"
+          "algorithm": "c",
+          "difftest.h": "c"
      }
 }
