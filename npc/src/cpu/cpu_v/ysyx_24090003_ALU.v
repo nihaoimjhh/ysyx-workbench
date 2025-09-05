@@ -1,23 +1,20 @@
 `include "ysyx_24090003_define.v"
 module ysyx_24090003_ALU (
-    input      [31:0] i_op1,     // 第一个操作数
-    input      [31:0] i_op2,     // 第二个操作数
-    input      [ 3:0] i_alu_op,  // ALU操作码
-    output reg [31:0] o_result,  // 运算结果
-    output            o_zero     // 零标志位(用于条件分支)
+    input      [31:0] i_op1,     
+    input      [31:0] i_op2,  
+    input      [ 3:0] i_alu_op,  
+    output reg [31:0] o_result,  
+    output            o_zero    
 );
-  // 内部信号
   wire [31:0] w_add_result;
   wire [31:0] w_sub_result;
-  wire        w_overflow;  // 溢出标志位
-  wire        w_carry_out;  // 进位标志位
+  wire        w_overflow;  
+  wire        w_carry_out; 
   wire [31:0] w_sll_result;
   wire [31:0] w_srl_result;
   wire [31:0] w_sra_result;
   wire        w_slt_result;
   wire        w_sltu_result;
-
-  // 加法器实现 (使用基本门电路)
   adder_32bit adder (
       .a(i_op1),
       .b(i_op2),
@@ -25,22 +22,18 @@ module ysyx_24090003_ALU (
       .sum(w_add_result),
       .cout(w_carry_out)
   );
-
-  // 减法实现 (使用加法器和取反)
   wire [31:0] w_op2_not = ~i_op2;
   wire [31:0] w_op2_not_plus_1;
-
   adder_32bit adder_sub (
       .a   (i_op1),
       .b   (w_op2_not),
-      .cin (1'b1),          // 加1实现补码
+      .cin (1'b1),
       .sum (w_sub_result),
       .cout()
   );
-
   // 有符号和无符号比较
   assign w_slt_result  = (i_op1[31] != i_op2[31]) ? i_op1[31] : w_sub_result[31];
-  assign w_sltu_result = (i_op1 < i_op2) ? 1'b1 : 1'b0;  // 无符号比较
+  assign w_sltu_result = (i_op1 < i_op2) ? 1'b1 : 1'b0; 
 
   // 左移实现 (桶形移位器)
   wire [31:0] w_sll_level1 = i_op2[0] ? {i_op1[30:0], 1'b0} : i_op1;
@@ -84,8 +77,6 @@ module ysyx_24090003_ALU (
       default:   o_result = w_add_result;
     endcase
   end
-
-  // 零标志位 - 当结果为0时置1
   assign o_zero = (o_result == 32'b0);
 
 endmodule

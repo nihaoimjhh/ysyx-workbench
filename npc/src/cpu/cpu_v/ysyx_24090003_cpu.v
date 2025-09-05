@@ -1,21 +1,16 @@
 `include "ysyx_24090003_define.v"
 
 (*dont_touch = "true"*)
-// Prevent synthesis tool from optimizing the module
 module ysyx_24090003_cpu (
     input i_clk,
     input i_rst_n,
-
-    // 新增内存接口
     output [31:0] o_mem_addr,
     output [31:0] o_mem_wdata,
     output o_mem_we,
     output o_mem_en,
-    output [2:0] o_mem_wmask,  // 新增：写掩码输出
+    output [2:0] o_mem_wmask,
     input [31:0] i_mem_rdata
 );
-  // 模块间互连信号
-
   // IFU相关
   wire [31:0] w_pc;
   wire [31:0] w_inst;
@@ -28,12 +23,11 @@ module ysyx_24090003_cpu (
   wire [ 4:0] w_rd_addr;
   wire [ 6:0] w_opcode;
   wire [ 2:0] w_funct3;
-  wire [ 6:0] w_funct7;  // 新增: funct7连接信号
+  wire [ 6:0] w_funct7;
   wire [31:0] w_imm;
 
-  // 修改后的内存控制信号
-  wire        w_mem_we;  // 内存写使能（1：写，0：读）
-  wire        w_mem_en;  // 内存使能
+  wire        w_mem_we;  
+  wire        w_mem_en; 
 
   // 新增信号 - 内存访问控制
   wire [ 1:0] w_mem_width;  // 内存访问宽度
@@ -77,18 +71,14 @@ module ysyx_24090003_cpu (
 
   // PC更新信号现在直接从EXU获取
   assign w_pc_update_en = w_exu_pc_update;
-
-  // 指令获取单元
   ysyx_24090003_IFU ifu (
       .i_clk(i_clk),
       .i_rst_n(i_rst_n),
-      .i_next_pc(w_next_pc),  // 直接使用EXU计算的下一PC
+      .i_next_pc(w_next_pc),
       .i_pc_update_en(w_pc_update_en),
       .o_inst(w_inst),
       .o_pc(w_pc)
   );
-
-  // 指令解码单元 - 添加funct7连接
   ysyx_24090003_IDU idu (
       .i_inst(w_inst),
       .i_rst_n(i_rst_n),

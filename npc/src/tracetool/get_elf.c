@@ -120,7 +120,6 @@ int sym_func_index_find( Elf32_Sym * symtab_pointer,uint32_t arr,int symlens){
         return -1;
     }
     return -1;
-
 }//通过函数的地址找到函数的索引，这样才能通过函数的索引找到函数的名字
 void memory_free(Elf32_Shdr *shdr_pointer, Elf32_Sym *symtab_pointer, char *strtab,char *shstrtab) {
     if(shdr_pointer != NULL) {

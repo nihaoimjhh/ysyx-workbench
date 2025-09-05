@@ -88,6 +88,7 @@ int strncmp(const char *s1, const char *s2, size_t n) {
   // 已经比较了n个字符，它们都相等
   return 0;
 }
+//nbyte
 void *memset(void *s, int c, size_t n) {
   unsigned char *p;
   p=( unsigned char*)s;

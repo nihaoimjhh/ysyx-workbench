@@ -79,7 +79,7 @@ __am_asm_trap:
   
     // 保存通用寄存器
     sw x1,  (1 * 4)(sp)
-    sw x2 , (2 * 4)(sp)  
+    //sw x2 , (2 * 4)(sp)  
     sw x3,  (3 * 4)(sp)
     sw x4,  (4 * 4)(sp)
     sw x5,  (5 * 4)(sp)
@@ -165,7 +165,7 @@ __am_asm_trap:
     lw x29, (29 * 4)(sp)
     lw x30, (30 * 4)(sp)
     lw x31, (31 * 4)(sp)
-    lw x2 ,  (2 * 4)(sp)  // 恢复sp寄存器
+    //lw x2 ,  (2 * 4)(sp)  // 恢复sp寄存器
   
     addi sp, sp, CONTEXT_SIZE
     mret

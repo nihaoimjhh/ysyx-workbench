@@ -9,8 +9,6 @@
 
 #define FUNC_INFO 18
 
-
-
 // 函数声明
 FILE *elf_fileopen(char *filename);
 int elf32_Ehdr_read(FILE *fp, Elf32_Ehdr *ehdr);

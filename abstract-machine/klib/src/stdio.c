@@ -9,15 +9,12 @@ int printf(const char *fmt, ...) {
   char buf[4096]; // 定义一个足够大的缓冲区
   va_list args;
   va_start(args, fmt);
-  
   // 使用 vsprintf 将格式化字符串写入缓冲区
   int len = vsprintf(buf, fmt, args);
-  
   // 逐个字符输出到标准输出
   for (int i = 0; buf[i] != '\0'; i++) {
     putch(buf[i]);
   }
-  
   va_end(args);
   return len;
 }

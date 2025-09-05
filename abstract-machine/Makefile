@@ -12,7 +12,6 @@ ifeq ($(MAKECMDGOALS),)
   MAKECMDGOALS  = image
   .DEFAULT_GOAL = image
 endif
-#规定目标就是镜像文件，整个am就是输出镜像文件给nemu使用，因为nemu只有一个端口，在monitor里面实现，使用getopt来读取文件，需要提供文件的位置，读取之后就
 #可以运行了
 ### Override checks when `make clean/clean-all/html`
 ifeq ($(findstring $(MAKECMDGOALS),clean|clean-all|html),)
