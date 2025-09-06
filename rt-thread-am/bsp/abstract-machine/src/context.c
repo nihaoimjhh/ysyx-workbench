@@ -88,14 +88,11 @@ void rt_hw_context_switch_interrupt(void *context, rt_ubase_t from, rt_ubase_t t
 rt_uint8_t *rt_hw_stack_init(void *tentry, void *parameter, rt_uint8_t *stack_addr, void *texit) {
   // 对齐栈地址到sizeof(uintptr_t)
   uintptr_t aligned_stack = (uintptr_t)stack_addr & ~(sizeof(uintptr_t) - 1);
-  
   // 在栈上为包裹函数参数分配空间
   wrapper_args_t *args = (wrapper_args_t *)(aligned_stack - sizeof(wrapper_args_t));
   args->tentry = (void (*)(void *))tentry;
   args->parameter = parameter;
   args->texit = (void (*)(void))texit;
-  
-  // 创建栈区域，从参数位置向下
   Area kstack = {
     .start = (void *)((uintptr_t)args - 4096), // 假设栈大小为4KB
     .end = (void *)args

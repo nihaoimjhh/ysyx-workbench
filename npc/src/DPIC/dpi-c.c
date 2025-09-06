@@ -57,16 +57,44 @@ extern "C" void set_dnpc(vaddr_t value)
 {
      s.dnpc = value;
 }
+// extern "C" int cpu_pmem_read(paddr_t addr)
+// {
+//      if (addr == 0xa0000048 || addr == 0xa000004c)
+//      {
+//           uint64_t us = get_time();
+//           uint32_t result;
+//           if (addr == 0xa0000048)
+//                result = (uint32_t)us;
+//           else
+//                result = (uint32_t)(us >> 32);
+          
+//           // 添加RTC外设访问追踪
+//           log_device_access("RTC", addr, result, 0);
+//           difftest_skip_ref();
+//           return result;
+//      }
+//      else
+//      {
+//           uint32_t result = paddr_read(addr, 4);
+//           return result;
+//      }
+// }
+static uint32_t rtc_buf[2] = {0};
+
 extern "C" int cpu_pmem_read(paddr_t addr)
 {
      if (addr == 0xa0000048 || addr == 0xa000004c)
      {
-          uint64_t us = get_time();
-          uint32_t result;
-          if (addr == 0xa0000048)
-               result = (uint32_t)us;
-          else
-               result = (uint32_t)(us >> 32);
+          uint32_t offset = addr - 0xa0000048;
+          
+          // 只有读取高位(offset==4)时才更新时间
+          if (offset == 4) {
+               uint64_t us = get_time();
+               rtc_buf[0] = (uint32_t)us;        // 低32位
+               rtc_buf[1] = (uint32_t)(us >> 32); // 高32位
+          }
+          
+          uint32_t result = rtc_buf[offset / 4];
           
           // 添加RTC外设访问追踪
           log_device_access("RTC", addr, result, 0);
