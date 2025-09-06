@@ -14,7 +14,7 @@ LDFLAGS   += -T $(AM_HOME)/scripts/linker.ld \
 LDFLAGS   += --gc-sections -e _start
 CFLAGS += -DMAINARGS=\"$(mainargs)\"
 .PHONY: $(AM_HOME)/am/src/riscv/npc/trm.c
-NPCFLAGS +=  -e $(IMAGE).elf -d /home/jinghanhui/ysyx-workbench/nemu/build/riscv32-nemu-interpreter-so 
+NPCFLAGS +=  -e $(IMAGE).elf -d /home/jinghanhui/ysyx-workbench/nemu/build/riscv32-nemu-interpreter-so -b
 image: $(IMAGE).elf
 	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin

@@ -16,6 +16,7 @@
 		"locale.h": "c",
 		"functional": "c",
 		"stdarg.h": "c",
-		"cstdint": "c"
+		"cstdint": "c",
+		"atomic": "c"
 	}
 }

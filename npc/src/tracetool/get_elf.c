@@ -136,16 +136,35 @@ void memory_free(Elf32_Shdr *shdr_pointer, Elf32_Sym *symtab_pointer, char *strt
     }
 }//释放内存
 int catch_call_ret(uint32_t inst,uint32_t dnpc,uint32_t pc){ 
-       if((inst&0x7f)==0x6f||(inst&0x7f)==0x67){//是不是jal,是不是jarl
-       if((inst&0xfffff)==0x8067){//是不是ret
-              return 1;
-         }
-         else{
-              return 0;
-         }
+    //    if((inst&0x7f)==0x6f||(inst&0x7f)==0x67){//是不是jal,是不是jarl
+    //    if((inst&0xfffff)==0x8067){//是不是ret
+    //           return 1;
+    //      }
+    //      else{
+    //           return 0;
+    //      }
+    //     }
+    //     else
+    //         return -1;
+    uint32_t opcode = inst & 0x7f;
+    uint32_t rd = (inst >> 7) & 0x1f;
+    uint32_t rs1 = (inst >> 15) & 0x1f;
+    
+    if (opcode == 0x67) { // JALR指令
+        if (rd == 0 && rs1 == 1) { // jalr x0, offset(ra)
+            return 1; 
+        } 
+        else if (rd == 1) { // jalr ra, offset(rs)
+            return 0; // 是调用指令
         }
-        else
-            return -1;
+    } 
+    else if (opcode == 0x6f) { // JAL指令
+        if (rd == 1) { // jal ra, offset
+            return 0; // 是调用指令
+        }
+    }
+    
+    return -1; // 既不是调用也不是返回
     
 }//判断是不是call和ret，其中先判断是不是jal和jarl，再判断是不是ret，由于ret比较好判断所以先判断ret，剩下的就是call
 void inst_print_funcname(Elf32_Shdr *shdr_pointer,char *strtab,Elf32_Sym *symtab_pointer,uint32_t inst,uint32_t dnpc ,uint32_t pc,int symlens,int *call_count){
@@ -156,7 +175,7 @@ void inst_print_funcname(Elf32_Shdr *shdr_pointer,char *strtab,Elf32_Sym *symtab
         int i=0;
         if(catch_call_ret(inst,dnpc,pc)==0){
             (*call_count)++;
-            npc_state.state = NPC_STOP;
+            // npc_state.state = NPC_STOP;
             printf("\033[31m""%#x:""\033[0m",pc);
             for(i=0;i<*call_count;i++){
                 printf(" ");
@@ -170,7 +189,7 @@ void inst_print_funcname(Elf32_Shdr *shdr_pointer,char *strtab,Elf32_Sym *symtab
         }
         else if(catch_call_ret(inst,dnpc,pc)==1){
             (*call_count)--;
-            npc_state.state = NPC_STOP;
+            // npc_state.state = NPC_STOP;
             printf("\033[32m""%#x:""\033[0m",pc);
             for(i=0;i<*call_count;i++){
             printf(" ");
