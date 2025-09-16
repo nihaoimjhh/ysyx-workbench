@@ -5,4 +5,11 @@ npc/build
 am-kernels/tests/cpu-tests/build/
 abstract-machine/am/build
 npc/sim.fst
-nemu/build/*
+nemu/build/
+*.o
+*.a
+*.so
+*.elf
+*.bin
+*.vcd
+*.fst
