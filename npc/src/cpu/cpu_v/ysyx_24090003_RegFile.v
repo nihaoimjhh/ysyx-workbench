@@ -41,12 +41,15 @@ module ysyx_24090003_RegFile (
     set_csr({20'b0, `CSR_MTVEC}, r_mtvec);
     set_csr({20'b0, `CSR_MEPC}, r_mepc);
     set_csr({20'b0, `CSR_MCAUSE}, r_mcause);
+    set_csr({20'b0, `CSR_MCYCLE}, r_mcycle[31:0]);
+    set_csr({20'b0, `CSR_MCYCLEH}, r_mcycle[63:32]);
   end
   reg [31:0] r_gpr     [31:0];
   reg [31:0] r_mstatus;
   reg [31:0] r_mtvec;
   reg [31:0] r_mepc;
   reg [31:0] r_mcause;
+  reg [63:0] r_mcycle;  // 64位周期计数器
   assign o_rs1_data = (i_rs1_addr == 5'b0) ? 32'b0 : r_gpr[i_rs1_addr];
   assign o_rs2_data = (i_rs2_addr == 5'b0) ? 32'b0 : r_gpr[i_rs2_addr];
 
@@ -57,6 +60,8 @@ module ysyx_24090003_RegFile (
       `CSR_MTVEC:   r_csr_rdata = r_mtvec;
       `CSR_MEPC:    r_csr_rdata = r_mepc;
       `CSR_MCAUSE:  r_csr_rdata = r_mcause;
+      `CSR_MCYCLE:  r_csr_rdata = r_mcycle[31:0];   // mcycle低32位
+      `CSR_MCYCLEH: r_csr_rdata = r_mcycle[63:32];  // mcycle高32位
       default:      r_csr_rdata = 32'h0;
     endcase
   end
@@ -74,7 +79,13 @@ module ysyx_24090003_RegFile (
       r_mtvec   <= 32'h0;
       r_mepc    <= 32'h0;
       r_mcause  <= 32'h0;
+      r_mcycle  <= 64'h0;
     end else begin
+      // 每个时钟周期递增mcycle计数器（除非正在写入mcycle/mcycleh）
+      if (!(i_csr_we && (i_csr_addr == `CSR_MCYCLE || i_csr_addr == `CSR_MCYCLEH))) begin
+        r_mcycle <= r_mcycle + 64'h1;
+      end
+      
       if (i_ecall) begin
         r_mepc   <= i_pc;
         r_mcause <= `ECALL_M_MODE;
@@ -123,6 +134,28 @@ module ysyx_24090003_RegFile (
                 end
               end
               default: r_mcause <= i_csr_wdata;
+            endcase
+          end
+          `CSR_MCYCLE: begin
+            case (i_csr_op)
+              2'b01:   r_mcycle[31:0] <= i_csr_wdata;  // CSRRW: 直接写入rs1值
+              2'b10: begin  // CSRRS: 只有rs1不为x0时才写入
+                if (i_rs1_addr != 5'b0) begin
+                  r_mcycle[31:0] <= r_mcycle[31:0] | i_csr_wdata;
+                end
+              end
+              default: r_mcycle[31:0] <= i_csr_wdata;
+            endcase
+          end
+          `CSR_MCYCLEH: begin
+            case (i_csr_op)
+              2'b01:   r_mcycle[63:32] <= i_csr_wdata;  // CSRRW: 直接写入rs1值
+              2'b10: begin  // CSRRS: 只有rs1不为x0时才写入
+                if (i_rs1_addr != 5'b0) begin
+                  r_mcycle[63:32] <= r_mcycle[63:32] | i_csr_wdata;
+                end
+              end
+              default: r_mcycle[63:32] <= i_csr_wdata;
             endcase
           end
           default: begin

@@ -108,6 +108,43 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
           break;
         }
         
+        case 'u': {
+          unsigned long long num;
+          if (is_long) {
+            num = va_arg(ap, unsigned long);  // 获取无符号长整型参数
+          } else {
+            num = va_arg(ap, unsigned int);   // 获取普通无符号整型参数
+          }
+          char num_str[64];  // 增大缓冲区，防止长整型溢出
+          int num_index = 0;
+          
+          // 处理0值的特殊情况
+          if (num == 0) {
+            num_str[num_index++] = '0';
+          } else {
+            // 转换为字符串（反序）
+            while (num > 0) {
+              num_str[num_index++] = (num % 10) + '0';
+              num /= 10;
+            }
+          }
+          
+          // 处理宽度和填充
+          int padding = width - num_index;
+          if (padding > 0 && zero_padding) {
+            // 添加0填充
+            while (padding-- > 0) {
+              out[outindex++] = '0';
+            }
+          }
+          
+          // 反向输出数字
+          while (num_index > 0) {
+            out[outindex++] = num_str[--num_index];
+          }
+          break;
+        }
+        
         case 's': {
           char *str = va_arg(ap, char*);
           while (str && *str) {

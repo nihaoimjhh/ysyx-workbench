@@ -39,6 +39,8 @@
 `define CSR_MTVEC 12'h305          // 机器陷阱向量寄存器
 `define CSR_MEPC 12'h341          // 机器异常程序计数器
 `define CSR_MCAUSE 12'h342          // 机器异常原因寄存器
+`define CSR_MCYCLE 12'hB00          // 机器周期计数器低32位
+`define CSR_MCYCLEH 12'hB80          // 机器周期计数器高32位
 
 // 异常原因编码
 `define ECALL_M_MODE 32'd11           // 机器模式下的环境调用
