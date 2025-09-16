@@ -145,6 +145,65 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
           break;
         }
         
+        case 'c': {
+          char ch = (char)va_arg(ap, int);  // char 类型会被提升为 int
+          
+          // 处理宽度和填充
+          int padding = width - 1;  // 单个字符占用1个位置
+          if (padding > 0 && !zero_padding) {
+            // 添加空格填充（字符不支持零填充）
+            while (padding-- > 0) {
+              out[outindex++] = ' ';
+            }
+          }
+          
+          // 输出字符
+          out[outindex++] = ch;
+          break;
+        }
+        
+        case 'x': {
+          unsigned long long num;
+          if (is_long) {
+            num = va_arg(ap, unsigned long);  // 获取无符号长整型参数
+          } else {
+            num = va_arg(ap, unsigned int);   // 获取普通无符号整型参数
+          }
+          char num_str[64];  // 增大缓冲区，防止长整型溢出
+          int num_index = 0;
+          
+          // 处理0值的特殊情况
+          if (num == 0) {
+            num_str[num_index++] = '0';
+          } else {
+            // 转换为十六进制字符串（反序）
+            while (num > 0) {
+              int digit = num % 16;
+              if (digit < 10) {
+                num_str[num_index++] = digit + '0';
+              } else {
+                num_str[num_index++] = digit - 10 + 'a';  // 使用小写字母 a-f
+              }
+              num /= 16;
+            }
+          }
+          
+          // 处理宽度和填充
+          int padding = width - num_index;
+          if (padding > 0 && zero_padding) {
+            // 添加0填充
+            while (padding-- > 0) {
+              out[outindex++] = '0';
+            }
+          }
+          
+          // 反向输出十六进制数字
+          while (num_index > 0) {
+            out[outindex++] = num_str[--num_index];
+          }
+          break;
+        }
+        
         case 's': {
           char *str = va_arg(ap, char*);
           while (str && *str) {

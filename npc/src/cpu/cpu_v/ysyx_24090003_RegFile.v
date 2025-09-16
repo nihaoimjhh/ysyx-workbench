@@ -37,6 +37,8 @@ module ysyx_24090003_RegFile (
     for (i = 0; i < 32; i = i + 1) begin
       set_gpr(i, r_gpr[i]);
     end
+    set_csr({20'b0, `CSR_MVENDORID}, r_mvendorid);
+    set_csr({20'b0, `CSR_MARCHID}, r_marchid);
     set_csr({20'b0, `CSR_MSTATUS}, r_mstatus);
     set_csr({20'b0, `CSR_MTVEC}, r_mtvec);
     set_csr({20'b0, `CSR_MEPC}, r_mepc);
@@ -45,6 +47,8 @@ module ysyx_24090003_RegFile (
     set_csr({20'b0, `CSR_MCYCLEH}, r_mcycle[63:32]);
   end
   reg [31:0] r_gpr     [31:0];
+  reg [31:0] r_mvendorid;  // 厂商ID寄存器
+  reg [31:0] r_marchid;    // 架构ID寄存器  
   reg [31:0] r_mstatus;
   reg [31:0] r_mtvec;
   reg [31:0] r_mepc;
@@ -56,13 +60,15 @@ module ysyx_24090003_RegFile (
   reg [31:0] r_csr_rdata;
   always @(*) begin
     case (i_csr_addr)
-      `CSR_MSTATUS: r_csr_rdata = r_mstatus;
-      `CSR_MTVEC:   r_csr_rdata = r_mtvec;
-      `CSR_MEPC:    r_csr_rdata = r_mepc;
-      `CSR_MCAUSE:  r_csr_rdata = r_mcause;
-      `CSR_MCYCLE:  r_csr_rdata = r_mcycle[31:0];   // mcycle低32位
-      `CSR_MCYCLEH: r_csr_rdata = r_mcycle[63:32];  // mcycle高32位
-      default:      r_csr_rdata = 32'h0;
+      `CSR_MVENDORID: r_csr_rdata = r_mvendorid;
+      `CSR_MARCHID:   r_csr_rdata = r_marchid;
+      `CSR_MSTATUS:   r_csr_rdata = r_mstatus;
+      `CSR_MTVEC:     r_csr_rdata = r_mtvec;
+      `CSR_MEPC:      r_csr_rdata = r_mepc;
+      `CSR_MCAUSE:    r_csr_rdata = r_mcause;
+      `CSR_MCYCLE:    r_csr_rdata = r_mcycle[31:0];   // mcycle低32位
+      `CSR_MCYCLEH:   r_csr_rdata = r_mcycle[63:32];  // mcycle高32位
+      default:        r_csr_rdata = 32'h0;
     endcase
   end
   assign o_csr_rdata = r_csr_rdata;
@@ -75,11 +81,13 @@ module ysyx_24090003_RegFile (
       for (i = 0; i < 32; i = i + 1) begin
         r_gpr[i] <= 32'b0;
       end
-      r_mstatus <= 32'h1800;
-      r_mtvec   <= 32'h0;
-      r_mepc    <= 32'h0;
-      r_mcause  <= 32'h0;
-      r_mcycle  <= 64'h0;
+      r_mvendorid <= `MVENDORID_VALUE;  // "ysyx"的ASCII码
+      r_marchid   <= `MARCHID_VALUE;    // 学号数字部分
+      r_mstatus   <= 32'h1800;
+      r_mtvec     <= 32'h0;
+      r_mepc      <= 32'h0;
+      r_mcause    <= 32'h0;
+      r_mcycle    <= 64'h0;
     end else begin
       // 每个时钟周期递增mcycle计数器（除非正在写入mcycle/mcycleh）
       if (!(i_csr_we && (i_csr_addr == `CSR_MCYCLE || i_csr_addr == `CSR_MCYCLEH))) begin
@@ -92,6 +100,12 @@ module ysyx_24090003_RegFile (
       end  // CSR写入
       else if (i_csr_we) begin
         case (i_csr_addr)
+          `CSR_MVENDORID: begin
+            // mvendorid是只读寄存器，忽略写入操作
+          end
+          `CSR_MARCHID: begin
+            // marchid是只读寄存器，忽略写入操作
+          end
           `CSR_MSTATUS: begin
             case (i_csr_op)
               2'b01:   r_mstatus <= i_csr_wdata;  // CSRRW: 直接写入rs1值

@@ -35,6 +35,8 @@
 `define FUNCT7_ALT 7'b0100000       // 替代操作(SUB/SRA等)
 
 // CSR寄存器地址定义
+`define CSR_MVENDORID 12'hF11        // 厂商ID寄存器
+`define CSR_MARCHID 12'hF12          // 架构ID寄存器
 `define CSR_MSTATUS 12'h300          // 机器状态寄存器
 `define CSR_MTVEC 12'h305          // 机器陷阱向量寄存器
 `define CSR_MEPC 12'h341          // 机器异常程序计数器
@@ -44,6 +46,10 @@
 
 // 异常原因编码
 `define ECALL_M_MODE 32'd11           // 机器模式下的环境调用
+
+// 学号相关常量定义
+`define MVENDORID_VALUE 32'h79737978  // "ysyx"的ASCII码
+`define MARCHID_VALUE 32'd24090003
 
 // 系统指令编码
 `define MRET_INST 12'h302          // MRET指令编码 (0011000 00010)

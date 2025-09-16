@@ -1,5 +1,6 @@
 am-kernels/tests/cpu-tests/.result
 am-kernels/tests/am-tests/build
+abstract-machine/klib/build/
 nemu/tools/spike-diff/build
 npc/build
 am-kernels/tests/cpu-tests/build/
