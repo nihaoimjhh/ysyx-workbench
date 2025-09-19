@@ -1,8 +1,9 @@
 `include "ysyx_24090003_define.v"
 (*dont_touch = "true"*)
 module ysyx_24090003_IDU (
-    input [31:0] i_inst,
-    input i_rst_n,
+  input [31:0] i_inst,
+  input        i_inst_valid,  // 指令有效信号
+  input        i_rst_n,
     output [4:0] o_rs1_addr,
     output [4:0] o_rs2_addr,
     output [4:0] o_rd_addr,
@@ -64,7 +65,33 @@ module ysyx_24090003_IDU (
     endcase
   end
   assign o_imm = r_imm_out;
+
+  // 默认控制信号（安全状态）
+  localparam [3:0] DEFAULT_ALU_OP = `ALU_ADD;
+  localparam [1:0] DEFAULT_ALU_SRC1_SEL = `SRC_REG;
+  localparam [1:0] DEFAULT_ALU_SRC2_SEL = `SRC_IMM;
+
+  // 主要译码逻辑
   always @(*) begin
+    if (~i_rst_n || ~i_inst_valid) begin  // 指令复位或无效时保持安全状态
+      o_mem_we = 1'b0;
+      o_mem_en = 1'b0;
+      o_mem_width = 2'b10;
+      o_mem_unsigned = 1'b0;
+      o_reg_wen = 1'b0;
+      o_mem_to_reg = 1'b0;
+      o_jump = 1'b0;
+      o_branch = 1'b0;
+      o_jalr = 1'b0;
+      o_ebreak = 1'b0;
+      o_ecall = 1'b0;
+      o_mret = 1'b0;
+      o_csr_we = 1'b0;
+      o_csr_op = 2'b00;
+      o_alu_op = DEFAULT_ALU_OP;
+      o_alu_src1_sel = DEFAULT_ALU_SRC1_SEL;
+      o_alu_src2_sel = DEFAULT_ALU_SRC2_SEL;
+    end else begin
     case (o_opcode)
       7'b0000011: begin  // 加载指令 (LB/LBU/LH/LHU/LW)
         case (o_funct3)
@@ -1035,6 +1062,7 @@ module ysyx_24090003_IDU (
         o_alu_src2_sel = `SRC_IMM;
         inst_not_found(8'hff, {8{i_rst_n}});
       end
-    endcase
+      endcase
+    end
   end
 endmodule

@@ -27,6 +27,8 @@ void (*ref_difftest_memcpy)(paddr_t addr, void *buf, size_t n, bool direction) =
 void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(uint64_t n) = NULL;
 static bool is_skip_ref = false;
+// 多周期CPU支持：只有PC变化时才检查
+static vaddr_t last_pc = 0;
 void init_difftest(char *ref_so_file, long img_size, int port) {
   printf("ref_so_file = %s\n", ref_so_file);
   assert(ref_so_file != NULL);
@@ -68,13 +70,20 @@ void difftest_skip_ref() {
 }
 
 void difftest_step(vaddr_t pc, vaddr_t npc) {
-  CPU_state ref_r;
-  if (is_skip_ref) {
-    ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
-    is_skip_ref = false;
+  if (pc == last_pc) {
     return;
   }
-  ref_difftest_exec(1);
-  ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
-  checkregs(&ref_r, pc);
+  if (last_pc != 0) {
+    CPU_state ref_r;
+    if (is_skip_ref) {
+      ref_difftest_regcpy(&cpu, DIFFTEST_TO_REF);
+      is_skip_ref = false;
+    } else {
+      ref_difftest_exec(1);
+      ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
+      checkregs(&ref_r, last_pc);
+    }
+  }
+  
+  last_pc = pc;
 }
