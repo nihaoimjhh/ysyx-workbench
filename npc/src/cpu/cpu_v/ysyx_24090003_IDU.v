@@ -11,10 +11,10 @@ module ysyx_24090003_IDU (
     output [2:0] o_funct3,
     output [6:0] o_funct7,
     output [31:0] o_imm,
-    output reg o_mem_we,
-    output reg o_mem_en,
-    output reg [1:0] o_mem_width,  // 新增：内存访问宽度（00:byte, 01:halfword, 10:word）
-    output reg o_mem_unsigned,  // 新增：是否为无符号加载
+    output reg o_lsu_we,
+    output reg o_lsu_en,
+    output reg [3:0] o_lsu_wmask,  // 4位写掩码: 全字0100，半字0010，字节0001
+    output reg [3:0] o_lsu_rmask,  // 4位读掩码: 全字0100，半字0010，字节0001，有符号扩展最高位为1
     output reg o_reg_wen,
     output reg o_mem_to_reg,  // 内存到寄存器信号
     output reg o_jump,  // 跳转信号
@@ -74,10 +74,10 @@ module ysyx_24090003_IDU (
   // 主要译码逻辑
   always @(*) begin
     if (~i_rst_n || ~i_inst_valid) begin  // 指令复位或无效时保持安全状态
-      o_mem_we = 1'b0;
-      o_mem_en = 1'b0;
-      o_mem_width = 2'b10;
-      o_mem_unsigned = 1'b0;
+      o_lsu_we = 1'b0;
+      o_lsu_en = 1'b0;
+      o_lsu_wmask = 4'b0000;
+      o_lsu_rmask = 4'b0000;
       o_reg_wen = 1'b0;
       o_mem_to_reg = 1'b0;
       o_jump = 1'b0;
@@ -96,10 +96,10 @@ module ysyx_24090003_IDU (
       7'b0000011: begin  // 加载指令 (LB/LBU/LH/LHU/LW)
         case (o_funct3)
           3'b000: begin  // LB
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b1;
-            o_mem_width = 2'b00;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b1;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b1001;  // 字节有符号扩展: 最高位1表示符号扩展，最低位1表示字节
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b1;
             o_jump = 1'b0;
@@ -115,10 +115,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b001: begin  // LH
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b1;
-            o_mem_width = 2'b01;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b1;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b1010;  // 半字有符号扩展: 最高位1表示符号扩展，0010表示半字
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b1;
             o_jump = 1'b0;
@@ -134,10 +134,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b010: begin  // LW
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b1;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b1;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0100;  // 全字: 0100
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b1;
             o_jump = 1'b0;
@@ -153,10 +153,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b100: begin  // LBU
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b1;
-            o_mem_width = 2'b00;
-            o_mem_unsigned = 1'b1;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b1;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0001;  // 字节无符号扩展: 最高位0表示无符号扩展，最低位1表示字节
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b1;
             o_jump = 1'b0;
@@ -172,10 +172,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b101: begin  // LHU
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b1;
-            o_mem_width = 2'b01;
-            o_mem_unsigned = 1'b1;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b1;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0010;  // 半字无符号扩展: 最高位0表示无符号扩展，0010表示半字
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b1;
             o_jump = 1'b0;
@@ -191,10 +191,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           default: begin
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b1;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b1;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0100;  // 默认全字
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b1;
             o_jump = 1'b0;
@@ -216,10 +216,10 @@ module ysyx_24090003_IDU (
       7'b0010011: begin  // I型算术指令
         case (o_funct3)
           3'b000: begin  // ADDI
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -235,10 +235,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b010: begin  // SLTI
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -254,10 +254,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b011: begin  // SLTIU
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -273,10 +273,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b100: begin  // XORI
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -292,10 +292,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b110: begin  // ORI
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -311,10 +311,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b111: begin  // ANDI
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -330,10 +330,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b001: begin  // SLLI
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -349,10 +349,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b101: begin  // SRLI/SRAI
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -369,10 +369,10 @@ module ysyx_24090003_IDU (
             else o_alu_op = `ALU_SRA;  // SRAI
           end
           default: begin
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -392,10 +392,10 @@ module ysyx_24090003_IDU (
       end
 
       7'b0010111: begin  // auipc
-        o_mem_we = 1'b0;
-        o_mem_en = 1'b0;
-        o_mem_width = 2'b10;
-        o_mem_unsigned = 1'b0;
+        o_lsu_we = 1'b0;
+        o_lsu_en = 1'b0;
+        o_lsu_wmask = 4'b0000;
+        o_lsu_rmask = 4'b0000;
         o_reg_wen = 1'b1;
         o_mem_to_reg = 1'b0;
         o_jump = 1'b0;
@@ -412,10 +412,10 @@ module ysyx_24090003_IDU (
       end
 
       7'b1100111: begin  // jalr
-        o_mem_we = 1'b0;
-        o_mem_en = 1'b0;
-        o_mem_width = 2'b10;
-        o_mem_unsigned = 1'b0;
+        o_lsu_we = 1'b0;
+        o_lsu_en = 1'b0;
+        o_lsu_wmask = 4'b0000;
+        o_lsu_rmask = 4'b0000;
         o_reg_wen = 1'b1;
         o_mem_to_reg = 1'b0;
         o_jump = 1'b1;
@@ -432,10 +432,10 @@ module ysyx_24090003_IDU (
       end
 
       7'b1101111: begin  // jal
-        o_mem_we = 1'b0;
-        o_mem_en = 1'b0;
-        o_mem_width = 2'b10;
-        o_mem_unsigned = 1'b0;
+        o_lsu_we = 1'b0;
+        o_lsu_en = 1'b0;
+        o_lsu_wmask = 4'b0000;
+        o_lsu_rmask = 4'b0000;
         o_reg_wen = 1'b1;
         o_mem_to_reg = 1'b0;
         o_jump = 1'b1;
@@ -452,10 +452,10 @@ module ysyx_24090003_IDU (
       end
 
       7'b0110111: begin  // lui
-        o_mem_we = 1'b0;
-        o_mem_en = 1'b0;
-        o_mem_width = 2'b10;
-        o_mem_unsigned = 1'b0;
+        o_lsu_we = 1'b0;
+        o_lsu_en = 1'b0;
+        o_lsu_wmask = 4'b0000;
+        o_lsu_rmask = 4'b0000;
         o_reg_wen = 1'b1;
         o_mem_to_reg = 1'b0;
         o_jump = 1'b0;
@@ -474,10 +474,10 @@ module ysyx_24090003_IDU (
       7'b0100011: begin  // S型存储指令 (SB/SH/SW)
         case (o_funct3)
           3'b000: begin  // SB
-            o_mem_we = 1'b1;
-            o_mem_en = 1'b1;
-            o_mem_width = 2'b00;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b1;
+            o_lsu_en = 1'b1;
+            o_lsu_wmask = 4'b0001;  // 字节写掩码
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -493,10 +493,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b001: begin  // SH
-            o_mem_we = 1'b1;
-            o_mem_en = 1'b1;
-            o_mem_width = 2'b01;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b1;
+            o_lsu_en = 1'b1;
+            o_lsu_wmask = 4'b0010;  // 半字写掩码
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -512,10 +512,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           3'b010: begin  // SW
-            o_mem_we = 1'b1;
-            o_mem_en = 1'b1;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b1;
+            o_lsu_en = 1'b1;
+            o_lsu_wmask = 4'b0100;  // 全字写掩码
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -531,10 +531,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_IMM;
           end
           default: begin
-            o_mem_we = 1'b1;
-            o_mem_en = 1'b1;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b1;
+            o_lsu_en = 1'b1;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -556,10 +556,10 @@ module ysyx_24090003_IDU (
       7'b0110011: begin  // R型算术指令
         case (o_funct3)
           3'b000: begin  // ADD/SUB
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -580,10 +580,10 @@ module ysyx_24090003_IDU (
             end
           end
           3'b001: begin  // SLL
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -603,10 +603,10 @@ module ysyx_24090003_IDU (
             end
           end
           3'b010: begin  // SLT
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -626,10 +626,10 @@ module ysyx_24090003_IDU (
             end
           end
           3'b011: begin  // SLTU
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -649,10 +649,10 @@ module ysyx_24090003_IDU (
             end
           end
           3'b100: begin  // XOR
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -672,10 +672,10 @@ module ysyx_24090003_IDU (
             end
           end
           3'b101: begin  // SRL/SRA
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -696,10 +696,10 @@ module ysyx_24090003_IDU (
             end
           end
           3'b110: begin  // OR
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -719,10 +719,10 @@ module ysyx_24090003_IDU (
             end
           end
           3'b111: begin  // AND
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -742,10 +742,10 @@ module ysyx_24090003_IDU (
             end
           end
           default: begin
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b1;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -767,10 +767,10 @@ module ysyx_24090003_IDU (
       7'b1100011: begin  // 条件分支指令 (B型)
         case (o_funct3)
           3'b000: begin  // BEQ
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -786,10 +786,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_REG;
           end
           3'b001: begin  // BNE
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -805,10 +805,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_REG;
           end
           3'b100: begin  // BLT
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -824,10 +824,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_REG;
           end
           3'b101: begin  // BGE
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -843,10 +843,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_REG;
           end
           3'b110: begin  // BLTU
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -862,10 +862,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_REG;
           end
           3'b111: begin  // BGEU
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -881,10 +881,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_REG;
           end
           default: begin
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -907,10 +907,10 @@ module ysyx_24090003_IDU (
         case (o_funct3)
           3'b000: begin  // ECALL/EBREAK/MRET
             if (i_inst[31:20] == 12'h000) begin  // ECALL
-              o_mem_we = 1'b0;
-              o_mem_en = 1'b0;
-              o_mem_width = 2'b10;
-              o_mem_unsigned = 1'b0;
+              o_lsu_we = 1'b0;
+              o_lsu_en = 1'b0;
+              o_lsu_wmask = 4'b0000;
+              o_lsu_rmask = 4'b0000;
               o_reg_wen = 1'b0;
               o_mem_to_reg = 1'b0;
               o_jump = 1'b0;
@@ -925,10 +925,10 @@ module ysyx_24090003_IDU (
               o_alu_src1_sel = `SRC_REG;
               o_alu_src2_sel = `SRC_REG;
             end else if (i_inst[31:20] == 12'h001) begin  // EBREAK
-              o_mem_we = 1'b0;
-              o_mem_en = 1'b0;
-              o_mem_width = 2'b10;
-              o_mem_unsigned = 1'b0;
+              o_lsu_we = 1'b0;
+              o_lsu_en = 1'b0;
+              o_lsu_wmask = 4'b0000;
+              o_lsu_rmask = 4'b0000;
               o_reg_wen = 1'b0;
               o_mem_to_reg = 1'b0;
               o_jump = 1'b0;
@@ -943,10 +943,10 @@ module ysyx_24090003_IDU (
               o_alu_src1_sel = `SRC_REG;
               o_alu_src2_sel = `SRC_REG;
             end else if (i_inst[31:20] == `MRET_INST) begin  // MRET
-              o_mem_we = 1'b0;
-              o_mem_en = 1'b0;
-              o_mem_width = 2'b10;
-              o_mem_unsigned = 1'b0;
+              o_lsu_we = 1'b0;
+              o_lsu_en = 1'b0;
+              o_lsu_wmask = 4'b0000;
+              o_lsu_rmask = 4'b0000;
               o_reg_wen = 1'b0;
               o_mem_to_reg = 1'b0;
               o_jump = 1'b0;
@@ -961,10 +961,10 @@ module ysyx_24090003_IDU (
               o_alu_src1_sel = `SRC_REG;
               o_alu_src2_sel = `SRC_REG;
             end else begin  // 未识别的系统指令
-              o_mem_we = 1'b0;
-              o_mem_en = 1'b0;
-              o_mem_width = 2'b10;
-              o_mem_unsigned = 1'b0;
+              o_lsu_we = 1'b0;
+              o_lsu_en = 1'b0;
+              o_lsu_wmask = 4'b0000;
+              o_lsu_rmask = 4'b0000;
               o_reg_wen = 1'b0;
               o_mem_to_reg = 1'b0;
               o_jump = 1'b0;
@@ -982,10 +982,10 @@ module ysyx_24090003_IDU (
             end
           end
           3'b001: begin  // CSRRW
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = (o_rd_addr != 5'b0) ? 1'b1 : 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -1001,10 +1001,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_REG;
           end
           3'b010: begin  // CSRRS
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = (o_rd_addr != 5'b0) ? 1'b1 : 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -1020,10 +1020,10 @@ module ysyx_24090003_IDU (
             o_alu_src2_sel = `SRC_REG;
           end
           default: begin
-            o_mem_we = 1'b0;
-            o_mem_en = 1'b0;
-            o_mem_width = 2'b10;
-            o_mem_unsigned = 1'b0;
+            o_lsu_we = 1'b0;
+            o_lsu_en = 1'b0;
+            o_lsu_wmask = 4'b0000;
+            o_lsu_rmask = 4'b0000;
             o_reg_wen = 1'b0;
             o_mem_to_reg = 1'b0;
             o_jump = 1'b0;
@@ -1043,10 +1043,10 @@ module ysyx_24090003_IDU (
       end
 
       default: begin
-        o_mem_we = 1'b0;
-        o_mem_en = 1'b0;
-        o_mem_width = 2'b10;
-        o_mem_unsigned = 1'b0;
+        o_lsu_we = 1'b0;
+        o_lsu_en = 1'b0;
+        o_lsu_wmask = 4'b0000;
+        o_lsu_rmask = 4'b0000;
         o_reg_wen = 1'b0;
         o_mem_to_reg = 1'b0;
         o_jump = 1'b0;

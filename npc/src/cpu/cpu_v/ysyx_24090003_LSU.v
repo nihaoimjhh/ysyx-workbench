@@ -3,56 +3,41 @@
 (*dont_touch = "true"*)
 // Prevent synthesis tool from optimizing the module
 module ysyx_24090003_LSU (
-    input [31:0] i_mem_addr,  // 内存地址
-    input [31:0] i_mem_wdata,  // 写入数据
-    input        i_mem_we,     // 内存写使能信号（1：写，0：读）
-    input        i_mem_en,     // 内存使能信号
-    input [31:0] i_mem_rdata,  // 从外部传入的读取数据
-    input [1:0]  i_mem_width,   // 新增：内存访问宽度（00:byte, 01:halfword, 10:word）
-    input        i_mem_unsigned,// 新增：是否为无符号加载（1:无符号扩展, 0:符号扩展）
+    input [31:0] i_lsu_addr,    // 内存地址
+    input [31:0] i_lsu_wdata,   // 写入数据
+    input        i_lsu_we,      // 内存写使能信号（1：写，0：读）
+    input        i_lsu_en,      // 内存使能信号
+    input [31:0] i_lsu_rdata,   // 从外部传入的读取数据
+    input [3:0]  i_lsu_wmask,   // 4位写掩码（0001:byte, 0010:halfword, 0100:word）
+    input [3:0]  i_lsu_rmask,   // 4位读掩码（0001:byte无符号, 0010:halfword无符号, 0100:word, 1001:byte有符号, 1010:halfword有符号）
 
-    // 新增输出到computer的信号
-    output [31:0] o_mem_addr,   // 输出到computer的地址
-    output [31:0] o_mem_wdata,  // 输出到computer的写数据
-    output        o_mem_we,     // 输出到computer的写使能
-    output        o_mem_en,     // 输出到computer的内存使能
-    output [ 2:0] o_mem_wmask,  // 新增：写掩码（001:byte, 010:halfword, 100:word）
-    output [31:0] o_mem_rdata   // 读出数据（传给其他模块）
+    // 输出到computer的信号
+    output [31:0] o_lsu_addr,   // 输出到computer的地址
+    output [31:0] o_lsu_wdata,  // 输出到computer的写数据
+    output        o_lsu_we,     // 输出到computer的写使能
+    output        o_lsu_en,     // 输出到computer的内存使能
+    output [ 3:0] o_lsu_wmask,  // 4位写掩码传递给外部
+    output [31:0] o_lsu_rdata   // 读出数据（传给其他模块）
 );
   // 简单地传递信号到外部
-  assign o_mem_addr = i_mem_addr;
-  assign o_mem_wdata = i_mem_wdata;
-  assign o_mem_we = i_mem_we;
-  assign o_mem_en = i_mem_en;
+  assign o_lsu_addr = i_lsu_addr;
+  assign o_lsu_wdata = i_lsu_wdata;
+  assign o_lsu_we = i_lsu_we;
+  assign o_lsu_en = i_lsu_en;
+  assign o_lsu_wmask = i_lsu_wmask;  // 直接传递4位写掩码
 
-  // 根据内存访问宽度生成写掩码
-  reg [2:0] r_mem_wmask;
+  // 处理读取数据，根据4位读掩码进行符号扩展
+  reg [31:0] r_lsu_rdata;
   always @(*) begin
-    case (i_mem_width)
-      2'b00:   r_mem_wmask = 3'b001;  // 字节访问 (8位)
-      2'b01:   r_mem_wmask = 3'b010;  // 半字访问 (16位)
-      2'b10:   r_mem_wmask = 3'b100;  // 字访问 (32位)
-      default: r_mem_wmask = 3'b100;  // 默认为字访问
+    case (i_lsu_rmask)
+      4'b0001: r_lsu_rdata = {24'b0, i_lsu_rdata[7:0]};              // 字节无符号扩展 (lbu)
+      4'b1001: r_lsu_rdata = {{24{i_lsu_rdata[7]}}, i_lsu_rdata[7:0]}; // 字节有符号扩展 (lb)
+      4'b0010: r_lsu_rdata = {16'b0, i_lsu_rdata[15:0]};             // 半字无符号扩展 (lhu)
+      4'b1010: r_lsu_rdata = {{16{i_lsu_rdata[15]}}, i_lsu_rdata[15:0]}; // 半字有符号扩展 (lh)
+      4'b0100: r_lsu_rdata = i_lsu_rdata;                            // 字访问 (lw)
+      default: r_lsu_rdata = i_lsu_rdata;                            // 默认字访问
     endcase
   end
 
-  assign o_mem_wmask = r_mem_wmask;
-
-  // 处理读取数据，根据宽度和符号扩展类型
-  reg [31:0] r_mem_rdata;
-  always @(*) begin
-    case (i_mem_width)
-      2'b00: begin  // 字节访问 (8位)
-        if (i_mem_unsigned) r_mem_rdata = {24'b0, i_mem_rdata[7:0]};  // 零扩展 (lbu)
-        else r_mem_rdata = {{24{i_mem_rdata[7]}}, i_mem_rdata[7:0]};  // 符号扩展 (lb)
-      end
-      2'b01: begin  // 半字访问 (16位)
-        if (i_mem_unsigned) r_mem_rdata = {16'b0, i_mem_rdata[15:0]};  // 零扩展 (lhu)
-        else r_mem_rdata = {{16{i_mem_rdata[15]}}, i_mem_rdata[15:0]};  // 符号扩展 (lh)
-      end
-      default: r_mem_rdata = i_mem_rdata;  // 字访问 (32位), 直接传递 (lw)
-    endcase
-  end
-
-  assign o_mem_rdata = r_mem_rdata;
+  assign o_lsu_rdata = r_lsu_rdata;
 endmodule

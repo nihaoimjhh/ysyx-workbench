@@ -6,12 +6,12 @@ module ysyx_24090003_cpu (
     input i_rst_n,
     
     // LSU memory interface
-    output [31:0] o_mem_addr,
-    output [31:0] o_mem_wdata,
-    output o_mem_we,
-    output o_mem_en,
-    output [2:0] o_mem_wmask,
-    input [31:0] i_mem_rdata,
+    output [31:0] o_lsu_addr,
+    output [31:0] o_lsu_wdata,
+    output o_lsu_we,
+    output o_lsu_en,
+    output [3:0] o_lsu_wmask,
+    input [31:0] i_lsu_rdata,
     
     // IFU memory interface (SimpleBus)
     output [31:0] o_ifu_raddr,
@@ -36,10 +36,10 @@ module ysyx_24090003_cpu (
   wire [ 6:0] w_funct7;
   wire [31:0] w_imm;
 
-  wire        w_mem_we;  
-  wire        w_mem_en; 
-  wire [ 1:0] w_mem_width;
-  wire        w_mem_unsigned;
+  wire        w_lsu_we;  
+  wire        w_lsu_en; 
+  wire [ 3:0] w_lsu_wmask;
+  wire [ 3:0] w_lsu_rmask;
 
   // Other control signals
   wire        w_reg_wen;
@@ -68,7 +68,7 @@ module ysyx_24090003_cpu (
   wire        w_exu_pc_update;
 
   // LSU related
-  wire [31:0] w_mem_rdata;
+  wire [31:0] w_lsu_rdata;
 
   // WBU related
   wire [31:0] w_rs1_data;
@@ -107,10 +107,10 @@ module ysyx_24090003_cpu (
       .o_funct3(w_funct3),
       .o_funct7(w_funct7),
       .o_imm(w_imm),
-      .o_mem_we(w_mem_we),
-      .o_mem_en(w_mem_en),
-      .o_mem_width(w_mem_width),
-      .o_mem_unsigned(w_mem_unsigned),
+      .o_lsu_we(w_lsu_we),
+      .o_lsu_en(w_lsu_en),
+      .o_lsu_wmask(w_lsu_wmask),
+      .o_lsu_rmask(w_lsu_rmask),
       .o_reg_wen(w_reg_wen),
       .o_mem_to_reg(w_mem_to_reg),
       .o_jump(w_jump),
@@ -155,19 +155,19 @@ module ysyx_24090003_cpu (
 
   // Instantiate LSU
   ysyx_24090003_LSU lsu (
-      .i_mem_addr(w_alu_result),
-      .i_mem_wdata(w_rs2_data),
-      .i_mem_we(w_mem_we),
-      .i_mem_en(w_mem_en),
-      .i_mem_width(w_mem_width),
-      .i_mem_unsigned(w_mem_unsigned),
-      .i_mem_rdata(i_mem_rdata),
-      .o_mem_addr(o_mem_addr),
-      .o_mem_wdata(o_mem_wdata),
-      .o_mem_we(o_mem_we),
-      .o_mem_en(o_mem_en),
-      .o_mem_wmask(o_mem_wmask),
-      .o_mem_rdata(w_mem_rdata)
+      .i_lsu_addr(w_alu_result),
+      .i_lsu_wdata(w_rs2_data),
+      .i_lsu_we(w_lsu_we),
+      .i_lsu_en(w_lsu_en),
+      .i_lsu_wmask(w_lsu_wmask),
+      .i_lsu_rmask(w_lsu_rmask),
+      .i_lsu_rdata(i_lsu_rdata),
+      .o_lsu_addr(o_lsu_addr),
+      .o_lsu_wdata(o_lsu_wdata),
+      .o_lsu_we(o_lsu_we),
+      .o_lsu_en(o_lsu_en),
+      .o_lsu_wmask(o_lsu_wmask),
+      .o_lsu_rdata(w_lsu_rdata)
   );
 
   // Instantiate WBU
@@ -178,7 +178,7 @@ module ysyx_24090003_cpu (
       .i_rs1_addr(w_rs1_addr),
       .i_rs2_addr(w_rs2_addr),
       .i_alu_result(w_alu_result),
-      .i_mem_rdata(w_mem_rdata),
+      .i_mem_rdata(w_lsu_rdata),
       .i_pc(w_pc),
       .i_reg_wen(w_reg_wen),
       .i_mem_to_reg(w_mem_to_reg),
