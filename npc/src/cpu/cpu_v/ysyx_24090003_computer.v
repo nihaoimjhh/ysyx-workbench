@@ -38,7 +38,7 @@ module ysyx_24090003_computer (
   end
 
   // IFU memory read logic (SimpleBus protocol - delayed by one cycle)
-  always @(*) begin
+  always @(posedge i_clk) begin
     if (~i_rst_n) begin
       r_ifu_rdata = 32'b0;
     end else if(w_inst_ready) begin

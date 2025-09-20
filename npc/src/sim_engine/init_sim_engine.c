@@ -97,7 +97,7 @@ static void perform_reset() {
     int i;
     // top->eval();
     top->i_clk = 0;
-    for(i = 0; i < 3; i++) {
+    for(i = 0; i < 7; i++) {
         top->i_clk = !top->i_clk;
         top->i_rst_n = 0;
         top->eval();

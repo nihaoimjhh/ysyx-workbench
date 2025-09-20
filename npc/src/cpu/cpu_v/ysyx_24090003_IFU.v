@@ -13,16 +13,24 @@ module ysyx_24090003_IFU (
     input  [31:0] i_ifu_rdata      // Data from memory
 );
 
-  // State machine states - 使用2位状态
-  localparam STATE_WAIT = 2'b00;  // Wait state - initial state after reset
-  localparam STATE_ADDR = 2'b01;  // Address phase - send address request
-  localparam STATE_DATA = 2'b10;  // Data phase - receive valid instruction
+  // State machine states - 使用3位状态
+  localparam STATE_WAIT = 3'b000;  // Wait state - initial state after reset
+  localparam STATE_UPDATE = 3'b001; // PC update state - update PC after decode/execute
+  localparam STATE_ADDR = 3'b010;  // Address phase - send address request
+  localparam STATE_DATA = 3'b100;  // Data phase - receive valid instruction
 
   // Registers
   reg  [31:0] r_pc;          // Current PC
   reg  [31:0] r_pc_inst;     // PC corresponding to current instruction
   reg  [31:0] r_inst;        // Instruction register
-  reg  [1:0]  r_state;       // State machine state (now 2 bits)
+  reg  [2:0]  r_state;       // Current state register (now 3 bits)
+  
+  // Next state logic (combinational)
+  reg  [2:0]  next_state;    // Next state (now 3 bits)
+  
+  // Output registers (sequential)
+  reg         r_inst_valid;  // Output register: instruction valid
+  reg         r_inst_ready;  // Output register: IFU ready
   
   // PC+4 adder
   wire [31:0] w_pc_plus_4;
@@ -41,11 +49,34 @@ module ysyx_24090003_IFU (
   import "DPI-C" function void set_pc(input int value);
   import "DPI-C" function void set_dnpc(input int value);
 
-  // 添加延迟寄存器来保证指令有效和准备信号的正确时序
-  reg r_inst_valid;
-  reg r_inst_ready;
-
-  // SimpleBus protocol implementation with wait state
+  // 第一段：组合逻辑 - 状态转移逻辑
+  always @(*) begin
+    // 默认保持当前状态
+    next_state = r_state;
+    
+    case (r_state)
+      STATE_WAIT: begin
+        next_state = STATE_DATA;
+      end
+      
+      STATE_UPDATE: begin
+        next_state = STATE_ADDR;
+      end
+      
+      STATE_ADDR: begin
+        next_state = STATE_DATA;
+      end
+      
+      STATE_DATA: begin
+        next_state = STATE_UPDATE;
+      end
+      
+      default: begin
+        next_state = STATE_WAIT;
+      end
+    endcase
+  end
+  // 第二段：时序逻辑 - 状态更新、寄存器更新和输出逻辑
   always @(posedge i_clk) begin
     if (~i_rst_n) begin
       r_pc         <= 32'h80000000;
@@ -53,53 +84,51 @@ module ysyx_24090003_IFU (
       r_inst       <= 32'b0;
       r_state      <= STATE_WAIT;  // 初始状态是等待状态
       r_inst_valid <= 1'b0;
-      r_inst_ready <= 1'b0;
+      r_inst_ready <= 1'b1;
     end else begin
-      // 更新指令有效和准备信号
-      r_inst_valid <= (r_state == STATE_DATA);  
-      r_inst_ready <= (r_state == STATE_ADDR);
-      
+      // 状态更新
+      r_state <= next_state;
       case (r_state)
         STATE_WAIT: begin
-          // 等待一个周期，确保系统稳定
-          r_state <= STATE_ADDR;
+          r_inst_valid <= 1'b0;
+          r_inst_ready <= 1'b1;
         end
-        
-        STATE_ADDR: begin
-          // Address phase: Send current PC to memory
-          // Record which PC this instruction will correspond to
-          r_pc_inst <= r_pc;
-          r_state   <= STATE_DATA;
-          
-          // 跳转更新PC逻辑 - 只在STATE_ADDR状态且有跳转请求时执行
-      if (i_pc_update_en) begin
+        STATE_UPDATE: begin
+          if (i_pc_update_en) begin
             r_pc <= i_next_pc;
           end else begin
             r_pc <= w_pc_plus_4;
           end
-        
+          
+          r_inst_valid <= 1'b0;  // 指令还未准备好
+          r_inst_ready <= 1'b0;  // 正在更新PC，不ready
+        end
+        STATE_ADDR: begin
+          r_pc_inst <= r_pc;  // 记录当前PC对应的指令
+          
+          r_inst_valid <= 1'b0;  // 指令还未有效
+          r_inst_ready <= 1'b1;  // IFU准备接受地址
         end
         
         STATE_DATA: begin
-          // Data phase: Receive instruction from memory
-          r_inst  <= i_ifu_rdata;
-          r_state <= STATE_ADDR;
+          r_inst <= i_ifu_rdata;
           
-          // 顺序更新PC逻辑 - 只在STATE_DATA状态且无跳转请求时执行
-    
+          r_inst_valid <= 1'b1;  // 指令有效
+          r_inst_ready <= 1'b0;  // IFU正在处理数据
         end
-
+        
         default: begin
-          r_state <= STATE_WAIT;
+          r_inst_valid <= 1'b0;
+          r_inst_ready <= 1'b1;
         end
       endcase
     end
   end
 
-  // 使用寄存器输出作为有效和准备信号
+  // 输出赋值
   assign o_inst_valid = r_inst_valid;
   assign o_inst_ready = r_inst_ready;
-  assign o_ifu_raddr = r_pc;
+  assign o_ifu_raddr = r_pc_inst;
 
   // Outputs
   assign o_inst       = r_inst;

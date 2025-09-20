@@ -51,9 +51,9 @@ typedef uint16_t ioaddr_t;
 /* 功能开关宏 */
 #define ENABLE_FTRACE     0  // 函数追踪功能
 #define ENABLE_DISASM     0  // 反汇编功能
-#define ENABLE_DIFFTEST   1  // 差分测试功能
+#define ENABLE_DIFFTEST   0  // 差分测试功能
 #define ENABLE_MTRACE     0   // 设置为1开启内存访问追踪，0关闭
-#define ENABLE_WAVE     0   // 设置为1开启写入访问追踪，0关闭
+#define ENABLE_WAVE     1   // 设置为1开启写入访问追踪，0关闭
 #define ENABLE_ETRACE 0   // 异常追踪功能
 #define ENABLE_DTRACE 0  // 外设追踪功能
 #define ENABLE_WP 0  //监视点 
